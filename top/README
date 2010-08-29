@@ -4,9 +4,10 @@ Test-Ranger version 0.0.1
         That's what it's paid to do, after all."
                                           -- Larry Wall
 
-This is a procedural, comprehensive testing module compatible with 
-Test::More and friends within TAP::Harness. Helper scripts and templates 
-are included to make test-driven development quick, easy, and reliable. 
+This is a comprehensive testing module compatible with Test::More and friends 
+within TAP::Harness. Helper scripts and templates are included to make 
+test-driven development quick, easy, and reliable. Test data structure is 
+open; choose from object-oriented methods or procedural/functional calls. 
 
 Tests themselves are formally untestable. All code conceals bugs. Do you want 
 to spend your time debugging tests or writing production code? 
