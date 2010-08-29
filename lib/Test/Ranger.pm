@@ -123,13 +123,37 @@ NOTE: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
 
     $test->execute();
 
-
-=for author to fill in:
-    Brief code example(s) here showing commonest usage(s).
-    This section will be as far as many users bother reading
-    so make it as educational and exeplary as possible.
-
 =head1 DESCRIPTION
+
+=over
+
+I<The computer should be doing the hard work.> 
+I<That's what it's paid to do, after all.>
+-- Larry Wall
+
+=back
+
+This is a comprehensive testing module compatible with Test::More and friends 
+within TAP::Harness. Helper scripts and templates are included to make 
+test-driven development quick, easy, and reliable. Test data structure is 
+open; choose from object-oriented methods or procedural/functional calls. 
+
+Tests themselves are formally untestable. All code conceals bugs. Do you want 
+to spend your time debugging tests or writing production code? 
+The Test::Ranger philosophy is to reduce the amount of code in a test script 
+and let test data (given inputs and wanted outputs) dominate. 
+
+Many hand-rolled test scripts examine expected output to see if it matches 
+expectations. Test::Ranger traps fatal exceptions cleanly and makes it easy 
+to check every execution for both expected and unexpected output. 
+
+
+
+
+
+
+
+
 
 =for author to fill in:
     Write a full description of the module and its features here.
