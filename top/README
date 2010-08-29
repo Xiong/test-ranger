@@ -30,9 +30,10 @@ DEPENDENCIES
 None.
 
 
-COPYRIGHT AND LICENCE
+LICENCE
 
-Copyright (C) 2010 Xiong Changnian
+Copyright (C) 2010 Xiong Changnian <xiong@cpan.org>
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+This library and its contents are released under Artistic License 2.0:
+
+(http://www.opensource.org/licenses/artistic-license-2.0.php)
