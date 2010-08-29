@@ -19,7 +19,6 @@ expectations. Test::Ranger traps fatal exceptions cleanly and makes it easy
 to check every execution for both expected and unexpected output. 
 
 
-
 INSTALLATION
 
 To install this module with Module::Build, run the following commands:
@@ -35,7 +34,7 @@ DEPENDENCIES
 None.
 
 
-LICENCE
+LICENSE
 
 Copyright (C) 2010 Xiong Changnian <xiong@cpan.org>
 
