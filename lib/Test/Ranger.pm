@@ -14,48 +14,48 @@ use Test::More;
 
 ######## CLASS METHOD ########
 #
-#	my $obj	= Test::Hump->new();
+#   my $obj = Test::Hump->new();
 #
-#		Returns a hashref blessed into class of calling package
+#       Returns a hashref blessed into class of calling package
 #
-#		see also: init();
+#       see also: init();
 #
 sub new {
-	my $class	= $_[0];
-	my $self	= {};
-	
-	bless ($self => $class);
-	$self->init(@_);			# init all remaining args
-	
-	return $self;
+    my $class   = $_[0];
+    my $self    = {};
+    
+    bless ($self => $class);
+    $self->init(@_);            # init all remaining args
+    
+    return $self;
 }; ## new
 
 ######## OBJECT METHOD ########
 #
-#	$obj->init( $AoH );
+#   $obj->init( $AoH );
 #
-#		Initializes $obj with a preconstructed data structure.
-#		$obj is a conventional hash-based object.
-#		See docs for specification.
+#       Initializes $obj with a preconstructed data structure.
+#       $obj is a conventional hash-based object.
+#       See docs for specification.
 #
 sub init {
-	my $self	= $_[0];
-	my $aref	= $_[1];
-	
-	# assign list to hash
-	$self->{-data}	    = $aref;
-	
-	return $self;
+    my $self    = $_[0];
+    my $aref    = $_[1];
+    
+    # assign list to hash
+    $self->{-data}      = $aref;
+    
+    return $self;
 }; ## init
 
 ######## OBJECT METHOD ########
 #
-#	$test->execute();
+#   $test->execute();
 #
-#		Executes the tests and subtests defined in the object $test.
+#       Executes the tests and subtests defined in the object $test.
 #
 sub execute {
-	my $self	= $_[0];
+    my $self    = $_[0];
     
     pass('DUMMY');
     done_testing(1);
@@ -86,8 +86,8 @@ NOTE: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
 
     my $test    = Test::Ranger->new(
         {
-            -coderef	=> \&Acme::Dummy::hello_mult,
-            -basename	=> 'hello-mult',
+            -coderef    => \&Acme::Dummy::hello_mult,
+            -basename   => 'hello-mult',
         },
         
         {
@@ -145,21 +145,142 @@ and let test data (given inputs and wanted outputs) dominate.
 
 Many hand-rolled test scripts examine expected output to see if it matches 
 expectations. Test::Ranger traps fatal exceptions cleanly and makes it easy 
-to check every execution for both expected and unexpected output. 
+to subtest every execution for both expected and unexpected output. 
+
+=head2 Approach
+
+Our overall approach is to declare all the conditions for a series of 
+tests in an Array-of-Hashes. We loop through the tests, supplying inputs 
+to code under test and capturing outputs within the same AoH. Then we check 
+each execution's actual outputs with what we expected. 
+
+Each test is represented by a hashref in which each key is a literal string; 
+the values may be thought of as attributes of the test. The literal keys are 
+part of our published interface; accessor methods are not required. 
+
+Test::Ranger does not lock you in to a single specific approach. You can 
+declare your entire test series as an object and simply execute it, 
+letting TR handle the details. You can read your data from somewhere 
+and just use TR to capture a single execution, then examine the results 
+on your own. You can mix TR methods and function calls; you can add 
+other Test::More-ish checks. The door is open.
+
+=head2 Templates
+
+To further speed things along, please note that a number of templates 
+are shipped with TR. These may be copied, modified, and extended as you 
+please, of course. Consider them a sort of cookbook and an appendix to 
+this documentation. 
+
+=head1 GLOSSARY
+
+I<You are in a maze of twisty little tests, all different.>
+
+The word B<test> is so heavily overloaded that documentation may be unclear. 
+In TR docs, I will use the following terms: 
+
+=head3 manager
+
+E.g., I<prove>, I<make test>; 
+program that runs a L</suite> through a L</harness>
+
+=head3 harness
+
+E.g., L<Test::Harness> or L<TAP::Harness>; summarizes L</framework> results
+
+=head3 framework
+
+E.g., L<Test::Simple> or L<Test::More>; sends results to L</harness>
+
+=head3 suite
+
+Folder or set of test L<scripts|/script>.
+
+=head3 script
+
+File containing Perl code meant to be run by a L</harness>; 
+filename usually ends in .t
+
+=head3 group
+
+Array of (several sequential) test L<declarations|/declaration>
+
+=head3 declaration
+
+The data required to execute a test, 
+including given L</inputs> and expected L</outputs>
+
+=head3 execution
+
+The process of running a test L</declaration> and capturing actual L</outputs>
+
+=head3 subtest
+
+For an execution, a single comparison of actual and expected 
+results for some output. 
+
+Note that a C<Test::More::subtest()>, used internally by Test::Ranger, 
+counts as a single 'test' passed to harness. In these docs, a 'subtest' is 
+any one comparison within a call to C<subtest()>. 
+
+=head3 inputs
+
+Besides arguments passed to SUT, any state that it might read, 
+such as C<@ARGV> and C<%ENV>. 
+
+Inputs are I<given>, perhaps I<generated>. 
+
+=head3 outputs
+
+Besides the conventional return value, anything else SUT might write, 
+particularly STDOUT and STDERR; also includes exceptions thrown by SUT.
+
+Outputs may be I<actual> (L</-got>) or I<expected> (L</-want>).
+
+=head3 CUT, SUT, MUT
+
+code under test, subroutine..., module...; the thing being tested
 
 
 
-
-
-
-
-
-
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
 
 =head1 INTERFACE 
+
+The primary interface to TR is the test data structure you normally supply 
+as the argument to L</new()>. There are also a number of methods you can use. 
+In Perl, methods can be called as functions; Test::Ranger's methods 
+are written with this in mind.
+
+=head2 $test
+
+You can call this anything you like, of course. 
+If you pass a hashref to the constructor L<Test::Ranger::new()|/new()>, 
+it will return an object blessed into class B<Test::Ranger>; 
+if you pass an arrayref of hashrefs, it will bless each hashref into the 
+base class, wrap the arrayref in a top-level hashref, and bless the mess 
+into L<Test::Ranger::List>. 
+
+The B<Test::Ranger> object represents a single test L</declaration>. 
+Besides the data that you provide, it contains test outputs 
+and some housekeeping information. All data is kept in essentially 
+the same structure you pass to the constructor. You should use the following 
+literal hash keys to access any element or object attribute: 
+
+=over
+
+
+
+
+=back
+
+
+
+=head2 Methods
+
+=head3 new()
+
+
+
 
 =for author to fill in:
     Write a separate section listing the public components of the modules
