@@ -2,9 +2,9 @@ use strict;
 use warnings;
  
 use lib qw{
-	      lib
-	   ../lib
-	../../lib
+          lib
+       ../lib
+    ../../lib
 };
 
 use Test::Ranger;
@@ -12,8 +12,8 @@ use Test::Ranger;
 # Object-oriented usage
 my $test    = Test::Ranger->new(
     {
-		-coderef	=> \&Acme::Dummy::hello_mult,
-		-basename	=> 'hello-mult',
+        -coderef    => \&Acme::Dummy::hello_mult,
+        -basename   => 'hello-mult',
     },
     
     {
