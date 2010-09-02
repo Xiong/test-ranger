@@ -77,7 +77,7 @@ Test::Ranger - Test with data tables, capturing, templates
 
 This document describes Test::Ranger version 0.0.1
 
-NOTE: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
+TODO: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
 
 =head1 SYNOPSIS
 
@@ -122,6 +122,9 @@ NOTE: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
     ); ## end new
 
     $test->execute();
+    $test->compare();
+    
+    __END__
 
 =head1 DESCRIPTION
 
@@ -150,7 +153,7 @@ to subtest every execution for both expected and unexpected output.
 =head2 Approach
 
 Our overall approach is to declare all the conditions for a series of 
-tests in an Array-of-Hashes. We loop through the tests, supplying inputs 
+tests in an Arrayref-of-Hashrefs. We loop through the tests, supplying inputs 
 to code under test and capturing outputs within the same AoH. Then we check 
 each execution's actual outputs with what we expected. 
 
@@ -208,20 +211,26 @@ Array of (several sequential) test L<declarations|/declaration>
 =head3 declaration
 
 The data required to execute a test, 
-including given L</inputs> and expected L</outputs>
+including given L</inputs> and expected L</outputs>; 
+also, the phase in which this is done
 
 =head3 execution
 
-The process of running a test L</declaration> and capturing actual L</outputs>
+The action of running a test L</declaration> and capturing actual L</outputs>;
+also, the phase in which this is done
+
+=head3 comparison
+
+The action of checking actual and expected values for some execution; 
+also, the phase in which this is done
 
 =head3 subtest
 
-For an execution, a single comparison of actual and expected 
-results for some output. 
+A single check of actual and expected results for some output. 
 
 Note that a C<Test::More::subtest()>, used internally by Test::Ranger, 
 counts as a single 'test' passed to harness. In these docs, a 'subtest' is 
-any one comparison within a call to C<subtest()>. 
+any one check within a call to C<subtest()>. 
 
 =head3 inputs
 
@@ -235,14 +244,11 @@ Inputs are I<given>, perhaps I<generated>.
 Besides the conventional return value, anything else SUT might write, 
 particularly STDOUT and STDERR; also includes exceptions thrown by SUT.
 
-Outputs may be I<actual> (L</-got>) or I<expected> (L</-want>).
+Outputs may be I<actual> (L</-got>) results or I<expected> (L</-want>).
 
 =head3 CUT, SUT, MUT
 
 code under test, subroutine..., module...; the thing being tested
-
-
-
 
 =head1 INTERFACE 
 
@@ -262,31 +268,349 @@ into L<Test::Ranger::List>.
 
 The B<Test::Ranger> object represents a single test L</declaration>. 
 Besides the data that you provide, it contains test outputs 
-and some housekeeping information. All data is kept in essentially 
+and some housekeeping information. 
+
+All data is kept in essentially 
 the same structure you pass to the constructor. You should use the following 
-literal hash keys to access any element or object attribute: 
+literal hash keys to access any element or object attribute. 
+Generally, values are interpreted according to the rule: 
+If the value is a simple scalar, it is considered the intended value of the
+corresponding key. If the value is an arrayref, it is dereferenced and the 
+resulting array considered a list of intended values. If the value is 
+a hashref, then it is considered to introduce more keys from this interface. 
+
+It's not necessary to supply values for all these keys. 
+The only essential key is L</-coderef>. If nothing else is declared, 
+C<&{$test->{-coderef}}()> will be executed, with no arguments. 
+One subtest will pass if the execution's return value is C<TRUE>. 
+C<STDOUT> and C<STDERR> are expected to be empty. 
+Any exception will be trapped and reported as a subtest failure. 
+
+See defaults. 
 
 =over
 
+=item *
 
+L</-argv>
 
+=item *
+
+L</-basename>
+
+=item *
+
+L</-coderef>
+
+=item *
+
+L</-counter>
+
+=item *
+
+L</-env>
+
+=item *
+
+L</-fatal>
+
+=item *
+
+L</-file>
+
+=item *
+
+L</-given>
+
+=item *
+
+L</-infile>
+
+=item *
+
+L</-input>
+
+=item *
+
+L</-is>
+
+=item *
+
+L</-like>
+
+=item *
+
+L</-lines>
+
+=item *
+
+L</-matches>
+
+=item *
+
+L</-name>
+
+=item *
+
+L</-outfile>
+
+=item *
+
+L</-return>
+
+=item *
+
+L</-stdout>
+
+=item *
+
+L</-want>
+
+=item *
+
+L</-warn>
 
 =back
 
+=head2 Inputs
 
+These are the values passed into a test execution. 
+
+=head3 -given
+
+    {-given => [2, 'foo']}              # default == ()
+
+Values passed as arguments to CUT. 
+Your code might well be passed a hashref; so, if you supply this here, 
+TR will not look deeper for more keys. 
+
+=head3 -argv
+
+    {-argv => [--fleegle => 'one']}     # default: untouched
+
+Before each execution, C<@ARGV> will be set to this list. 
+Existing C<@ARGV> will be replaced.
+
+=head3 -env
+
+    {-env => [PERL5LIB => '../blib']}   # default: untouched
+
+Before each execution, this list will be added to C<%ENV>. 
+Existing C<%ENV> key/value pairs will be untouched.
+
+=head3 -infile
+
+    {-infile => 'my/data/file.txt'}
+
+The supplied file will be opened for reading and one record passed per 
+execution. This hashref can be declared as the value for some other 
+input; if it's found at the top level of a declaration, 
+the record will be passed in as a single string L</-given>.
+
+=head3 -input
+
+    {-input => {-foo => 'baz'}}
+
+These values will not be processed directly when the declaration is executed. 
+This feature is intended to allow you to supply additional test inputs. 
+It's up to you to pick them out during execution and use them as you wish. 
+
+You may, if you like, collect other inputs here; it's not required. 
+C<-inputs> is a synonym. 
+
+=head2 Expectations
+
+These are the values you B<want> to find after a test execution. 
+
+=head3 -return
+
+    {-return => 1}                      # default: any TRUE value
+
+The value normally returned by the execution. 
+Your code might well return a hashref; so, if you supply this here, 
+TR will not look deeper for more keys. 
+
+TODO: wantarray?
+
+=head3 -stdout
+
+    {-stdout => [qw(foo bar baz)]}      # default eq q{}
+
+C<STDOUT> is always captured. 
+If a scalar or arrayref is supplied for this key (as the example), 
+it will be treated as though you had declared: 
+
+    {
+        -stdout => {
+            -like       => [qw(foo bar baz)],
+            -matches    => 1,
+        }
+    }
+
+You may want more control over the comparison. If you supply a hashref, 
+you can declare various subkeys for this purpose. 
+
+=head3 -warn
+
+C<STDERR> is always captured. 
+This feature is parallel to L</-stdout>. 
+Synonym for C<-stderr>. 
+
+=head3 -fatal
+
+Exceptions are always trapped. You might I<want> the execution to fatal out; 
+if so, supply a value for this key, which will be subtested as are 
+L</-stdout> and L</-warn>. 
+
+=head3 -want
+
+    {-want => {-foo => 'baz'}}
+
+These values will not be processed directly when the declaration is executed. 
+This feature is intended to allow you to supply additional test expectations. 
+It's up to you to pick them out during comparison and use them as you wish. 
+
+You may, if you like, collect other wants here; it's not required. 
+C<-wants> is a synonym. 
+
+=head2 Results
+
+Actual results from execution and comparison are stored in the same object 
+you declared in the constructor. 
+You may wish to perform additional subtests on them. 
+You might like to dump stored results to screen or disk. 
+
+=head3 -got
+
+    {
+        -got => {
+            -return => 'foo',
+            -stdout     => {
+                -string     => 'Hello, world!',
+            },
+            -stderr     => {
+                -string     => 'Foo caught at line 17.',
+                -matches    => 3,
+            },
+            -fatal      => undef,
+        },
+    }
+    
+All captured results are stored as subkeys of C<-got>. 
+To see in detail how TR stores these results, you might like to use the 
+convenience method L</dump()>.
+
+=head2 Execution control
+
+TODO: Matrix testing, bailout, ?
+
+=head2 Comparison control
+
+TODO: For any script, comparisons may be done for each declaration 
+immediately after its execution; or all at once after all executions have 
+completed. 
+
+Between any pair of actual and expected outputs, one or more subtests can be 
+made. These are declared, generally, with a subkey similar to the 
+corresponding framework comparison function. 
+If, for any L</-want>, an expected value is given directly, 
+it will be compared using its fallback. 
+
+FIXME: fallback table
+
+-want       value           fallback method
+
+-return     scalar          Test::More::is()
+            not scalar      Test::More::is_deeply()
+
+-stdout                     
+-stderr                     
+-fatal                      
+
+=head3 -is
+
+    {-is => 'Hello, world!'}
+
+String B<eq>. A synonym is C<-string>.
+
+=head3 -number
+
+    {-number => 42}
+
+Numeric B<==>. An additional subtest will fail if the actual result raises
+a warning of string in numeric comparision. 
+This warning will not be captured into C<{-got}{-warn}>.
+See L<perllexwarn/Category Hierarchy>.
+
+=head3 -min
+
+    {-min => 3}
+
+Subtest passes if actual value is at least this. 
+
+=head3 -max
+
+    {-max => 5}
+
+Subtest passes if actual value is not more than this. 
+
+=head3 -like
+
+    {-like => [qw(foo bar baz)]}
+
+A regex will be constructed from the provided list, e.g.: 
+
+    $test->{-got} =~ m/foo|bar|baz/
+
+This subtest will pass if there is at least one match. But see L</matches>. 
+
+=head3 -regex
+
+    {-regex => qr/$my_big_fat_regex/}
+
+Like L</-like>, but allows you to use full regex syntax. 
+
+=head3 -matches
+
+    {
+        -like       => [qw(foo bar baz)],
+        -matches    => 2,
+    }
+
+Only useful with L</-like> or L</-regex>. Checks to see that at least a 
+required number of matches were found. But see L</-max>. 
+
+=head3 -lines
+
+    {-lines => 7}
+
+Checks to see that at least a required number of lines were captured. 
+As a sanity check, this subtest will also fail if the actual number of lines 
+is much greater than expected. TODO: how many more is too much?
+To override this and get finer control, see L</number>, L</min>, L</min>. 
+You can say: 
+
+    {-lines => {-min => 5, -max => 9} }         
 
 =head2 Methods
 
 =head3 new()
 
+=head3 execute()
 
+=head3 compare()
 
+=head3 test()
 
-=for author to fill in:
-    Write a separate section listing the public components of the modules
-    interface. These normally consist of either subroutines that may be
-    exported, or methods that may be called on objects belonging to the
-    classes provided by the module.
+=head3 append()
+
+=head3 crossjoin()
+
+=head3 shuffle()
+
+=head3 expand()
+
+=head3 dump()
 
 =head1 DIAGNOSTICS
 
