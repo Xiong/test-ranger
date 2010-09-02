@@ -7,3 +7,8 @@
 hold/
 sym/
 sym
+
+# Ignore temporary files
+*.tmp
+*.pm.html
+lib/Test/Ranger-List.pm
