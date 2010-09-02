@@ -152,17 +152,23 @@ to subtest every execution for both expected and unexpected output.
 
 =head2 Approach
 
-Our overall approach is to declare all the conditions for a series of 
-tests in an Arrayref-of-Hashrefs. We loop through the tests, supplying inputs 
-to code under test and capturing outputs within the same AoH. Then we check 
-each execution's actual outputs with what we expected. 
+Our overall approach is to B<declare> all the conditions for a series of 
+tests in an Arrayref-of-Hashrefs. We B<execute> the tests, supplying inputs 
+to code under test and capturing outputs within the same AoH. 
+Then we B<compare> each execution's actual outputs with what we expected. 
 
 Each test is represented by a hashref in which each key is a literal string; 
 the values may be thought of as attributes of the test. The literal keys are 
 part of our published interface; accessor methods are not required. 
+Hashrefs and their keys may be nested DWIMmishly. 
+
+Much of the merit of our approach lies in B<sticky> declaration. Once you 
+declare, say, a coderef, you don't need to declare it again 
+for every set of givens. Or, you can declare a given list of arguments once 
+and pass them to several subroutines. See L</-sticky>, L</-clear>.
 
 Test::Ranger does not lock you in to a single specific approach. You can 
-declare your entire test series as an object and simply execute it, 
+declare your entire test series as an object and simply L</test()> it, 
 letting TR handle the details. You can read your data from somewhere 
 and just use TR to capture a single execution, then examine the results 
 on your own. You can mix TR methods and function calls; you can add 
@@ -204,15 +210,15 @@ Folder or set of test L<scripts|/script>.
 File containing Perl code meant to be run by a L</harness>; 
 filename usually ends in .t
 
-=head3 group
+=head3 list
 
-Array of (several sequential) test L<declarations|/declaration>
+Arrayref or series of (several sequential) test L<declarations|/declaration>
 
 =head3 declaration
 
 The data required to execute a test, 
 including given L</inputs> and expected L</outputs>; 
-also, the phase in which this is done
+also, the phase in which this data is constructed
 
 =head3 execution
 
@@ -259,16 +265,12 @@ are written with this in mind.
 
 =head2 $test
 
-You can call this anything you like, of course. 
-If you pass a hashref to the constructor L<Test::Ranger::new()|/new()>, 
-it will return an object blessed into class B<Test::Ranger>; 
-if you pass an arrayref of hashrefs, it will bless each hashref into the 
-base class, wrap the arrayref in a top-level hashref, and bless the mess 
-into L<Test::Ranger::List>. 
+You can call this anything you like, of course. This is the football you 
+pass to various methods. 
 
 The B<Test::Ranger> object represents a single test L</declaration>. 
 Besides the data that you provide, it contains test outputs 
-and some housekeeping information. 
+and some housekeeping information. See </new()>.
 
 All data is kept in essentially 
 the same structure you pass to the constructor. You should use the following 
@@ -502,7 +504,19 @@ convenience method L</dump()>.
 
 =head2 Execution control
 
-TODO: Matrix testing, bailout, ?
+TODO: Explain these. See also crossjoin() and friends. 
+
+=head3 -expand
+
+=head3 -sticky
+
+=head3 -clear
+
+=head3 -bailout
+
+=head3 -skip
+
+=head3 -done
 
 =head2 Comparison control
 
@@ -592,25 +606,118 @@ You can say:
 
     {-lines => {-min => 5, -max => 9} }         
 
-=head2 Methods
+=head2 Class Methods
+
+TODO: Explain these stuffs
 
 =head3 new()
 
+Takes a hashref or arrayref as a required argument. 
+
+If you pass a hashref to the constructor C<Test::Ranger::new()>, 
+it will return an object blessed into class B<Test::Ranger>; 
+if you pass an arrayref of hashrefs, it will bless each hashref into the 
+base class, wrap the arrayref in a top-level hashref, and bless the mess 
+into L<Test::Ranger::List>. 
+
+TR objects are conventionally hashref based and its keys are part of our 
+public interface. So, you're free to poke around as you like. 
+
+Returns $self.
+
+=head2 Object Methods
+
+TODO: Explain these stuffs
+
+TR object methods may generally be called as fully-qualified functions. 
+Internally, the argument supplied to the function will be passed to L</new()>.
+
 =head3 execute()
+
+Takes a hashref or arrayref as a required argument when called as a function. 
+Takes no argument when called as a method. 
+
+Perform the execution of the declared data and code, capturing outputs. 
+If the class is L<Test::Ranger::List>, then the list will be looped through 
+sequentiallly and each Test::Ranger subobject executed. 
+
+Returns $self. 
 
 =head3 compare()
 
+Takes a hashref or arrayref as a required argument when called as a function. 
+Takes no argument when called as a method. 
+
+Perform a series of subtests comparing expected and actual results. 
+Each subtest writes to C<STDOUT/STDERR> for consumption by a harness. 
+
+Returns $self. 
+
 =head3 test()
+
+Takes a hashref or arrayref as an optional argument when called as a function. 
+Takes no argument when called as a method. 
+
+Performs both the execution and comparison phase on a Test::Ranger object. 
+If invoked on a Test::Ranger::List, then each subobject will be executed 
+and then compared before going to the next. You may prefer this to 
+the two-step C<execute; compare;> approach, especially if you want to 
+L</-bailout> of testing on failure. 
+
+Returns $self.
 
 =head3 append()
 
+Takes a TR object as a required argument. 
+Not usable as a function. 
+
+Pushes its argument into $self. 
+
+Returns $self.
+
 =head3 crossjoin()
+
+Takes a TR object as a required argument. 
+Not usable as a function. 
+
+Builds a two-dimensional matrix from $self and its argument, then flattens 
+this into a new list. Useful for running every possible combination of two 
+lists of test declarations. 
+
+Returns $self. 
 
 =head3 shuffle()
 
+Takes any scalar value as an argument, but interprets it as a boolean. 
+A Test::Ranger::List object (only) method. 
+
+Pseudo-randomly rearranges a list of TR subobjects, so they I<won't> 
+execute in sequence. Useful for uncovering unexpected state retention. 
+Best used I<after> L</expand()>.
+
+Returns $self. 
+
 =head3 expand()
 
+Takes no argument. Not usable as a function. 
+
+Expands the declarations in an object to the most-fully-qualified extent. 
+This removes all dependency on L</-sticky> declaration and inserts defaults 
+for all values not supplied. Useful if you're not sure TR is really DWYM. 
+
+Returns $self. 
+
 =head3 dump()
+
+Takes a keyword as an optional argument; see below. Not usable as a function. 
+
+    print $test->dump('form');
+
+Convenience method dumps an entire object so you can see what's in it. 
+Keyword 'form' uses L<Perl6::Form> to try to get a compact dump. Default is 
+L<Data::Dumper>. 
+
+Returns a big long string. 
 
 =head1 DIAGNOSTICS
 
@@ -642,7 +749,7 @@ You can say:
     files, and the meaning of any environment variables or properties
     that can be set. These descriptions must also include details of any
     configuration language used.
-  
+
 Test::Ranger requires no configuration files or environment variables.
 
 =head1 DEPENDENCIES
