@@ -84,7 +84,7 @@ exit(0);
 sub _unlink_carefully {
     my $file_abs        = $_[0];
     
-    return 0 if ( substr $file_abs, 0, 1 eq q{.} ); # hidden file
+    return 0 if $file_abs =~ m{\/\.};               # hidden file
                                                     #   also catches ../, ./
     return 0 if not lstat $file_abs;                # lstat failed
                                                     #   symlink not target
