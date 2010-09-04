@@ -35,7 +35,6 @@ _talk 'Running...';
 
 # Be sure user cd to a project folder under Git control
 my $project_dirabs      = getcwd();
-my $project_dh          ;
 my $vcs_dirrel          = '.git';
 my $vcs_dirabs          = catdir( $project_dirabs, $vcs_dirrel );
 stat $vcs_dirabs or _crash('no_vcs');
@@ -59,42 +58,73 @@ _shell( $command );
 
 
 # Cleanup: Remove top-level files except dot.files
-opendir $project_dh, $project_dirabs; 
-my @loose_files         = readdir $project_dh;
-closedir $project_dh;
-#~ _talk @loose_files;
-foreach (@loose_files) { 
-    if ( _unlink_carefully( catfile( $project_dirabs, $_ ) ) ){
-        _talk $_ . q{ unlinked.};
-    };
+
+my @cleanup_files       = _get_files($project_dirabs);
+my $files_unlinked      = unlink @cleanup_files;
+_talk   qq{Unlinked $files_unlinked files:},
+        @cleanup_files;
+if (not $files_unlinked == scalar @cleanup_files) {
+    _grumble('unlink_count', scalar @cleanup_files);
 };
 say q{};
 
+# All finished this script.
 _talk '...Done.';
 say q{};
 exit(0);
 
 ######## INTERNAL ROUTINE ########
 #
-#   _unlink_carefully( $file_abs );     # delete only files that aren't hidden
+#   _get_files( $dir_abs );     # list files in folder
 #       
-# Check to be sure $file_abs is not a folder, symlink, or hidden file.
-# If not, delete it. 
+# Returns a list of all plain files in $dir_abs. 
+# Omits folders, symlinks, hidden files
 #   
-sub _unlink_carefully {
-    my $file_abs        = $_[0];
+sub _get_files {
+    my $dir_abs         = $_[0];
+    my $dh              ;
+    my @items           ;
+    my @files           ;
+        
+    # Get list of items in folder
+    opendir $dh, $dir_abs; 
+    @items              = readdir $dh;
+    closedir $dh;
     
-    return 0 if $file_abs =~ m{\/\.};               # hidden file
-                                                    #   also catches ../, ./
-    return 0 if not lstat $file_abs;                # lstat failed
-                                                    #   symlink not target
-    return 0 if -d _;                               # directory
-    return 0 if -l _;                               # symlink
+    # Filter out hidden files, ../ and ./
+    @files              = grep {
+                                !m/^\./     # hidden, ../, ./
+                            &&  lstat       # stats symlink not target
+                            &&  -f _        # "plain" file only
+                          } @items;
     
-    unlink $file_abs and return $file_abs;
-    return 0;                                       # failed after all
-    
-}; ## _unlink_carefully
+    return @files;
+}; ## _get_files
+
+#~ ######## INTERNAL ROUTINE ########
+#~ #
+#~ #   _unlink_carefully( $file_abs );     # delete only files that aren't hidden
+#~ # 
+#~ # Parms     : $file_abs     : fully-qualified path to file
+#~ # Returns   : $file_abs if it unlinked it; otherwise 0
+#~ #
+#~ # Check to be sure $file_abs is not a folder, symlink, or hidden file.
+#~ # If not, delete it. 
+#~ #   
+#~ sub _unlink_carefully {
+#~     my $file_abs        = $_[0];
+#~     
+#~     return 0 if $file_abs =~ m{\/\.};               # hidden file
+#~                                                     #   also catches ../, ./
+#~     return 0 if not lstat $file_abs;                # lstat failed
+#~                                                     #   symlink not target
+#~     return 0 if -d _;                               # directory
+#~     return 0 if -l _;                               # symlink
+#~     
+#~     unlink $file_abs and return $file_abs;
+#~     return 0;                                       # failed after all
+#~     
+#~ }; ## _unlink_carefully
 
 ######## INTERNAL ROUTINE ########
 #
@@ -158,12 +188,18 @@ sub _talk {
 
 ######## INTERNAL UTILITY ########
 #
-#   _crash( $errkey, @parms );      # fatal out of internal error
+#   _grumble( $errkey, @parms );      # complain of internal error
 #       
-# Calls croak() with some message. 
+# Calls carp() with some message. 
 #   
-sub _crash {
+sub _grumble {
     my $errkey      = $_[0];            # remaining args replace placeholders
+    
+    # Initialize args; otherwise unused placeholders will raise warnings.
+    $_[1] = $_[1] || q{};
+    $_[2] = $_[2] || q{};
+    $_[3] = $_[3] || q{};
+    
     my $prepend     = $0;               # prepend to all errors
     my $intro       = q{# };            # introduce each line
        $prepend     = join q{}, $intro, $prepend, q{: };
@@ -185,22 +221,38 @@ sub _crash {
         ],
         
         shell_died      => [
-            qq{Last shell command died with code $_[1].}
+            qq{Last shell command died with code $_[1].},
         ],
         
         shell_error     => [
-            qq{Last shell command exited with code $_[1].}
+            qq{Last shell command exited with code $_[1].},
+        ],
+        
+        unlink_count    => [
+             q{Failed to unlink expected number of files.},
+            qq{Expected number of files to unlink: $_[1].},
+             
         ],
         
     };
     
     # find and expand error
     @lines          = @{ $error->{$errkey} };
+    push @lines, q{ };
     $text           = $prepend . join $indent, @lines;
     
-    # now croak()
-    croak $text;
-    return 0;                   # should never get here, though
+    # now complain
+    carp $text;
+    return 1;
+}; ## _grumble
+
+######## INTERNAL UTILITY ########
+#
+#   _crash( $errkey, @parms );      # fatal out of internal error
+#   
+sub _crash {
+    _grumble (@_);
+    die;
 }; ## _crash
 
 __END__
