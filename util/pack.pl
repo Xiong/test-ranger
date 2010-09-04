@@ -39,7 +39,19 @@ my $vcs_dirrel          = '.git';
 my $vcs_dirabs          = catdir( $project_dirabs, $vcs_dirrel );
 stat $vcs_dirabs or _crash('no_vcs');
 
-# Save any loose top-level files
+# Save any loose top-level files to .save/
+my @saved_files         = _get_files($project_dirabs);
+my $save_dirrel         = '.save';
+my $save_dirabs         = catdir( $project_dirabs, $save_dirrel );
+mkdir $save_dirrel or _crash('mkdir_save');
+$command                = join q{ }, (
+                            q{mv},              # move
+                            q{-nv},             # no-clobber, verbose
+                            q{-t},              # target first
+                            $save_dirabs,       # to there
+                            @saved_files,       # all files in here
+                          );
+_shell( $command );
 
 
 
@@ -56,6 +68,10 @@ $command                = join q{ }, (
 _shell( $command );
 
 
+# TODO: Now invoke Module::Build
+
+
+
 
 # Cleanup: Remove top-level files except dot.files
 
@@ -68,10 +84,32 @@ if (not $files_unlinked == scalar @cleanup_files) {
 };
 say q{};
 
+# Restore saved files to ./
+@saved_files            = _get_files($save_dirabs);
+@saved_files            = map { catfile $save_dirabs, $_ } @saved_files;
+$command                = join q{ }, (
+                            q{mv},              # move
+                            q{-nv},             # no-clobber, verbose
+                            q{-t},              # target first
+                            $project_dirabs,    # to there
+                            @saved_files,       # all files in here
+                          );
+_shell( $command );
+
+# rmdir .save
+rmdir $save_dirrel or _crash('rmdir_save');
+
+
+
+
+
+
 # All finished this script.
 _talk '...Done.';
 say q{};
 exit(0);
+
+#----------------------------------------------------------------------------#
 
 ######## INTERNAL ROUTINE ########
 #
@@ -85,11 +123,15 @@ sub _get_files {
     my $dh              ;
     my @items           ;
     my @files           ;
+    my $previous_dir    = getcwd();
         
     # Get list of items in folder
     opendir $dh, $dir_abs; 
     @items              = readdir $dh;
     closedir $dh;
+    
+    # chdir so @items, which are just item_names, will work in lstat
+    chdir $dir_abs;
     
     # Filter out hidden files, ../ and ./
     @files              = grep {
@@ -98,33 +140,12 @@ sub _get_files {
                             &&  -f _        # "plain" file only
                           } @items;
     
+    # chdir back so nothing weird happens
+    chdir $previous_dir;
+    
     return @files;
+    
 }; ## _get_files
-
-#~ ######## INTERNAL ROUTINE ########
-#~ #
-#~ #   _unlink_carefully( $file_abs );     # delete only files that aren't hidden
-#~ # 
-#~ # Parms     : $file_abs     : fully-qualified path to file
-#~ # Returns   : $file_abs if it unlinked it; otherwise 0
-#~ #
-#~ # Check to be sure $file_abs is not a folder, symlink, or hidden file.
-#~ # If not, delete it. 
-#~ #   
-#~ sub _unlink_carefully {
-#~     my $file_abs        = $_[0];
-#~     
-#~     return 0 if $file_abs =~ m{\/\.};               # hidden file
-#~                                                     #   also catches ../, ./
-#~     return 0 if not lstat $file_abs;                # lstat failed
-#~                                                     #   symlink not target
-#~     return 0 if -d _;                               # directory
-#~     return 0 if -l _;                               # symlink
-#~     
-#~     unlink $file_abs and return $file_abs;
-#~     return 0;                                       # failed after all
-#~     
-#~ }; ## _unlink_carefully
 
 ######## INTERNAL ROUTINE ########
 #
@@ -222,16 +243,26 @@ sub _grumble {
         
         shell_died      => [
             qq{Last shell command died with code $_[1].},
+            $!
         ],
         
         shell_error     => [
             qq{Last shell command exited with code $_[1].},
+            $!
         ],
         
         unlink_count    => [
              q{Failed to unlink expected number of files.},
             qq{Expected number of files to unlink: $_[1].},
              
+        ],
+        
+        mkdir_save      => [
+            qq{Failed to mkdir save folder $_[1].},
+        ],
+        
+        rmdir_save      => [
+            qq{Failed to rmdir save folder $_[1].},
         ],
         
     };
