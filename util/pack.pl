@@ -292,6 +292,20 @@ __END__
 
 pack.pl - Utility script to help Build
 
+I'm tired of wrestling with Module::Build's ways. 
+
+* Check to see user cd to VCS controlled project folder
+* cd pack
+* cp working tree . (omitting items on some skip list)
+* mv files into acceptable M::B tree
+* /run/bin/perl Build.PL
+* ./Build foo
+* cp resulting tarball to hold/tarball/
+* extract tarball to unpack/
+* rm everything in pack/
+
+=head3 old
+
 * Check to see user cd to VCS controlled project folder
 * Save any top-level loose files to .top/
 * Copy top/ to ./
