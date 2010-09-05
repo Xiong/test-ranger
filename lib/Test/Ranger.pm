@@ -14,7 +14,7 @@ use Test::More;
 
 ######## CLASS METHOD ########
 #
-#   my $obj = Test::Hump->new();
+#   my $obj = Test::Ranger->new();
 #
 #       Returns a hashref blessed into class of calling package
 #
@@ -32,7 +32,7 @@ sub new {
 
 ######## OBJECT METHOD ########
 #
-#   $obj->init( $AoH );
+#   $obj->init( $arg );
 #
 #       Initializes $obj with a preconstructed data structure.
 #       $obj is a conventional hash-based object.
@@ -43,7 +43,7 @@ sub init {
     my $aref    = $_[1];
     
     # assign list to hash
-    $self->{-data}      = $aref;
+    $self->{-list}      = $aref;
     
     return $self;
 }; ## init
