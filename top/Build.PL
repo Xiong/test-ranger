@@ -5,7 +5,7 @@ use Module::Build;
 
 my $builder = Module::Build->new(
     module_name         => 'Test::Ranger',
-    license             => 'Artistic-2',
+    license             => 'artistic-2',
     dist_author         => 'Xiong Changnian <xiong@cpan.org>',
     dist_version_from   => 'lib/Test/Ranger.pm',
     requires => {
