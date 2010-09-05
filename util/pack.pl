@@ -39,6 +39,17 @@ my $vcs_dirrel          = '.git';
 my $vcs_dirabs          = catdir( $project_dirabs, $vcs_dirrel );
 stat $vcs_dirabs or _crash('no_vcs');
 
+
+
+
+
+
+
+
+
+
+
+
 # Save any loose top-level files to .save/
 my @saved_files         = _get_files($project_dirabs);
 my $save_dirrel         = '.save';
