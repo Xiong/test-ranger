@@ -2,8 +2,6 @@ Build.PL
 Changes
 MANIFEST
 README
+lib/Acme/Teddy.pm
 lib/Test/Ranger.pm
-t/00.load.t
-t/perlcritic.t
-t/pod-coverage.t
-t/pod.t
+lib/Test/Ranger/List.pm
