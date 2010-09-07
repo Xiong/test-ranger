@@ -1,12 +1,6 @@
 use strict;
 use warnings;
  
-use lib qw{
-          lib
-       ../lib
-    ../../lib
-};
-
 use Test::Ranger;
 
 # Object-oriented usage
