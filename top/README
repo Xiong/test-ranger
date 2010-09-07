@@ -1,18 +1,22 @@
 Test-Ranger version 0.0.1
 
-[ REPLACE THIS...
+"The computer should be doing the hard work. 
+        That's what it's paid to do, after all."
+                                          -- Larry Wall
 
-  The README is used to introduce the module and provide instructions on
-  how to install the module, any machine dependencies it may have (for
-  example C compilers and installed libraries) and any other information
-  that should be understood before the module is installed.
+This is a comprehensive testing module compatible with Test::More and friends 
+within TAP::Harness. Helper scripts and templates are included to make 
+test-driven development quick, easy, and reliable. Test data structure is 
+open; choose from object-oriented methods or procedural/functional calls. 
 
-  A README file is required for CPAN modules since CPAN extracts the
-  README file from a module distribution so that people browsing the
-  archive can use it get an idea of the modules uses. It is usually a
-  good idea to provide version information here so that people can
-  decide whether fixes for the module are worth downloading.
-]
+Tests themselves are formally untestable. All code conceals bugs. Do you want 
+to spend your time debugging tests or writing production code? 
+The Test::Ranger philosophy is to reduce the amount of code in a test script 
+and let test data (given inputs and wanted outputs) dominate. 
+
+Many hand-rolled test scripts examine expected output to see if it matches 
+expectations. Test::Ranger traps fatal exceptions cleanly and makes it easy 
+to check every execution for both expected and unexpected output. 
 
 
 INSTALLATION
@@ -30,7 +34,7 @@ DEPENDENCIES
 None.
 
 
-LICENCE
+LICENSE
 
 Copyright (C) 2010 Xiong Changnian <xiong@cpan.org>
 
