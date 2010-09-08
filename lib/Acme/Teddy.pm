@@ -7,10 +7,25 @@ package Acme::Teddy;
 
 our $VERSION    = 1.002003;
 
+#=========# EXTERNAL FUNCTION
+#
+#   use Acme::Teddy qw( your $user @symbols );  # calls import()
+#       
+# Purpose   : Exports all arguments to caller.
+# Parms     : $pkg      : Provided by use()
+#           : @imports  : Anything
+# Writes    : Caller's symbol table.
+# Throws    : When passed something bizzare, maybe.
+# See also  : Exporter::Heavy::heavy_export()
+# 
+# Exports almost *anything* passed in. 
+# Note that this module defines very little, 
+#   so you need to define stuff to export it. 
+#
 sub import {
-    my $callpkg     = caller(1);
     my $pkg         = shift;
     my @imports     = @_;       # anything you like, baby
+    my $callpkg     = caller(1);
     my $type        ;
     my $sym         ;
     
@@ -30,9 +45,94 @@ sub import {
         $type eq '@' ? \@{"${pkg}::$sym"} :
         $type eq '%' ? \%{"${pkg}::$sym"} :
         $type eq '*' ?  *{"${pkg}::$sym"} :
-        die "$pkg: Can't export symbol: $type$sym\n";
+        die "$pkg: Can't export symbol: $type$sym\n", $!;
     }
-};
+}; ## import
+
+# For we enter thee sonne.
+use strict;
+use warnings;
+
+#=========# CLASS METHOD
+#
+#   my $bear    = Acme::Teddy->new();
+#   my $bear    = Acme::Teddy->new({ -a  => 'x' });
+#   my $bear    = Acme::Teddy->new([ 1, 2, 3, 4 ]);
+#   my $bear    = Acme::Teddy->new( {}, @some_data );
+#       
+# Purpose   : Dummy constructor
+# Parms     : $class    : Any subclass of this class
+#           : $self     : Any reference
+#           : @init     : All remaining args
+# Returns   : $self
+# Invokes   : init()
+# 
+# If invoked with $class only, 
+#   blesses an empty hashref and calls init() with no args. 
+# 
+# If invoked with $class and a reference,
+#   blesses the reference and calls init() with any remaining args. 
+# 
+sub new {
+    my $class   = shift;
+    my $self    = shift || {};      # default: hashref
+    
+    bless ($self => $class);
+    $self->init(@_);
+    
+    return $self;
+}; ## new
+
+#=========# OBJECT METHOD
+#
+#   $obj->init(@_);     # initialize object
+#       
+# Purpose   : Discard any extra arguments to new().
+# Returns   : $self
+# 
+# This is a placeholder method. You might want to override it in a subclass. 
+#   
+sub init {
+    return shift;
+}; ## init
+
+#=========# INTERNAL FUNCTION
+#
+#   _egg();     # short
+#       
+# Purpose   : Bunny rabbits have Easter eggs. Why not Teddy?
+# 
+# This function is undocumented, because it's mine. 
+# 
+sub _egg {
+    my @parms       = @_;
+    my $product     = 1;
+    my $prepend     = __PACKAGE__ . q{: };
+    my $message     = $prepend;
+    my $crack       = qr/crack/;
+    my $drop        = qr/drop/;
+    my $integer     = qr/^\d$/;
+    
+    foreach (@parms) {
+        if    (/$crack/) {
+            warn $prepend, q{Crack! }, $!;
+        }
+        elsif (/$drop/) {
+            die  $prepend, q{~~=@__.! }, $!;            
+        }
+        elsif (/$integer/) {
+            $product    *= $_;
+        }
+        else {
+            $message    .= $_;
+        }; ## if-else tree
+    }; ## foreach
+    
+    print $message, qq{\n};
+    return $product;
+    
+}; ## _egg
+
 
 ## END MODULE
 1;
@@ -41,11 +141,11 @@ __END__
 
 =head1 NAME
 
-Acme::Teddy - Dummy target for your pitbull testing module
+Acme::Teddy - Chewy target for your pitbull testing module
 
 =head1 VERSION
 
-This document describes Acme::Teddy version 1.23
+This document describes Acme::Teddy version 1.002003
 
 =head1 SYNOPSIS
     
