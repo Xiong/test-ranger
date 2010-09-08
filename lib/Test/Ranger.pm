@@ -21,7 +21,7 @@ use Test::More;
 #       see also: init();
 #
 sub new {
-    my $class   = $_[0];
+    my $class   = shift;
     my $self    = {};
     
     bless ($self => $class);
