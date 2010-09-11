@@ -1,19 +1,14 @@
 use strict;
 use warnings;
- 
-use lib qw{
-          lib
-       ../lib
-    ../../lib
-};
 
+use Acme::Teddy;
 use Test::Ranger;
 
 # Object-oriented usage
-my $test    = Test::Ranger->new(
+my $group    = Test::Ranger->new([
     {
-        -coderef    => \&Acme::Dummy::hello_mult,
-        -basename   => 'hello-mult',
+        -coderef    => \&Acme::Teddy::_egg,
+        -basename   => 'teddy-egg',
     },
     
     {
@@ -45,7 +40,7 @@ my $test    = Test::Ranger->new(
         },
     },
     
-); ## end new
+]); ## end new
 
-$test->execute();
+$group->execute();
 

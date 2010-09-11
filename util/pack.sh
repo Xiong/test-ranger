@@ -214,6 +214,7 @@ fi
 
 # cd to hold/unpack/
 cd hold/unpack/
+unpackfolder=`pwd`
 
 if (( $? ))
 then
@@ -229,7 +230,7 @@ buildfolder=${tarball%.tar.gz}
 contents=`ls $buildfolder`
 if [ -n "$contents" ]
 then
-    echo "& Removing old $projectfolder/$buildfolder:"
+    echo "& Removing old $unpackfolder/$buildfolder:"
     echo "$contents"
     #~ rm --recursive --force --interactive=once $verbose $buildfolder
     rm --recursive -I $verbose $buildfolder
