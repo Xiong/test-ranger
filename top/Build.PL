@@ -9,8 +9,11 @@ my $builder = Module::Build->new(
     dist_author         => 'Xiong Changnian <xiong@cpan.org>',
     dist_version_from   => 'lib/Test/Ranger.pm',
     requires => {
-        'Test::More' => 0,
-        'version'    => 0,
+        'Test::More'        => 0,
+        'version'           => 0,
+    },
+    build_requires => {
+        'Acme::Teddy'       => 1.002003,
     },
     add_to_cleanup      => [ 'Test-Ranger-*' ],
     meta_merge              => {
