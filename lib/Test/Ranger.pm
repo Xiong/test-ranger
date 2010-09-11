@@ -84,10 +84,10 @@ TODO: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
     # Object-oriented usage
     use Test::Ranger;
 
-    my $test    = Test::Ranger->new(
+    my $group    = Test::Ranger->new([
         {
-            -coderef    => \&Acme::Dummy::hello_mult,
-            -basename   => 'hello-mult',
+            -coderef    => \&Acme::Teddy::_egg,
+            -basename   => 'teddy-egg',
         },
         
         {
@@ -119,10 +119,9 @@ TODO: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
             },
         },
         
-    ); ## end new
+    ]); ## end new
 
-    $test->execute();
-    $test->compare();
+    $group->test();
     
     __END__
 
