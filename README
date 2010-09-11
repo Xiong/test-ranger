@@ -2,4 +2,29 @@ Test-Ranger version 0.0.1
 
 DEVELOPER README
 
+"The computer should be doing the hard work. 
+        That's what it's paid to do, after all."
+                                          -- Larry Wall
 
+This is a comprehensive testing module compatible with Test::More and friends 
+within TAP::Harness. Helper scripts and templates are included to make 
+test-driven development quick, easy, and reliable. Test data structure is 
+open; choose from object-oriented methods or procedural/functional calls. 
+
+Tests themselves are formally untestable. All code conceals bugs. Do you want 
+to spend your time debugging tests or writing production code? 
+The Test::Ranger philosophy is to reduce the amount of code in a test script 
+and let test data (given inputs and wanted outputs) dominate. 
+
+Many hand-rolled test scripts examine expected output to see if it matches 
+expectations. Test::Ranger traps fatal exceptions cleanly and makes it easy 
+to check every execution for both expected and unexpected output. 
+
+FOR DEVELOPERS
+
+Test::Ranger is a development tool. I don't expect help but I welcome it. 
+In particular, you're invited to ask about features you want to see in TR. 
+
+Please feel free to email me at <xiong@cpan.org>. 
+You can also use the wiki at: 
+<http://github.com/Xiong/test-ranger/wiki>.
