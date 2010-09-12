@@ -2,6 +2,7 @@
     package Acme::Teddy;
     sub one{ 1 };
 }
+use 5.010000;
 use strict;
 use warnings;
 
@@ -10,6 +11,8 @@ use Test::Ranger;
 use Test::More;
 
 #~ use Devel::Comments;
+#~ use Devel::Comments '####';
+use Devel::Comments '###';
 
 #----------------------------------------------------------------------------#
 
@@ -28,8 +31,9 @@ my $list        = {
 $list->{-list}  = [
     {
         -name       => q'empty-hashref',
-        -given      => 
+        -given      => {
             -args       => [ {} ],
+        },
         -scan       => {
             -return     => {
                 -ref        => {
@@ -42,34 +46,62 @@ $list->{-list}  = [
     
 ]; ## -list
 
+### Before:
+### $list
+
 test($list);
 done($list);
 
+### After:
+### $list
+
 #----------------------------------------------------------------------------#
+
+sub expand {
+    my $single      = shift;
+    my $list        = shift;
+    
+    if ( !defined $single->{-coderef} ) {
+        $single->{-coderef}     = $list->{-coderef};
+    };
+    
+    $single->{-plan_counter}    = 0;
+    $single->{-fullname}        = join q'-',
+                                    $list->{-basename},
+                                    $single->{-name};
+    
+    return 1;
+};
 
 sub execute {
     my $self            = shift;
-    
+    ##### $self
     my $coderef     = $self->{-coderef};
+    ##### $coderef
     my @args        = @{ $self->{-given}{-args} };
     my $got         ;
     
     # The real execution.
     $got            = &$coderef( @args );
     
-    $self->{-return}{-value}{-got}  = $got;
+    # Store results.
+    $self->{-scan}{-return}{-value}{-got}  = $got;
+    
+    if ( defined $self->{-scan}{-return}{-ref} ) {
+        $self->{-scan}{-return}{-ref}{-got}   = ref $got;
+    };
     
     return 1;
 };
 
 # $self                         # a single declaration
-#       -scan                   # set of scans              # $scan_key
-#           -return             # return from execution     # $out_key
-#               -value          # value returned            # $type_key
+#       -scan                   # set of scans
+#           -return             # return from execution     # $key_1
+#               -value          # value returned            # $key_2
 #                   -probe      # kind of probe
 #                   -want       # expectation
 #                   -got        # actual result
-#               -ref            # ref( value )              # $type_key
+#               -ref            # ref( value )              # $key_2
 #                   -probe      # type of probe
 #                   -want       # expectation
 #                   -got        # actual result
@@ -77,25 +109,25 @@ sub execute {
 sub check {
     my $self            = shift;
     my $scan            = $self->{-scan};           # $scan: tree branch
-    my $fullname        = $self->{-fullname};
-    my $counter         = $self->{-plan_counter};
-    
-    foreach my $scan_key ( keys %$scan ) {
-        foreach my $out_key ( keys %{ $scan->{$scan_key} } ) {
-            foreach my $type_key ( keys %{ $scan->{$scan_key}{$out_key} } ) {
-                my $probe       = $scan->{$scan_key}{$out_key}{$ype_key}{-probe};
-                my $got         = $scan->{$scan_key}{$out_key}{$ype_key}{-got};
-                my $want        = $scan->{$scan_key}{$out_key}{$ype_key}{-want};
-                given ($probe) {
-                    when ('is')     { is(   $got, $want, $name) } 
-                    when ('like')   { like( $got, $want, $name) } 
-                };
-                $counter++;
+    my $count           = $self->{-plan_counter};
+    #### $scan
+    foreach my $key_1 ( keys %$scan ) {
+        foreach my $key_2 ( keys %{ $scan->{$key_1} } ) {
+            #### $key_1
+            #### $key_2
+            my $check       = $scan->{$key_1}{$key_2};
+            my $probe       = $check->{-probe};
+            my $got         = $check->{-got};
+            my $want        = $check->{-want};
+            my $name        = $check->{-name};
+            given ($probe) {
+                when ('is')     { is(   $got, $want, $name); $count++; } 
+                when ('like')   { like( $got, $want, $name); $count++; } 
             };
         };
     };
     
-    
+    $self->{-plan_counter}  = $count;
     return 1;
 };
 
@@ -103,11 +135,8 @@ sub test {
     my $self            = shift;
     
     # Expand, execute, check
-    foreach my $single ( $self->{-list} ) {
-        $single->{-plan_counter}    = 0;
-        $single->{-fullname}        = join q'-',
-                                        $self->{-basename},
-                                        $single->{-name};
+    foreach my $single ( @{ $self->{-list} } ) {
+        expand($single, $self);
         execute($single);
         check($single);
         
