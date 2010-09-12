@@ -8,13 +8,19 @@ use warnings;
 use Acme::Teddy;
 use Test::Ranger;
 
+#~ use Devel::Comments;
+
 # Minimum
-my $test    = Test::Ranger->new(
+my $single      = Test::Ranger->new(
     {
         -coderef    => \&Acme::Teddy::one,
     },
     
 ); ## end new
 
-$test->test();
+### $single
 
+$single->test();
+$single->done();
+
+__END__
