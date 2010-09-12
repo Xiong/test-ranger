@@ -10,9 +10,11 @@ use Acme::Teddy;
 use Test::Ranger;
 use Test::More;
 
-#~ use Devel::Comments;
+use Devel::Comments '######';
+#~ use Devel::Comments '#####';
 #~ use Devel::Comments '####';
-use Devel::Comments '###';
+#~ use Devel::Comments '###';
+#~ use Devel::Comments;
 
 #----------------------------------------------------------------------------#
 
@@ -111,8 +113,8 @@ sub check {
     my $scan            = $self->{-scan};           # $scan: tree branch
     my $count           = $self->{-plan_counter};
     #### $scan
-    foreach my $key_1 ( keys %$scan ) {
-        foreach my $key_2 ( keys %{ $scan->{$key_1} } ) {
+    for my $key_1 ( keys %$scan ) {
+        for my $key_2 ( keys %{ $scan->{$key_1} } ) {
             #### $key_1
             #### $key_2
             my $check       = $scan->{$key_1}{$key_2};
@@ -120,6 +122,7 @@ sub check {
             my $got         = $check->{-got};
             my $want        = $check->{-want};
             my $name        = $check->{-name};
+            ###### $name
             given ($probe) {
                 when ('is')     { is(   $got, $want, $name); $count++; } 
                 when ('like')   { like( $got, $want, $name); $count++; } 
