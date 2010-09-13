@@ -8,9 +8,11 @@ use warnings;
 
 use Acme::Teddy;
 use Test::Ranger;
-use Test::More;
+use Test::More 0.94;
+use Test::Deep;
+use Capture::Tiny qw( capture );
 
-use Devel::Comments '######';
+#~ use Devel::Comments '######';
 #~ use Devel::Comments '#####';
 #~ use Devel::Comments '####';
 #~ use Devel::Comments '###';
@@ -23,16 +25,23 @@ my $unit        = sub {
     return Test::Ranger->new(@_);
 };
 
-my $plan_counter    = 0;
-
-
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+my $demo_list   = bless( {
+  '-expanded' => 0,
+  '-list' => [
+               bless( {
+                        '-expanded' => 0,
+                        '-plan_counter' => 0
+                      }, 'Test::Ranger' ),
+               bless( {
+                        '-expanded' => 0,
+                        '-plan_counter' => 0
+                      }, 'Test::Ranger' )
+             ],
+  '-plan_counter' => 0
+}, 'Test::Ranger::List' );
 
 my $list        = {
-    -basename       => q'new',
+    -name           => q'new',
     -list           => [],
     -plan_counter   => 0,
     -coderef        => $unit,
@@ -53,6 +62,41 @@ $list->{-list}  = [
             },
         },
     },
+    
+    {
+        -name       => q'dummy-hashref',
+        -given      => {
+            -args       => [ { -foo => 'bar' } ],
+        },
+        -scan       => {
+            -return     => {
+                -ref        => {
+                    -probe      => q'is',
+                    -want       => q'Test::Ranger',
+                },
+            },
+        },
+    },
+    
+    {
+        -name       => q'dummy-arrayref',
+        -given      => {
+            -args       => [ [ {}, {} ] ],
+        },
+        -scan       => {
+            -return     => {
+                -ref        => {
+                    -probe      => q'is',
+                    -want       => q'Test::Ranger::List',
+                },
+                -value      => {
+                    -probe      => q'is_deeply',
+                    -want       => $demo_list,
+                },
+            },
+        },
+    },
+    
     
 ]; ## -list
 
@@ -76,18 +120,24 @@ sub expand {
     };
     
     $single->{-plan_counter}    = 0;
-    $single->{-fullname}        = join q'-',
-                                    $list->{-basename},
+    
+    if ( !defined $single->{-name} ) {
+        $single->{-name}        = q{%};
+    };
+    $single->{-name}            = join q{|},
+                                    $list->{-name},
                                     $single->{-name};
+    
+    
     
     return 1;
 };
 
 sub execute {
     my $self            = shift;
-    ##### $self
+    #### $self
     my $coderef     = $self->{-coderef};
-    ##### $coderef
+    #### $coderef
     my @args        = @{ $self->{-given}{-args} };
     my $got         ;
     
@@ -129,11 +179,19 @@ sub check {
             my $probe       = $check->{-probe};
             my $got         = $check->{-got};
             my $want        = $check->{-want};
-            my $name        = $check->{-name};
-            ###### $name
+            my $name        = join q{|},
+                                $self->{-name},
+                                $key_1,
+                                $key_2;
+            ##### $name
+            ##### $check
             given ($probe) {
-                when ('is')     { is(   $got, $want, $name); $count++; } 
-                when ('like')   { like( $got, $want, $name); $count++; } 
+                when ('is')     
+                     { is(          $got, $want, $name); $count++; } 
+                when ('like')   
+                     { like(        $got, $want, $name); $count++; } 
+                when ('is_deeply')   
+                     { is_deeply(   $got, $want, $name); $count++; } 
             };
         };
     };

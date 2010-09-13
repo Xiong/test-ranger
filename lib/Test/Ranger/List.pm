@@ -1,4 +1,5 @@
 package Test::Ranger::List;
+use parent Test::Ranger;
 
 use strict;
 use warnings;
@@ -35,6 +36,7 @@ sub new {
     my @list    = @{ shift() };
     my $self    = {};
     
+    bless ($self => $class);
     $self->init(@list);
     
     return $self;

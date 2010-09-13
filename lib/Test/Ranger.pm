@@ -11,6 +11,7 @@ use Test::More;                 # Standard framework for writing test scripts
 use Const::Fast;                # Declare locked scalars, arrays, and hashes
 use Scalar::Util::Reftype;      # Alternate reftype() interface
 
+use Test::Ranger::List;
 
 ## use
 
