@@ -1,1 +1,0 @@
-../all/synopsis-oo.t
