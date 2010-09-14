@@ -89,6 +89,11 @@ sub init {
 sub expand {
     my $self        = shift;
     
+    # Default givens
+    if ( !$self->{-given}{-args} ) {
+        $self->{-given}{-args}     = [];
+    };
+    
     # Default expectations
     if ( !$self->{-return}{-want} ) {
         $self->{-return}{-want}     = 1;

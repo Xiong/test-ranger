@@ -10,7 +10,7 @@ use Acme::Teddy;
 use Test::Ranger;
 use Test::More;
 
-use Devel::Comments '######';
+#~ use Devel::Comments '######';
 #~ use Devel::Comments '#####';
 #~ use Devel::Comments '####';
 #~ use Devel::Comments '###';

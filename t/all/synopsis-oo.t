@@ -5,10 +5,10 @@ use Acme::Teddy;
 use Test::Ranger;
 
 # Object-oriented usage
-my $group    = Test::Ranger->new([
+my $list    = Test::Ranger->new([
     {
         -coderef    => \&Acme::Teddy::_egg,
-        -basename   => 'teddy-egg',
+        -name   => 'teddy-egg',
     },
     
     {
@@ -42,5 +42,5 @@ my $group    = Test::Ranger->new([
     
 ]); ## end new
 
-$group->execute();
+$list->test();
 
