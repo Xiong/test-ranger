@@ -1,55 +1,81 @@
 package Test::Ranger::List;
+use parent Test::Ranger;
 
 use strict;
 use warnings;
 use Carp;
 
-use version 0.77; our $VERSION = qv('0.0.1');
+use version 0.77; our $VERSION = qv('0.0.2');
 
 ## use
 
 #============================================================================#
 
-######## CLASS METHOD ########
+#=========# CLASS METHOD
 #
-#   my $obj = Test::Ranger::List->new();
-#
-#       Returns a hashref blessed into class of calling package
-#
-#       see also: init();
-#
+#   my $list    = $class->new( \@list );
+#   my $list    = $class->new([
+#                       { -a  => 'x' },
+#                       { -b  => 'y' },
+#                   ]);
+#       
+# Purpose   : Object constructor
+# Parms     : $class    : Any subclass of this class
+#           : \@list    : Arrayref only; required
+# Returns   : $self
+# Invokes   : init()
+# 
+# An object of this $class is a hashref, *not* an arrayref!
+# But it is constructed by passing in an arrayref. 
+# An empty hashref is blessed into $class. 
+# Each element of @list is blessed into Test::Ranger in init(). 
+# Housekeeping info for the whole object is stored in other keys. 
+# 
 sub new {
-    my $class   = $_[0];
+    my $class   = shift;
+    my @list    = @{ shift() };
     my $self    = {};
     
     bless ($self => $class);
-    $self->init(@_);            # init all remaining args
+    $self->init(@list);
     
     return $self;
 }; ## new
 
-######## OBJECT METHOD ########
+#=========# OBJECT METHOD
 #
-#   $obj->init( $arg );
-#
-#       Initializes $obj with a preconstructed data structure.
-#       $obj is a conventional hash-based object.
-#       See docs for specification.
-#
+#   $self->init( @list );
+# 
+# Purpose   : Object initializer
+# Parms     : $class
+#           : @list     : Array; required
+# Returns   : $self
+# Invokes   : Test::Ranger::new()
+# 
+# Blesses each element of @list into Test::Ranger and 
+#   assigns \@list to $self->{-list}.
+# Adds housekeeping info for the whole object to other keys. 
+# 
 sub init {
-    my $self    = $_[0];
-    my $aref    = $_[1];
+    my $self        = shift;
+    my @list_in     = @_;
+    my @list_out    ;
     
-    # assign list to hash
-    $self->{-list}      = $aref;
+    foreach my $single (@list_in) {
+        push @list_out, Test::Ranger->new($single);
+    };
+    
+    $self->{-list}              = \@list_out;
+    $self->SUPER::init();
     
     return $self;
 }; ## init
 
 
-#############################
-######## END MODULE #########
+
+## END MODULE
 1;
+#============================================================================#
 __END__
 
 =head1 NAME

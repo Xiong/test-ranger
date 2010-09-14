@@ -1,72 +1,183 @@
 package Test::Ranger;
 
+use 5.010000;
 use strict;
 use warnings;
 use Carp;
 
-use version 0.77; our $VERSION = qv('0.0.1');
+use version 0.77; our $VERSION = qv('0.0.2');
 
-use Test::More;
+use Test::More;                 # Standard framework for writing test scripts
+use Const::Fast;                # Declare locked scalars, arrays, and hashes
+use Scalar::Util::Reftype;      # Alternate reftype() interface
+
+use Test::Ranger::List;
 
 ## use
 
+# Alternate uses
+#~ use Devel::Comments;
+
 #============================================================================#
 
-######## CLASS METHOD ########
+# Pseudo-globals
+
+#~ # Literal hash keys
+#~ const my $coderef     => '-coderef';    # cref to code under test
+
+#----------------------------------------------------------------------------#
+
+#=========# CLASS METHOD
 #
-#   my $obj = Test::Ranger->new();
-#
-#       Returns a hashref blessed into class of calling package
-#
-#       see also: init();
-#
+#   my $obj     = $class->new($self);
+#   my $obj     = $class->new();
+#   my $obj     = $class->new({ -a  => 'x' });
+#   my $obj     = $class->new([ 1, 2, 3, 4 ]);
+#       
+# Purpose   : Object constructor
+# Parms     : $class    : Any subclass of this class
+#           : $self     : Hashref or arrayref
+# Returns   : $self
+# Invokes   : init(), Test::Ranger::List::new()
+# 
+# If invoked with $class only, blesses and returns an empty hashref. 
+# If invoked with $class and a hashref, blesses and returns it. 
+# If invoked with $class and an arrayref, invokes ::List::new(). 
+# 
 sub new {
     my $class   = shift;
-    my $self    = {};
+    my $self    = shift || {};      # default: hashref
     
-    bless ($self => $class);
-    $self->init(@_);            # init all remaining args
+    if ( (reftype $self)->array ) {
+        $self       = Test::Ranger::List->new($self);
+    } 
+    else {
+        bless ($self => $class);
+        $self->init();
+    };
     
     return $self;
 }; ## new
 
-######## OBJECT METHOD ########
+#=========# OBJECT METHOD
 #
-#   $obj->init( $arg );
+#   $obj->init();
 #
-#       Initializes $obj with a preconstructed data structure.
-#       $obj is a conventional hash-based object.
-#       See docs for specification.
+# Purpose   : Initialize housekeeping info.
+# Parms     : $class    : Any subclass of this class
+#           : $self     : Hashref
+# Returns   : $self
 #
 sub init {
-    my $self    = $_[0];
-    my $aref    = $_[1];
+    my $self        = shift;
     
-    # assign list to hash
-    $self->{-list}      = $aref;
+    $self->{-plan_counter}      = 0;
+    $self->{-expanded}          = 0;
     
     return $self;
 }; ## init
 
-######## OBJECT METHOD ########
+#=========# OBJECT METHOD
 #
-#   $test->execute();
+#   $single->expand();
 #
-#       Executes the tests and subtests defined in the object $test.
+# Purpose   : Expand/parse declaration into canonical form.
+# Parms     : $class
+#           : $self
+# Returns   : $self
+#
+sub expand {
+    my $self        = shift;
+    
+    # Default givens
+    if ( !$self->{-given}{-args} ) {
+        $self->{-given}{-args}     = [];
+    };
+    
+    # Default expectations
+    if ( !$self->{-return}{-want} ) {
+        $self->{-return}{-want}     = 1;
+    };
+    
+    
+    
+    $self->{-expanded}          = 1;
+    
+    return $self;
+}; ## expand
+
+#=========# OBJECT METHOD
+#
+#   $single->execute();
+#
+#       Execute a $single object.
 #
 sub execute {
-    my $self    = $_[0];
+    my $self        = shift;
     
-    pass('DUMMY');
-    done_testing(1);
+    $self->expand() if !$self->{-expanded};
     
-    return 1;                           # DUMMY
+    my $coderef     = $self->{-coderef};
+    my @args        = @{ $self->{-given}{-args} };
+    ### $coderef
+    
+    $self->{-return}{-got}    = &$coderef( @args );
+    
+    return $self;
     
 }; ## execute
 
-#############################
-######## END MODULE #########
+#=========# OBJECT METHOD
+#
+#   $single->check();
+#
+#       Check results in a $single object.
+#
+sub check {
+    my $self        = shift;
+    
+    is( $self->{-return}{-got}, $self->{-return}{-want}, $self->{-fullname} );
+    $self->{-plan_counter}++;
+    
+    return $self;
+    
+}; ## check
+
+#=========# OBJECT METHOD
+#
+#   $single->test();
+#
+#       Execute and check a $single object.
+#
+sub test {
+    my $self        = shift;
+    
+    $self->execute();
+    $self->check();
+    
+    return $self;
+    
+}; ## test
+
+#=========# OBJECT METHOD
+#
+#   $single->done();
+#
+#       Conclude testing.
+#
+sub done {
+    my $self        = shift;
+    
+    done_testing( $self->{-done_counter} );
+    
+    return $self;
+    
+}; ## done
+
+
+## END MODULE
 1;
+#============================================================================#
 __END__
 
 =head1 NAME
@@ -211,7 +322,7 @@ filename usually ends in .t
 
 =head3 list
 
-Arrayref or series of (several sequential) test L<declarations|/declaration>
+Array or series of (several sequential) test L<declarations|/declaration>
 
 =head3 declaration
 
@@ -224,14 +335,14 @@ also, the phase in which this data is constructed
 The action of running a test L</declaration> and capturing actual L</outputs>;
 also, the phase in which this is done
 
-=head3 comparison
+=head3 checking
 
-The action of checking actual and expected values for some execution; 
+The action of comparing actual and expected values for some execution; 
 also, the phase in which this is done
 
 =head3 subtest
 
-A single check of actual and expected results for some output. 
+A single comparison of actual and expected results for some output. 
 
 Note that a C<Test::More::subtest()>, used internally by Test::Ranger, 
 counts as a single 'test' passed to harness. In these docs, a 'subtest' is 
@@ -467,7 +578,7 @@ L</-stdout> and L</-warn>.
 
     {-want => {-foo => 'baz'}}
 
-These values will not be processed directly when the declaration is executed. 
+Extra values will not be processed directly when the declaration is executed. 
 This feature is intended to allow you to supply additional test expectations. 
 It's up to you to pick them out during comparison and use them as you wish. 
 
@@ -642,7 +753,7 @@ sequentiallly and each Test::Ranger subobject executed.
 
 Returns $self. 
 
-=head3 compare()
+=head3 check()
 
 Takes a hashref or arrayref as a required argument when called as a function. 
 Takes no argument when called as a method. 

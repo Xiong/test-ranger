@@ -1,4 +1,4 @@
-Test-Ranger version 0.0.1
+Test-Ranger version 0.0.2
 
 "The computer should be doing the hard work. 
         That's what it's paid to do, after all."
@@ -18,15 +18,18 @@ Many hand-rolled test scripts examine expected output to see if it matches
 expectations. Test::Ranger traps fatal exceptions cleanly and makes it easy 
 to check every execution for both expected and unexpected output. 
 
+Developers, please feel free to pull from: 
+http://github.com/Xiong/test-ranger
+and know that your comments are welcome. 
 
 INSTALLATION
 
 To install this module with Module::Build, run the following commands:
 
-	perl Makefile.PL
-	make
-	make test
-	make install
+    perl Build.PL
+    Build
+    Build test
+    Build install
 
 
 DEPENDENCIES

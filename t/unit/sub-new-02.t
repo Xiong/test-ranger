@@ -1,0 +1,1 @@
+/home/xiong/projects/test-ranger/t/all/sub-new-02.t
