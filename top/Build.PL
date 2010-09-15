@@ -1,4 +1,4 @@
-use 5.10.1;
+use 5.010001;
 use strict;
 use warnings;
 use Module::Build;
@@ -9,9 +9,14 @@ my $builder = Module::Build->new(
     dist_author         => 'Xiong Changnian <xiong@cpan.org>',
     dist_version_from   => 'lib/Test/Ranger.pm',
     requires => {
-        'perl'              => 5.010001,
-        'Test::More'        => 0.94,
-        'version'           => 0.77,
+        'perl'                      => 5.010001,
+        'version'                   => 0.77,
+        'Test::More'                => 0.94,
+        'Data::Lock'                => 0,
+        'Scalar::Util'              => 0,
+        'Scalar::Util::Reftype'     => 0,
+        'Capture::Tiny'             => 0,
+        'Try::Tiny'                 => 0,
     },
     build_requires => {
         'Acme::Teddy'       => 1.002003,
