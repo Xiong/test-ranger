@@ -5,10 +5,11 @@ use strict;
 use warnings;
 use Carp;
 
-use version 0.77; our $VERSION = qv('0.0.2');
+use version 0.77; our $VERSION = qv('0.0.3');
 
 use Test::More;                 # Standard framework for writing test scripts
-use Const::Fast;                # Declare locked scalars, arrays, and hashes
+use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
+use Scalar::Util;               # General-utility scalar subroutines
 use Scalar::Util::Reftype;      # Alternate reftype() interface
 
 use Test::Ranger::List;
@@ -23,7 +24,7 @@ use Test::Ranger::List;
 # Pseudo-globals
 
 #~ # Literal hash keys
-#~ const my $coderef     => '-coderef';    # cref to code under test
+#~ dlock( my $coderef     = '-coderef');    # cref to code under test
 
 #----------------------------------------------------------------------------#
 
