@@ -187,7 +187,7 @@ Test::Ranger - Test with data tables, capturing, templates
 
 =head1 VERSION
 
-This document describes Test::Ranger version 0.0.1
+This document describes Test::Ranger version 0.0.4
 
 TODO: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
 
