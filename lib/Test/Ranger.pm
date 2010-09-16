@@ -394,7 +394,7 @@ a hashref, then it is considered to introduce more keys from this interface.
 
 It's not necessary to supply values for all these keys. 
 The only essential key is L</-coderef>. If nothing else is declared, 
-C<&{$test->{-coderef}}()> will be executed, with no arguments. 
+C<< &{$test->{-coderef}}() >> will be executed, with no arguments. 
 One subtest will pass if the execution's return value is C<TRUE>. 
 C<STDOUT> and C<STDERR> are expected to be empty. 
 Any exception will be trapped and reported as a subtest failure. 
