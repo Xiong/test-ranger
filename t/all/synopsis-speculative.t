@@ -24,6 +24,14 @@ $ranger->cub({
     },
 });
     
+my $ranger  = Test::Ranger->new({
+    -name       => 'teddy-egg',
+    -code       => \&Acme::Teddy::_egg,
+});
+    
+    
+    
+    
     {
         -name       => '9*9',
         -given      => [ 9, 9 ],
