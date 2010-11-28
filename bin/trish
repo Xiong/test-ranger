@@ -6,7 +6,7 @@
 use strict;
 use warnings;
 
-use Test::Ranger::Shell;
+use Test::Ranger::Shell;        # invoke Test::Ranger::Shell
 
 #----------------------------------------------------------------------------#
 
