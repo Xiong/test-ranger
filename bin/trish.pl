@@ -6,21 +6,14 @@
 use strict;
 use warnings;
 
-use File::Spec::Functions qw(
-    catdir
-    catfile
-    catpath
-    splitpath
-    curdir
-    rootdir
-    updir
-    canonpath
-);
-use Cwd;
-use Devel::Comments '###', '####';
+use Test::Ranger::Shell;
 
-#
+#----------------------------------------------------------------------------#
 
+Test::Ranger::Shell::main();
+
+# It is better to die() than to return() in failure.
+exit(0);
 
 __END__
 
