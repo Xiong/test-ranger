@@ -8,8 +8,13 @@ use Carp;
 use version 0.77; our $VERSION = qv('v0.0.4');
 
 use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
-use Scalar::Util;               # General-utility scalar subroutines
-use Scalar::Util::Reftype;      # Alternate reftype() interface
+use List::MoreUtils qw(
+    any all none notall true false firstidx first_index 
+    lastidx last_index insert_after insert_after_string 
+    apply after after_incl before before_incl indexes 
+    firstval first_value lastval last_value each_array
+    each_arrayref pairwise natatime mesh zip uniq minmax
+);
 
 
 ## use
@@ -21,10 +26,83 @@ use Scalar::Util::Reftype;      # Alternate reftype() interface
 
 # Constants
 
-#~ # Literal hash keys
-#~ dlock( my $coderef     = '-coderef');    # cref to code under test
+# Command line options
+dlock( my $option_oneshot     = '-1');    # execute from a script
 
 #----------------------------------------------------------------------------#
+
+#=========# MAIN INVOCATION ROUTINE
+#
+#   main();     # invoke Test::Ranger::Shell
+#       
+# Purpose   : Decide whether to execute once (scripted) or loop interactively.
+# Parms     : none
+# Reads     : @ARGV
+# Returns   : nothing
+# Writes    : nothing
+# Throws    : dies on bad @ARGV
+# See also  : _one_shot(), _main_loop()
+# 
+# trish may be run in one of two distinct modes: scripted or interactive. 
+#   If invoked as scripted, will execute on its arguments and exit.
+#   If invoked as interactive, will enter a main loop indefinitely. 
+# 
+sub main {
+    my $action;         # for debug
+    
+    if    ( any { $_ eq $option_oneshot } @ARGV ) {
+        $action     = '_one_shot';
+        _one_shot();
+    } 
+    else {
+        $action     = '_main_loop';
+        _main_loop();
+    };
+    
+    return $action;
+}; ## main
+
+#=========# INTERNAL ROUTINE
+#
+#   _one_shot();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _one_shot {
+    
+    
+    
+}; ## _one_shot
+
+#=========# INTERNAL ROUTINE
+#
+#   _main_loop();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _main_loop {
+    
+    
+    
+}; ## _main_loop
+
+
 
 
 ## END MODULE
