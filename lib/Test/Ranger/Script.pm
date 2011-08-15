@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-use version 0.77; our $VERSION = qv('v0.0.4');
+use version 0.89; our $VERSION = qv('v0.0.4');
 
 use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
 use List::MoreUtils qw(
@@ -16,6 +16,7 @@ use List::MoreUtils qw(
     each_arrayref pairwise natatime mesh zip uniq minmax
 );
 
+use Tk;                         # GUI toolkit
 
 ## use
 
@@ -46,20 +47,69 @@ our $Debug;
 # Purpose   : Execute top-level routines.
 # Parms     : none
 # Reads     : @ARGV
-# Returns   : nothing
+# Returns   : $tk       : Tk main window object
 # Writes    : nothing
 # Throws    : nothing
-# See also  : _main_loop()
+# See also  : _setup()
 # 
 # 
 sub main {    
-    my $action      ;
+    my $tk          ;
     
-    $action         = '_main_loop';
-    _main_loop()        unless $Debug->{-unit};
+    $tk             = MainWindow->new;
+    _setup($tk);
+    MainLoop;
     
-    return $action;
+    return $tk;
 }; ## main
+
+#=========# INTERNAL ROUTINE
+#
+#   _setup($tk);
+#       
+# Purpose   : Set up all Tk stuff.
+# Parms     : $tk       : Tk main window object
+# Reads     : ____
+# Returns   : $tk
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup {
+    
+    my $tk          = shift;
+    my $exit_button ;
+    
+    $tk->title("Hello World");
+    $exit_button    = $tk->Button(
+        -text => "Done", -command => sub{exit}
+    );
+    $exit_button->pack;
+
+    return $tk;
+}; ## _setup
+
+#=========# INTERNAL ROUTINE
+#
+#   _exit();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _exit {
+    
+    exit;
+    
+}; ## _exit
 
 #=========# INTERNAL ROUTINE
 #
