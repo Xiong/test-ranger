@@ -1,11 +1,13 @@
 use Test::More;
-use Test::Trap qw( :default );
+use Test::Trap qw( :default );  # trap{} and $trap exported by default
 
 use Test::Ranger::Shell;    # module under test
 
+#~ use Devel::Comments;        # Debug with executable smart comments to logs
+
 #----------------------------------------------------------------------------#
 
-my @test_data   = (
+my @test_list   = (
     {
         -name       => 'no-arguments',              # interactive by default
         -argv       => [],                          # no arguments
@@ -28,7 +30,7 @@ my @test_data   = (
         -name       => 'cp foo baz',                # interactive
         -argv       => [qw( cp foo baz ) ],         # arguments
         -leaveby    => 'return',                    # normal return
-        -return     => '_main_loop',                # enter main loop
+        -return     => '_one_shot',                 # do one shot
         -stdout     => q{},                         # no STDOUT
         -stderr     => q{},                         # no STDERR
     },
@@ -38,15 +40,24 @@ my @test_data   = (
 
 #----------------------------------------------------------------------------#
 
+our $Debug          ;           # global hashref; debug and testing
+
 my $test_counter    ;
 
-for (@test_data) {
+@test_list  = expand(@test_list);   # insert defaults and propagate stickies
+
+for (@test_list) {
     test($_);
 };
-    done_testing($test_counter);
+done_testing($test_counter);
+### @test_list
 exit(0);
 
 #----------------------------------------------------------------------------#
+
+sub expand {
+    return @_;
+};
 
 sub test {
     my $t           = shift;
@@ -55,7 +66,8 @@ sub test {
     my $name        ;
     
     # Set up test conditions
-    @ARGV           = @{ $t->{-argv} };
+    @ARGV               = @{ $t->{-argv} };
+    $Debug->{-unit}     = 1;
     
     # Execute code under test
     my $rv  = trap{

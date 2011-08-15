@@ -27,7 +27,15 @@ use List::MoreUtils qw(
 # Constants
 
 # Command line options
-dlock( my $option_oneshot     = '-1');    # execute from a script
+#~ dlock( my $option_oneshot     = '-1');    # execute from a script
+
+#----------------------------------------------------------------------------#
+
+# Globals
+
+# Debug and test hashref set in caller
+#       -unit       unit testing if true
+our $Debug;
 
 #----------------------------------------------------------------------------#
 
@@ -40,23 +48,25 @@ dlock( my $option_oneshot     = '-1');    # execute from a script
 # Reads     : @ARGV
 # Returns   : nothing
 # Writes    : nothing
-# Throws    : dies on bad @ARGV
+# Throws    : nothing
 # See also  : _one_shot(), _main_loop()
 # 
 # trish may be run in one of two distinct modes: scripted or interactive. 
 #   If invoked as scripted, will execute on its arguments and exit.
 #   If invoked as interactive, will enter a main loop indefinitely. 
 # 
-sub main {
-    my $action;         # for debug
+sub main {    
+    my $action      ;
     
-    if    ( any { $_ eq $option_oneshot } @ARGV ) {
-        $action     = '_one_shot';
-        _one_shot();
+    if    ( 0 ) {           # reserved for some special interactive argument
     } 
-    else {
+    elsif ( @ARGV ) {       # any other arguments trigger scripted mode
+        $action     = '_one_shot';
+        _one_shot(@ARGV)    unless $Debug->{-unit};
+    } 
+    else {                  # otherwise, interactive mode
         $action     = '_main_loop';
-        _main_loop();
+        _main_loop()        unless $Debug->{-unit};
     };
     
     return $action;
@@ -64,15 +74,15 @@ sub main {
 
 #=========# INTERNAL ROUTINE
 #
-#   _one_shot();     # short
+#   _one_shot(@args);     # short
 #       
-# Purpose   : ____
-# Parms     : ____
+# Purpose   : Execute arguments in real shell.
+# Parms     : @args     : command line to-be
 # Reads     : ____
 # Returns   : ____
 # Writes    : ____
 # Throws    : ____
-# See also  : ____
+# See also  : _filter_input(), _filter_output()
 # 
 # ____
 # 
