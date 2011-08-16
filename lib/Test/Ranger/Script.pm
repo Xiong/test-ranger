@@ -57,17 +57,18 @@ sub main {
     my $tk          ;
     
     $tk             = MainWindow->new;
+    $tk     -> geometry( '600x600' );       # enforce starting size
     _setup($tk);
     MainLoop;
     
     return $tk;
 }; ## main
 
-#=========# INTERNAL ROUTINE
+#=========# TK SETUP METHOD
 #
 #   _setup($tk);
 #       
-# Purpose   : Set up all Tk stuff.
+# Purpose   : Set up all Tk stuff. Main method.
 # Parms     : $tk       : Tk main window object
 # Reads     : ____
 # Returns   : $tk
@@ -78,18 +79,101 @@ sub main {
 # ____
 # 
 sub _setup {
-    
     my $tk          = shift;
-    my $exit_button ;
     
-    $tk->title("Hello World");
-    $exit_button    = $tk->Button(
-        -text => "Done", -command => sub{exit}
-    );
-    $exit_button->pack;
+    # MainWindow title
+    $tk->title("Test Ranger");
+    
+    # Menu bar
+    _setup_menus($tk);     # initial menus on launch
+    
+#~     # Emergency exit button
+#~     my $exit_button ;
+#~     $exit_button    = $tk->Button(
+#~         -text => "Exit", -command => \&_exit
+#~     );
+#~     $exit_button->pack;
+    
+#~     # demo grab keysym -- debug only
+#~     $tk->bind('<KeyPress>' => \&print_keysym);
+#~     sub print_keysym {
+#~         my($widget) = @_;
+#~         my $e = $widget->XEvent;    # get event object
+#~         my($keysym_text, $keysym_decimal) = ($e->K, $e->N);
+#~         print "keysym=$keysym_text, numeric=$keysym_decimal\n";
+#~     };
 
+    
     return $tk;
 }; ## _setup
+
+#=========# TK SETUP METHOD
+#
+#   _setup_menus($tk);     # initial menus on launch
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup_menus {
+    my $tk              = shift;
+    my $menubar         ;
+    
+    my $file_menu       ;
+    my $file_menu_items =[
+        [ command => 'Quit', 
+            -command        => \&_exit, 
+            -accelerator    => 'Ctrl-Q', 
+        ],
+    ];
+    $tk->bind('<Control-q>' => \&_exit);
+    
+    my $edit_menu       ;
+    my $edit_menu_items ;
+    
+    my $help_menu       ;
+    my $help_menu_items ;
+    
+    # Entire main menubar
+    $tk->configure(-menu => $menubar = $tk->Menu);
+    $file_menu   = $menubar->cascade(-label => '~File', 
+        -menuitems => $file_menu_items
+    );
+    $edit_menu   = $menubar->cascade(-label => '~Edit',
+        -menuitems => $edit_menu_items
+    );
+    $help_menu   = $menubar->cascade(-label => '~Help',
+        -menuitems => $help_menu_items
+    );
+
+    return $tk;
+}; ## _setup_menus
+
+#=========# TK SETUP METHOD
+#
+#   _do_();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _do_ {
+    
+    
+    
+}; ## _do_
 
 #=========# INTERNAL ROUTINE
 #
@@ -110,26 +194,6 @@ sub _exit {
     exit;
     
 }; ## _exit
-
-#=========# INTERNAL ROUTINE
-#
-#   _do_();     # short
-#       
-# Purpose   : ____
-# Parms     : ____
-# Reads     : ____
-# Returns   : ____
-# Writes    : ____
-# Throws    : ____
-# See also  : ____
-# 
-# ____
-# 
-sub _do_ {
-    
-    
-    
-}; ## _do_
 
 #=========# INTERNAL ROUTINE
 #
