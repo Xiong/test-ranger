@@ -85,7 +85,12 @@ sub _setup {
     $tk->title("Test Ranger");
     
     # Menu bar
-    _setup_menus($tk);     # initial menus on launch
+    _setup_menus($tk);      # initial menus on launch
+    
+    # Panes
+    _setup_panes($tk);      # initial window panes
+    
+    
     
 #~     # Emergency exit button
 #~     my $exit_button ;
@@ -154,6 +159,74 @@ sub _setup_menus {
 
     return $tk;
 }; ## _setup_menus
+
+#=========# TK SETUP METHOD
+#
+#   _setup_panes(tk);     # initial window panes
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup_panes {
+    my $tk              = shift;
+    
+    my $sash1           ;       # outer, horizontal sash
+    my $sash2           ;       # inner, vertical sash (top)
+    
+    my $pane1           ;       # left
+    my $pane2           ;       # right
+    my $pane3           ;       # bottom
+    
+    # 'vertical' pane orientation means a horizontal sash
+    $sash1              = $tk->Panedwindow( -orient => 'vertical' );
+    $sash1->pack(
+        -side       => 'top',
+        -expand     => 'yes',
+        -fill       => 'both',
+        -padx       => 2,
+        -pady       => 2,
+    );
+    
+    # $sash2 fills the top area within $sash1
+    $sash2              = $sash1->Panedwindow;
+    $sash2->pack(
+        -side       => 'top',
+        -expand     => 'yes',
+        -fill       => 'both',
+        -padx       => 2,
+        -pady       => 2,
+    );
+    
+    # top left is child of $sash2
+    $pane1              = $sash2->Label(
+                            -text       => 'left',
+                            -background => 'yellow',
+                        );
+    
+    # top right is child of $sash2
+    $pane2              = $sash2->Label(
+                            -text       => 'right',
+                            -background => 'cyan',
+                        );
+    
+    # bottom is child of $sash1
+    $pane3              = $sash1->Label(
+                            -text       => 'bottom',
+                            -background => 'red',
+                        );
+    
+    $sash2->add( $pane1, $pane2 );
+    $sash1->add( $sash2, $pane3 );
+        
+    return $tk;
+}; ## _setup_panes
 
 #=========# TK SETUP METHOD
 #
