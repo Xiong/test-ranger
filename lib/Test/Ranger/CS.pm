@@ -9,6 +9,7 @@ use version 0.89; our $VERSION = qv('v0.0.4');
 #use parent qw{  };             # inherits from UNIVERSAL only
 
 use Data::Dumper;               # value stringification toolbox
+use Tk;                         # GUI toolkit
 
 $::Debug = 0 unless (defined $::Debug);     # global; can be raised in caller
 
@@ -75,7 +76,18 @@ sub _crash {
         init_0          => [ 
             'Odd number of args in init()', 
         ],
-        
+        get_tk_0        => [
+            'Tried to retrieve MainWindow into an undefined reference',
+        ],
+        put_tk_0        => [
+            'Tried to store MainWindow from an undefined reference',
+        ],
+        put_tk_1        => [
+            'Not a MainWindow',
+        ],
+        put_tk_2        => [
+            'Not a Tk object',
+        ],
     };
     
     # find and expand error
@@ -89,6 +101,73 @@ sub _crash {
 ######## /_crash ########
 
 #============================================================================#
+
+# CS is a 'sloppy' hashref class in which callers are expected to stuff 
+# things in and take them out directly. It's expected that only one such 
+# object will exist per script invocation. I call it a "football" because 
+# it's passed from hand to hand; nothing can be done by anything that has 
+# not got it. I call it "pseudo-global" because it contains values that are, 
+# essentially, global to all execution. 
+#
+# LIST KEYS HERE:
+# 
+# -tk                       # Tk MainWindow object
+
+
+
+#=========# OBJECT METHOD
+#
+#   $cs->get_tk( $tk );     # retrieve the Tk MainWindow object
+#       
+# Purpose   : Copy MainWindow object from football into supplied ref.
+# Parms     : $tk
+# Reads     : $cs
+# Writes    : $tk
+# Throws    : if no $tk given
+# See also  : put_tk()
+# 
+# Copies directly into ref so caller does not need to make an assignment.
+#   
+sub get_tk {
+    my $cs          = shift;
+    my $tk          = shift;
+    
+    # contents of $tk should be empty but a reference is needed
+    _crash('get_tk_0') if not defined $tk;
+    
+    $tk             = $cs->{ -tk };
+    
+    return $cs;
+}; ## get_tk
+
+#=========# OBJECT METHOD
+#
+#   $cs->put_tk( $tk );     # store the Tk MainWindow object
+#       
+# Purpose   : Copy MainWindow object from supplied ref into football.
+# Parms     : $tk
+# Writes    : $cs
+# Throws    : if no $tk given or $tk is not a valid Tk 
+# See also  : get_tk()
+#
+# There is no need to repeatedly put_tk($tk); the ref is stored. 
+# Call this method once only after MainWindow creation.
+#   
+sub put_tk {
+    my $cs          = shift;
+    my $tk          = shift;
+    
+    # $tk must be a defined reference
+    _crash('put_tk_0') if not defined $tk;
+    
+    # $tk must be a Tk MainWindow
+    _crash('put_tk_1') if not ( $tk = eval{ $tk->MainWindow(); } );
+    _crash('put_tk_2') if $!;    
+    
+    $cs->{ -tk }    = $tk;
+    
+    return $cs;
+}; ## put_tk
 
 
 
@@ -154,6 +233,27 @@ This document describes Test::Ranger::CS version 0.0.4
 You probably called the C<< new() >> method with an odd number of arguments. 
 If you want to initialize a T::R::CS object, you need to pass an array of 
 key/value pairs (not an array reference); this will be converted into a hash.
+
+=item C<< Tried to retrieve MainWindow into an undefined reference >>
+
+You need to call get_tk($tk). The variable must be defined (as a reference) 
+even if the reference points to nothing really. The simple way to do this is 
+to declare C<< my $tk = {}; >>. 
+
+=item C<< Tried to store MainWindow from an undefined reference >>
+
+Call Tk::new() before trying to store $tk in the football. 
+
+=item C<< Not a MainWindow >>
+
+You tried to store the wrong Tk object; put_tk() is only useful with 
+a MainWindow. 
+
+=item C<< Not a Tk object >>
+
+You really tried to store the wrong thing. 
+
+[Et cetera, et cetera]
 
 =item C<< Another error message here >>
 
