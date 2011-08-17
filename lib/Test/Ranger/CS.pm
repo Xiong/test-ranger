@@ -1,10 +1,10 @@
-package Devel::Hump::Base;
+package Test::Ranger::CS;
 
 use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.000_004';
+use version 0.89; our $VERSION = qv('v0.0.4');
 
 #use parent qw{  };             # inherits from UNIVERSAL only
 
@@ -14,7 +14,7 @@ $::Debug = 0 unless (defined $::Debug);     # global; can be raised in caller
 
 ######## CLASS METHOD ########
 #
-#   my $obj = Devel::Hump::Base->new();
+#   my $obj = Test::Ranger::CS->new();
 #
 #       Returns a hashref blessed into class of calling package
 #
@@ -46,7 +46,7 @@ sub init {
     my @args    = @_;
     
     # do some minimal checking
-    croak 'Odd number of args in init()' if ( scalar @args % 2 );
+    _crash('init_0') if ( scalar @args % 2 );
     
     # assign list to hash
     %{ $self }  = @args;
@@ -88,6 +88,15 @@ sub _crash {
 };
 ######## /_crash ########
 
+#============================================================================#
+
+
+
+
+
+
+
+
 
 #############################
 ######## END MODULE #########
@@ -96,17 +105,17 @@ __END__
 
 =head1 NAME
 
-Devel::Hump::Base - base class for all modules
+Test::Ranger::CS - class for 'context structure' football
 
 
 =head1 VERSION
 
-This document describes Devel::Hump::Base version 0.0.4
+This document describes Test::Ranger::CS version 0.0.4
 
 
 =head1 SYNOPSIS
 
-    use Devel::Hump::Base;
+    use Test::Ranger::CS;
 
 =for author to fill in:
     Brief code example(s) here showing commonest usage(s).
@@ -140,9 +149,11 @@ This document describes Devel::Hump::Base version 0.0.4
 
 =over
 
-=item C<< Error message here, perhaps with %s placeholders >>
+=item C<< Odd number of args in init() >>
 
-[Description of error here]
+You probably called the C<< new() >> method with an odd number of arguments. 
+If you want to initialize a T::R::CS object, you need to pass an array of 
+key/value pairs (not an array reference); this will be converted into a hash.
 
 =item C<< Another error message here >>
 
@@ -151,7 +162,6 @@ This document describes Devel::Hump::Base version 0.0.4
 [Et cetera, et cetera]
 
 =back
-
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
@@ -162,8 +172,7 @@ This document describes Devel::Hump::Base version 0.0.4
     that can be set. These descriptions must also include details of any
     configuration language used.
   
-Devel::Hump::Base requires no configuration files or environment variables.
-
+Test::Ranger::CS requires no configuration files or environment variables.
 
 =head1 DEPENDENCIES
 
@@ -175,7 +184,6 @@ Devel::Hump::Base requires no configuration files or environment variables.
 
 None.
 
-
 =head1 INCOMPATIBILITIES
 
 =for author to fill in:
@@ -186,7 +194,6 @@ None.
     filters are mutually incompatible).
 
 None reported.
-
 
 =head1 BUGS AND LIMITATIONS
 
@@ -202,42 +209,19 @@ None reported.
 No bugs have been reported.
 
 Please report any bugs or feature requests to
-C<bug-devel-hump-config@rt.cpan.org>, or through the web interface at
+C<bug-test-ranger@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
-
 
 =head1 AUTHOR
 
-Xiong Changnian  C<< <xiong@sf-id.com> >>
+Xiong Changnian  C<< <xiong@cpan.org> >>
 
+=head1 LICENSE
 
-=head1 LICENCE AND COPYRIGHT
+Copyright (C) 2011 Xiong Changnian C<< <xiong@cpan.org> >>
 
-Copyright (c) 2010, Xiong Changnian C<< <xiong@sf-id.com> >>. All rights reserved.
+This library and its contents are released under Artistic License 2.0:
 
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself. See L<perlartistic>.
+L<http://www.opensource.org/licenses/artistic-license-2.0.php>
 
-
-=head1 DISCLAIMER OF WARRANTY
-
-BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
-FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
-OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-PROVIDE THE SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
-EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
-ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
-YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
-NECESSARY SERVICING, REPAIR, OR CORRECTION.
-
-IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
-REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
-LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
-OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
-THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
-RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
-FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
-SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGES.
+=cut
