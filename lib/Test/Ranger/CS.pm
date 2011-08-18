@@ -1,4 +1,4 @@
-package Test::Ranger::CS;
+package Test::Ranger::CS;       # pseudo-global football of state
 
 use strict;
 use warnings;
@@ -10,6 +10,9 @@ use version 0.89; our $VERSION = qv('v0.0.4');
 
 use Data::Dumper;               # value stringification toolbox
 use Tk;                         # GUI toolkit
+
+# use for debug only
+use Devel::Comments '###';      # debug only                             #~
 
 $::Debug = 0 unless (defined $::Debug);     # global; can be raised in caller
 
@@ -58,12 +61,12 @@ sub init {
 
 ######## INTERNAL UTILITY ########
 #
-#   _crash( $errkey, @parms );      # fatal out of internal error
+#   _crash( $errkey, @more );      # fatal out of internal error
 #       
 # Calls croak() with some message. 
 #   
 sub _crash {
-    my $errkey      = $_[0];            # remaining args replace placeholders
+    my $errkey      = shift;            # remaining args are more lines
     my $prepend     = __PACKAGE__;      # prepend to all errors
        $prepend     = join q{}, q{# }, $prepend, q{: };
     my $indent      = qq{\n} . q{ } x length $prepend;
@@ -75,9 +78,6 @@ sub _crash {
     my $error       = {
         init_0          => [ 
             'Odd number of args in init()', 
-        ],
-        get_tk_0        => [
-            'Tried to retrieve MainWindow into an undefined reference',
         ],
         put_tk_0        => [
             'Tried to store MainWindow from an undefined reference',
@@ -91,7 +91,9 @@ sub _crash {
     };
     
     # find and expand error
-    @lines          = @{ $error->{$errkey} };
+    push @lines, $errkey;
+    push @lines, @{ $error->{$errkey} };
+    push @lines, @_;
     $text           = $prepend . join $indent, @lines;
     
     # now croak()
@@ -117,27 +119,19 @@ sub _crash {
 
 #=========# OBJECT METHOD
 #
-#   $cs->get_tk( $tk );     # retrieve the Tk MainWindow object
+#   $tk = $cs->get_tk();     # retrieve the Tk MainWindow object
 #       
 # Purpose   : Copy MainWindow object from football into supplied ref.
-# Parms     : $tk
 # Reads     : $cs
 # Writes    : $tk
-# Throws    : if no $tk given
+# Throws    : if $cs->{-tk} is unset
 # See also  : put_tk()
 # 
-# Copies directly into ref so caller does not need to make an assignment.
-#   
 sub get_tk {
     my $cs          = shift;
-    my $tk          = shift;
-    
-    # contents of $tk should be empty but a reference is needed
-    _crash('get_tk_0') if not defined $tk;
-    
-    $tk             = $cs->{ -tk };
-    
-    return $cs;
+    my $tk          = $cs->{ -tk };
+        
+    return $tk;
 }; ## get_tk
 
 #=========# OBJECT METHOD
@@ -157,12 +151,13 @@ sub put_tk {
     my $cs          = shift;
     my $tk          = shift;
     
+#### $tk    
     # $tk must be a defined reference
     _crash('put_tk_0') if not defined $tk;
     
     # $tk must be a Tk MainWindow
     _crash('put_tk_1') if not ( $tk = eval{ $tk->MainWindow(); } );
-    _crash('put_tk_2') if $!;    
+    _crash('put_tk_2', $@) if $@;    
     
     $cs->{ -tk }    = $tk;
     
@@ -195,6 +190,7 @@ This document describes Test::Ranger::CS version 0.0.4
 =head1 SYNOPSIS
 
     use Test::Ranger::CS;
+    $cs             = Test::Ranger::CS->new;
 
 =for author to fill in:
     Brief code example(s) here showing commonest usage(s).
@@ -203,6 +199,15 @@ This document describes Test::Ranger::CS version 0.0.4
   
   
 =head1 DESCRIPTION
+
+Since C<< test-ranger >> is a GUI application, a great deal of state must be
+stored for any instance of it while it is running. We could use a number of 
+global variables (if we were nasty) or some lexicals scoped to the main 
+package (e.g., $::Thingy) if we were somewhat less nasty. Somewhat better, we 
+store all this state in key/value pairs of a big hashref; we then pass this 
+around, like a football, to all our routines. 
+
+Test::Ranger::CS implements the pseudo-global football as an object. 
 
 =for author to fill in:
     Write a full description of the module and its features here.
@@ -228,28 +233,22 @@ This document describes Test::Ranger::CS version 0.0.4
 
 =over
 
-=item C<< Odd number of args in init() >>
+=item C<< init_0 >>
 
 You probably called the C<< new() >> method with an odd number of arguments. 
 If you want to initialize a T::R::CS object, you need to pass an array of 
 key/value pairs (not an array reference); this will be converted into a hash.
 
-=item C<< Tried to retrieve MainWindow into an undefined reference >>
-
-You need to call get_tk($tk). The variable must be defined (as a reference) 
-even if the reference points to nothing really. The simple way to do this is 
-to declare C<< my $tk = {}; >>. 
-
-=item C<< Tried to store MainWindow from an undefined reference >>
+=item C<< put_tk_0 >>
 
 Call Tk::new() before trying to store $tk in the football. 
 
-=item C<< Not a MainWindow >>
+=item C<< put_tk_1 >>
 
 You tried to store the wrong Tk object; put_tk() is only useful with 
 a MainWindow. 
 
-=item C<< Not a Tk object >>
+=item C<< put_tk_2 >>
 
 You really tried to store the wrong thing. 
 

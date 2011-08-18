@@ -7,6 +7,8 @@ use Carp;
 
 use version 0.89; our $VERSION = qv('v0.0.4');
 
+use Test::Ranger::CS;           # pseudo-global football of state
+
 use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
 use List::MoreUtils qw(
     any all none notall true false firstidx first_index 
@@ -47,29 +49,41 @@ our $Debug;
 # Purpose   : Execute top-level routines.
 # Parms     : none
 # Reads     : @ARGV
-# Returns   : $tk       : Tk main window object
+# Returns   : $cs       : my pseudo-global football
 # Writes    : nothing
 # Throws    : nothing
 # See also  : _setup()
 # 
+# This is intended to be called from an invocating script. 
+# It runs once, calling all needed routines. 
+# State is stored in $cs, the "pseudo-global football" passed around. 
+# So $cs is a big hash; an object of class Test::Ranger::CS. 
+# Generally, all routines in this module expect $cs as a param and return it. 
 # 
 sub main {    
-    my $tk          ;
+    my $tk          ;                       # Tk MainWindow object
+    my $cs          ;                       # my pseudo-global football
     
+    # Create the football
+    $cs             = Test::Ranger::CS->new;
+    
+    # Create the MainWindow
     $tk             = MainWindow->new;
-    $tk     -> geometry( '600x600' );       # enforce starting size
-    _setup($tk);
+    $tk-> geometry( '800x800' );            # enforce starting size
+    $cs->put_tk( $tk );                     # store the Tk MainWindow object
+    
+    _setup($cs);
     MainLoop;
     
-    return $tk;
+    return $cs;
 }; ## main
 
 #=========# TK SETUP METHOD
 #
-#   _setup($tk);
+#   _setup($cs);
 #       
 # Purpose   : Set up all Tk stuff. Main method.
-# Parms     : $tk       : Tk main window object
+# Parms     : $cs
 # Reads     : ____
 # Returns   : $tk
 # Writes    : ____
@@ -79,16 +93,17 @@ sub main {
 # ____
 # 
 sub _setup {
-    my $tk          = shift;
+    my $cs          = shift;
+    my $tk          = $cs->get_tk();
     
     # MainWindow title
     $tk->title("Test Ranger");
     
     # Menu bar
-    _setup_menus($tk);      # initial menus on launch
+    _setup_menus($cs);      # initial menus on launch
     
     # Panes
-    _setup_panes($tk);      # initial window panes
+    _setup_panes($cs);      # initial window panes
     
     
     
@@ -109,12 +124,12 @@ sub _setup {
 #~     };
 
     
-    return $tk;
+    return $cs;
 }; ## _setup
 
 #=========# TK SETUP METHOD
 #
-#   _setup_menus($tk);     # initial menus on launch
+#   _setup_menus($cs);     # initial menus on launch
 #       
 # Purpose   : ____
 # Parms     : ____
@@ -127,7 +142,9 @@ sub _setup {
 # ____
 # 
 sub _setup_menus {
-    my $tk              = shift;
+    my $cs          = shift;
+    my $tk          = $cs->get_tk();
+    
     my $menubar         ;
     
     my $file_menu       ;
@@ -157,12 +174,12 @@ sub _setup_menus {
         -menuitems => $help_menu_items
     );
 
-    return $tk;
+    return $cs;
 }; ## _setup_menus
 
 #=========# TK SETUP METHOD
 #
-#   _setup_panes(tk);     # initial window panes
+#   _setup_panes($cs);     # initial window panes
 #       
 # Purpose   : ____
 # Parms     : ____
@@ -175,7 +192,8 @@ sub _setup_menus {
 # ____
 # 
 sub _setup_panes {
-    my $tk              = shift;
+    my $cs          = shift;
+    my $tk          = $cs->get_tk();
     
     my $sash1           ;       # outer, horizontal sash
     my $sash2           ;       # inner, vertical sash (top)
@@ -225,7 +243,7 @@ sub _setup_panes {
     $sash2->add( $pane1, $pane2 );
     $sash1->add( $sash2, $pane3 );
         
-    return $tk;
+    return $cs;
 }; ## _setup_panes
 
 #=========# TK SETUP METHOD
@@ -243,9 +261,11 @@ sub _setup_panes {
 # ____
 # 
 sub _do_ {
+    my $cs          = shift;
+    my $tk          = $cs->get_tk();
     
     
-    
+    return $cs;
 }; ## _do_
 
 #=========# INTERNAL ROUTINE
