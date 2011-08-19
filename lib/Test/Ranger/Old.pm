@@ -1,3 +1,11 @@
+#
+#
+# DEPRECATED - KEPT FOR SCAVENGING ONLY
+#
+#
+
+
+
 package Test::Ranger;
 
 use 5.010000;
@@ -11,6 +19,8 @@ use Test::More;                 # Standard framework for writing test scripts
 use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
 use Scalar::Util;               # General-utility scalar subroutines
 use Scalar::Util::Reftype;      # Alternate reftype() interface
+
+use Test::Ranger::List;
 
 ## use
 

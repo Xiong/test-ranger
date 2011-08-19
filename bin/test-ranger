@@ -1,0 +1,22 @@
+#!/run/bin/perl
+#       test-ranger
+#       = Copyright 2011 Xiong Changnian <xiong@cpan.org> =
+#       = Free Software = Artistic License 2.0 = NO WARRANTY =
+
+use strict;
+use warnings;
+
+use lib qw( lib ../lib ../../lib);       # while under development       #~
+
+use Test::Ranger::Script;                   # implements everything
+
+#----------------------------------------------------------------------------#
+
+Test::Ranger::Script::main();
+
+# It is better to die() than to return() in failure.
+exit(0);
+
+__END__
+
+

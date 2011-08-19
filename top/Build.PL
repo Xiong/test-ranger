@@ -10,17 +10,16 @@ my $builder = Module::Build->new(
     dist_version_from   => 'lib/Test/Ranger.pm',
     requires            => {
         'perl'                      => 5.010001,
-        'version'                   => 0.77,
+        'version'                   => 0.89,
         'Test::More'                => 0.94,
         'Test::Deep'                => 0,
         'Data::Lock'                => 0,
         'Scalar::Util'              => 0,
         'Scalar::Util::Reftype'     => 0,
-        'Capture::Tiny'             => 0,
-        'Try::Tiny'                 => 0,
+        'Test::Trap'                => 0,
     },
     recommends          => {
-        'Devel::Comments'           => '1.1.2',
+        'Devel::Comments'           => '1.1.4',
     },
     build_requires      => {
         'Acme::Teddy'       => 1.002003,
@@ -40,6 +39,8 @@ my $builder = Module::Build->new(
             procedural
             capture     capturing
             template    templating
+            
+            gui     ofm     valet   butler
                     
         ) ],
     },
