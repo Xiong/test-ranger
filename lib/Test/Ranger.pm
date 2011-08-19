@@ -12,8 +12,6 @@ use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
 use Scalar::Util;               # General-utility scalar subroutines
 use Scalar::Util::Reftype;      # Alternate reftype() interface
 
-use Test::Ranger::List;
-
 ## use
 
 # Alternate uses
