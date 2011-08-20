@@ -9,7 +9,7 @@ use version 0.89; our $VERSION = qv('v0.0.4');
 #use parent qw{  };             # inherits from UNIVERSAL only
 
 use Data::Dumper;               # value stringification toolbox
-use Tk;                         # GUI toolkit
+use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
 
 # use for debug only
 use Devel::Comments '###';      # debug only                             #~
@@ -79,14 +79,14 @@ sub _crash {
         init_0          => [ 
             'Odd number of args in init()', 
         ],
-        put_tk_0        => [
-            'Tried to store MainWindow from an undefined reference',
+        put_mw_0        => [
+            'Tried to store main Window from an undefined reference',
         ],
-        put_tk_1        => [
-            'Not a MainWindow',
+        put_mw_1        => [
+            'Not a main Window',
         ],
-        put_tk_2        => [
-            'Not a Tk object',
+        put_mw_2        => [
+            'Not a Gtk object',
         ],
     };
     
@@ -113,56 +113,57 @@ sub _crash {
 #
 # LIST KEYS HERE:
 # 
-# -tk                       # Tk MainWindow object
+# -mw                           # Gtk main Window object
 
 
 
 #=========# OBJECT METHOD
 #
-#   $tk = $cs->get_tk();     # retrieve the Tk MainWindow object
+#   $mw = $cs->get_mw();        # retrieve the Gtk main Window object
 #       
-# Purpose   : Copy MainWindow object from football into supplied ref.
+# Purpose   : Copy main Window object from football into supplied ref.
 # Reads     : $cs
-# Writes    : $tk
-# Throws    : if $cs->{-tk} is unset
-# See also  : put_tk()
+# Writes    : $mw
+# Throws    : ____
+# See also  : put_mw()
 # 
-sub get_tk {
+sub get_mw {
     my $cs          = shift;
-    my $tk          = $cs->{ -tk };
+    my $mw          = $cs->{ -mw };
         
-    return $tk;
-}; ## get_tk
+    return $mw;
+}; ## get_mw
 
 #=========# OBJECT METHOD
 #
-#   $cs->put_tk( $tk );     # store the Tk MainWindow object
+#   $cs->put_mw( $mw );     # store the Gtk main Window object
 #       
-# Purpose   : Copy MainWindow object from supplied ref into football.
-# Parms     : $tk
+# Purpose   : Copy main Window object from supplied ref into football.
+# Parms     : $mw
 # Writes    : $cs
-# Throws    : if no $tk given or $tk is not a valid Tk 
-# See also  : get_tk()
+# Throws    : if no $mw given or $mw is not a valid Gtk object 
+# See also  : get_mw()
 #
-# There is no need to repeatedly put_tk($tk); the ref is stored. 
-# Call this method once only after MainWindow creation.
+# There is no need to repeatedly put_mw($mw); the ref is stored. 
+# Call this method once only after main Window creation.
 #   
-sub put_tk {
+sub put_mw {
     my $cs          = shift;
-    my $tk          = shift;
+    my $mw          = shift;
     
-#### $tk    
-    # $tk must be a defined reference
-    _crash('put_tk_0') if not defined $tk;
+#### $mw    
+    # $mw must be a defined reference
+    _crash('put_mw_0') if not defined $mw;
     
-    # $tk must be a Tk MainWindow
-    _crash('put_tk_1') if not ( $tk = eval{ $tk->MainWindow(); } );
-    _crash('put_tk_2', $@) if $@;    
+    # $mw must be a Gtk main Window
+#~     TODO: is this a valid Gtk main Window?
+#~     _crash('put_mw_1') if not ( $mw = eval{ $mw->MainWindow(); } );
+    _crash('put_mw_2', $@) if $@;    
     
-    $cs->{ -tk }    = $tk;
+    $cs->{ -mw }    = $mw;
     
     return $cs;
-}; ## put_tk
+}; ## put_mw
 
 
 
@@ -239,16 +240,16 @@ You probably called the C<< new() >> method with an odd number of arguments.
 If you want to initialize a T::R::CS object, you need to pass an array of 
 key/value pairs (not an array reference); this will be converted into a hash.
 
-=item C<< put_tk_0 >>
+=item C<< put_mw_0 >>
 
-Call Tk::new() before trying to store $tk in the football. 
+Call Gtk2::Window->new() before trying to store $mw in the football. 
 
-=item C<< put_tk_1 >>
+=item C<< put_mw_1 >>
 
-You tried to store the wrong Tk object; put_tk() is only useful with 
-a MainWindow. 
+You tried to store the wrong Gtk object; put_mw() is only useful with 
+the main Window. 
 
-=item C<< put_tk_2 >>
+=item C<< put_mw_2 >>
 
 You really tried to store the wrong thing. 
 

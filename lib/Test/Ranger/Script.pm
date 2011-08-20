@@ -18,7 +18,7 @@ use List::MoreUtils qw(
     each_arrayref pairwise natatime mesh zip uniq minmax
 );
 
-use Tk;                         # GUI toolkit
+use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
 
 ## use
 
@@ -52,40 +52,41 @@ our $Debug;
 # Returns   : $cs       : my pseudo-global football
 # Writes    : nothing
 # Throws    : nothing
-# See also  : _setup()
+# See also  : _setup(), Test::Ranger::CS::new()
 # 
 # This is intended to be called from an invocating script. 
 # It runs once, calling all needed routines. 
 # State is stored in $cs, the "pseudo-global football" passed around. 
 # So $cs is a big hash; an object of class Test::Ranger::CS. 
-# Generally, all routines in this module expect $cs as a param and return it. 
+# Most routines in this module expect $cs as a param and return it. 
 # 
 sub main {    
-    my $tk          ;                       # Tk MainWindow object
+    my $mw          ;                       # Tk MainWindow object
     my $cs          ;                       # my pseudo-global football
     
     # Create the football
     $cs             = Test::Ranger::CS->new;
     
     # Create the MainWindow
-    $tk             = MainWindow->new;
-    $tk-> geometry( '800x800' );            # enforce starting size
-    $cs->put_tk( $tk );                     # store the Tk MainWindow object
+    $mw             = Gtk2::Window->new ('toplevel');
+#~     $mw             = MainWindow->new;
+#~     $mw->geometry( '800x800' );            # enforce starting size
+    $cs->put_mw( $mw );                     # store the Gtk main Window object
     
     _setup($cs);
-    MainLoop;
+    Gtk2->main;                             # run main event loop
     
     return $cs;
 }; ## main
 
-#=========# TK SETUP METHOD
+#=========# GTK SETUP METHOD
 #
 #   _setup($cs);
 #       
-# Purpose   : Set up all Tk stuff. Main method.
+# Purpose   : Set up all Gtk stuff. Main method.
 # Parms     : $cs
 # Reads     : ____
-# Returns   : $tk
+# Returns   : $mw
 # Writes    : ____
 # Throws    : ____
 # See also  : ____
@@ -94,10 +95,10 @@ sub main {
 # 
 sub _setup {
     my $cs          = shift;
-    my $tk          = $cs->get_tk();
+    my $mw          = $cs->get_mw();
     
     # MainWindow title
-    $tk->title("Test Ranger");
+    $mw->title("Test Ranger");
     
     # Menu bar
     _setup_menus($cs);      # initial menus on launch
@@ -109,13 +110,13 @@ sub _setup {
     
 #~     # Emergency exit button
 #~     my $exit_button ;
-#~     $exit_button    = $tk->Button(
+#~     $exit_button    = $mw->Button(
 #~         -text => "Exit", -command => \&_exit
 #~     );
 #~     $exit_button->pack;
     
 #~     # demo grab keysym -- debug only
-#~     $tk->bind('<KeyPress>' => \&print_keysym);
+#~     $mw->bind('<KeyPress>' => \&print_keysym);
 #~     sub print_keysym {
 #~         my($widget) = @_;
 #~         my $e = $widget->XEvent;    # get event object
@@ -127,7 +128,7 @@ sub _setup {
     return $cs;
 }; ## _setup
 
-#=========# TK SETUP METHOD
+#=========# GTK SETUP METHOD
 #
 #   _setup_menus($cs);     # initial menus on launch
 #       
@@ -143,7 +144,7 @@ sub _setup {
 # 
 sub _setup_menus {
     my $cs          = shift;
-    my $tk          = $cs->get_tk();
+    my $mw          = $cs->get_mw();
     
     my $menubar         ;
     
@@ -154,7 +155,7 @@ sub _setup_menus {
             -accelerator    => 'Ctrl-Q', 
         ],
     ];
-    $tk->bind('<Control-q>' => \&_exit);
+    $mw->bind('<Control-q>' => \&_exit);
     
     my $edit_menu       ;
     my $edit_menu_items ;
@@ -163,7 +164,7 @@ sub _setup_menus {
     my $help_menu_items ;
     
     # Entire main menubar
-    $tk->configure(-menu => $menubar = $tk->Menu);
+    $mw->configure(-menu => $menubar = $mw->Menu);
     $file_menu   = $menubar->cascade(-label => '~File', 
         -menuitems => $file_menu_items
     );
@@ -177,7 +178,7 @@ sub _setup_menus {
     return $cs;
 }; ## _setup_menus
 
-#=========# TK SETUP METHOD
+#=========# GTK SETUP METHOD
 #
 #   _setup_panes($cs);     # initial window panes
 #       
@@ -193,7 +194,7 @@ sub _setup_menus {
 # 
 sub _setup_panes {
     my $cs          = shift;
-    my $tk          = $cs->get_tk();
+    my $mw          = $cs->get_mw();
     
     my $sash1           ;       # outer, horizontal sash
     my $sash2           ;       # inner, vertical sash (top)
@@ -203,7 +204,7 @@ sub _setup_panes {
     my $pane3           ;       # bottom
     
     # 'vertical' pane orientation means a horizontal sash
-    $sash1              = $tk->Panedwindow( -orient => 'vertical' );
+    $sash1              = $mw->Panedwindow( -orient => 'vertical' );
     $sash1->pack(
         -side       => 'top',
         -expand     => 'yes',
@@ -246,7 +247,7 @@ sub _setup_panes {
     return $cs;
 }; ## _setup_panes
 
-#=========# TK SETUP METHOD
+#=========# GTK SETUP METHOD
 #
 #   _do_();     # short
 #       
@@ -262,7 +263,7 @@ sub _setup_panes {
 # 
 sub _do_ {
     my $cs          = shift;
-    my $tk          = $cs->get_tk();
+    my $mw          = $cs->get_mw();
     
     
     return $cs;

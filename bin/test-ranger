@@ -8,6 +8,7 @@ use warnings;
 
 use lib qw( lib ../lib ../../lib);       # while under development       #~
 
+use Gtk2 -init;                             # Gtk+ GUI toolkit
 use Test::Ranger::Script;                   # implements everything
 
 #----------------------------------------------------------------------------#
