@@ -1,6 +1,8 @@
-#! /usr/bin/perl -w
+#!/run/bin/perl
 
 use strict;
+use warnings;
+
 use Gtk2 '-init';
 use Glib qw/TRUE FALSE/; 
 
