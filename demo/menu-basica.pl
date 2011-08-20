@@ -13,10 +13,10 @@ $window->set_border_width(5);
 $window->set_position('center_always');
 
 #this vbox will return the bulk of the gui
-my $vbox = &ret_vbox();
+my $vbox1 = &ret_vbox();
 
 #add and show the vbox
-$window->add($vbox);
+$window->add($vbox1);
 $window->show();
 
 #our main event-loop
@@ -24,8 +24,8 @@ Gtk2->main();
 
 sub ret_vbox {
 
-my $vbox = Gtk2::VBox->new(FALSE,5);
-$vbox->set_size_request (300, 300);
+my $vbox1 = Gtk2::VBox->new(FALSE,5);
+$vbox1->set_size_request (300, 300);
 
     #====================================
     #Start of with a Gtk2::Menu widget
@@ -106,7 +106,7 @@ $vbox->set_size_request (300, 300);
           
     $menu_bar->append($menu_item_help); 
 
-$vbox->pack_start($menu_bar,FALSE,FALSE,0);
+$vbox1->pack_start($menu_bar,FALSE,FALSE,0);
 
     #====================================
     #add an event box to catch the right clicks
@@ -121,9 +121,9 @@ $eventbox->signal_connect('button-release-event' => sub {
         
     });
 
-$vbox->pack_start($eventbox,TRUE,TRUE,0);
-$vbox->show_all();
-return $vbox;
+$vbox1->pack_start($eventbox,TRUE,TRUE,0);
+$vbox1->show_all();
+return $vbox1;
 }
 
 sub toggle {

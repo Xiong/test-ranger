@@ -19,6 +19,7 @@ use List::MoreUtils qw(
 );
 
 use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
+use Glib qw{ TRUE FALSE };      # Gtk constants
 
 ## use
 
@@ -64,17 +65,30 @@ sub main {
     my $mw          ;                       # Tk MainWindow object
     my $cs          ;                       # my pseudo-global football
     
+    # defaults
+    my $mw_width    = 400;
+    my $mw_height   = 400;
+    
+    
     # Create the football
     $cs             = Test::Ranger::CS->new;
     
-    # Create the MainWindow
+    # Create the main Window
     $mw             = Gtk2::Window->new ('toplevel');
-#~     $mw             = MainWindow->new;
-#~     $mw->geometry( '800x800' );            # enforce starting size
     $cs->put_mw( $mw );                     # store the Gtk main Window object
     
+    # Standard window placement and signal connecting
+    $mw->signal_connect( 'delete_event' => sub{_exit()} );
+    $mw->set_border_width(5);
+    $mw->set_position('center_always');
+    $mw->set_default_size ($mw_width, $mw_height);    # initial size
+    
+    # Initial setup of all GUI elements
     _setup($cs);
-    Gtk2->main;                             # run main event loop
+    
+    # Go!
+    $mw->show();
+    _main_loop();
     
     return $cs;
 }; ## main
@@ -86,7 +100,7 @@ sub main {
 # Purpose   : Set up all Gtk stuff. Main method.
 # Parms     : $cs
 # Reads     : ____
-# Returns   : $mw
+# Returns   : $cs
 # Writes    : ____
 # Throws    : ____
 # See also  : ____
@@ -98,13 +112,19 @@ sub _setup {
     my $mw          = $cs->get_mw();
     
     # MainWindow title
-    $mw->title("Test Ranger");
+    $mw->set_title("Test Ranger");
+    
+    # Outermost box: first item is menubar
+    my $vbox1       = Gtk2::VBox->new( FALSE, 5 ); 
+                        #( $homo:bool, $spacing:int )
+    # $homo = "TRUE means setting $expand TRUE for all packed-in widgets"
+    $cs->{-vbox1}   = $vbox1;
     
     # Menu bar
     _setup_menus($cs);      # initial menus on launch
     
     # Panes
-    _setup_panes($cs);      # initial window panes
+#~     _setup_panes($cs);      # initial window panes
     
     
     
@@ -125,6 +145,10 @@ sub _setup {
 #~     };
 
     
+    # Display everything
+    $vbox1->show_all();
+    $mw->add($vbox1);
+
     return $cs;
 }; ## _setup
 
@@ -143,38 +167,48 @@ sub _setup {
 # ____
 # 
 sub _setup_menus {
-    my $cs          = shift;
-    my $mw          = $cs->get_mw();
-    
-    my $menubar         ;
-    
-    my $file_menu       ;
-    my $file_menu_items =[
-        [ command => 'Quit', 
-            -command        => \&_exit, 
-            -accelerator    => 'Ctrl-Q', 
-        ],
-    ];
-    $mw->bind('<Control-q>' => \&_exit);
-    
-    my $edit_menu       ;
-    my $edit_menu_items ;
-    
-    my $help_menu       ;
-    my $help_menu_items ;
+    my $cs              = shift;
+    my $mw              = $cs->get_mw();
+    my $vbox1           = $cs->{-vbox1};
     
     # Entire main menubar
-    $mw->configure(-menu => $menubar = $mw->Menu);
-    $file_menu   = $menubar->cascade(-label => '~File', 
-        -menuitems => $file_menu_items
-    );
-    $edit_menu   = $menubar->cascade(-label => '~Edit',
-        -menuitems => $edit_menu_items
-    );
-    $help_menu   = $menubar->cascade(-label => '~Help',
-        -menuitems => $help_menu_items
-    );
+    my $menubar         = Gtk2::MenuBar->new;
+    $cs->{-menubar}     = $menubar;
+    
+    # File menu
+    my $file_menu       = Gtk2::Menu->new();
+    
+    # File:Quit
+    my $file_quit       = Gtk2::ImageMenuItem->new_from_stock(
+                                'gtk-quit',     # stock item
+                                undef           # custom label
+                        );
+    $file_quit->signal_connect('activate' => sub{_exit()} );
+    $file_menu->append($file_quit);
+    
+    # File:Open...
+    # ...
+    
+    
+    
+    # The menubar is itself considered a menu, sort of. For each menu: 
+    #   Create the "item", which is the menu title
+    #   Set the "submenu", which is the menu
+    #   Add the menu to the menubar
+    
+    my $menubar_file    = Gtk2::MenuItem->new('_File');
+    $menubar_file->set_submenu ($file_menu);
+    $menubar->append($menubar_file);
 
+    ## File menu
+    
+    # Edit menu
+    
+    
+    # Pack the complete menubar into the display area, at the top
+    $vbox1->pack_start( $menubar, FALSE, FALSE, 0 );
+                        #( $widget, $expand:bool, $fill:bool, $padding:int )
+    
     return $cs;
 }; ## _setup_menus
 
@@ -273,7 +307,7 @@ sub _do_ {
 #
 #   _exit();     # short
 #       
-# Purpose   : ____
+# Purpose   : Quit, leave, exit, go bye-bye.
 # Parms     : ____
 # Reads     : ____
 # Returns   : ____
@@ -285,7 +319,7 @@ sub _do_ {
 # 
 sub _exit {
     
-    exit;
+    Gtk2->main_quit;
     
 }; ## _exit
 
@@ -305,7 +339,7 @@ sub _exit {
 # 
 sub _main_loop {
     
-    
+        Gtk2->main;                             # run main event loop
     
 }; ## _main_loop
 
