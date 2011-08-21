@@ -330,7 +330,7 @@ sub _setup_hotkeys {
                             sub{_exit()},       # callback
                         );
     $mw->add_accel_group($quit_accel);
-    
+        
     return $cs;
 }; ## _setup_hotkeys
 
