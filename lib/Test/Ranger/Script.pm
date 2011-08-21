@@ -19,12 +19,15 @@ use List::MoreUtils qw(
 );
 
 use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
-use Glib qw{ TRUE FALSE };      # Gtk constants
+use Glib                        # Gtk constants
+    'TRUE', 'FALSE',
+#    'GDK_CONTROL_MASK',
+; ## Glib
 
 ## use
 
 # Alternate uses
-#~ use Devel::Comments;
+use Devel::Comments '###';
 
 #============================================================================#
 
@@ -82,6 +85,10 @@ sub main {
     $mw->set_border_width(5);
     $mw->set_position('center_always');
     $mw->set_default_size ($mw_width, $mw_height);    # initial size
+    
+#~ my @accel_groups    = Gtk2::AccelGroups->from_object ($mw);
+#~ ### @accel_groups
+    
     
     # Initial setup of all GUI elements
     _setup($cs);
@@ -171,18 +178,30 @@ sub _setup_menus {
     my $mw              = $cs->get_mw();
     my $vbox1           = $cs->{-vbox1};
     
+    my $control_key     = 'control-mask';
+    my $keycode_q       = 113;
+    my $flag_visible    = 'visible';
+    
     # Entire main menubar
     my $menubar         = Gtk2::MenuBar->new;
     $cs->{-menubar}     = $menubar;
     
     # File menu
-    my $file_menu       = Gtk2::Menu->new();
+    my $file_menu       = Gtk2::Menu->new;
     
     # File:Quit
-    my $file_quit       = Gtk2::ImageMenuItem->new_from_stock(
-                                'gtk-quit',     # stock item
-                                undef           # custom label
+    my $quit_accel      = Gtk2::AccelGroup->new;
+    $quit_accel->connect(
+                            $keycode_q,         # $key:int (see demo/kbd.pl)
+                            $control_key,       # modifier
+                            $flag_visible,      # flags
+                            sub{_exit()},       # callback
                         );
+    my $file_quit       = Gtk2::ImageMenuItem->new_from_stock(
+                            'gtk-quit',         # stock item
+                            $quit_accel,        # Gtk2::AccelGroup
+                        );
+#~     $file_quit->set_accel_group($quit_accel);    #segfaults!
     $file_quit->signal_connect('activate' => sub{_exit()} );
     $file_menu->append($file_quit);
     
@@ -208,6 +227,12 @@ sub _setup_menus {
     # Pack the complete menubar into the display area, at the top
     $vbox1->pack_start( $menubar, FALSE, FALSE, 0 );
                         #( $widget, $expand:bool, $fill:bool, $padding:int )
+    
+    # Emergency exit button
+    my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
+    $exit_button->signal_connect( 'clicked' => sub {_exit()} );
+    $vbox1->pack_start( $exit_button, FALSE, FALSE, 0 );
+    
     
     return $cs;
 }; ## _setup_menus
