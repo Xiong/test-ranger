@@ -6,7 +6,7 @@ use warnings;
 use Carp;
 use utf8;
 
-use version 0.89; our $VERSION = qv('v0.0.4');
+use version 0.94; our $VERSION = qv('v0.0.4');
 
 use Test::Ranger::CS;           # pseudo-global football of state
 
