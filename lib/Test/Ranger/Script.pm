@@ -4,6 +4,7 @@ use 5.010000;
 use strict;
 use warnings;
 use Carp;
+use utf8;
 
 use version 0.89; our $VERSION = qv('v0.0.4');
 
@@ -355,7 +356,7 @@ sub _setup_hotkeys {
     return $cs;
 }; ## _setup_hotkeys
 
-#=========# GTK SETUP ROUTINE
+#=========# GTK CALLBACK
 #
 #   _help_about($cs);     # short
 #       
@@ -373,16 +374,79 @@ sub _help_about {
     my $cs          = shift;
     my $mw          = $cs->get_mw();
     
+    my $text        = join q{},
+        qq*<span foreground = "blue" size = "large">Test Ranger*, qq{\n},
+        qq* </span>*, qq{\n},
+        qq*<span weight = "bold">Version $VERSION</span>*, qq{\n},
+        qq* *, qq{\n},
+        qq*Copyright © 2011 Xiong Changnian*,
+#~          q{\<xiong\@cpan.org\>*}, 
+        qq{\n},
+        qq*This application is released under Artistic License 2.0:*, qq{\n},
+        qq*http://www.opensource.org/licenses/artistic-license-2.0.php*, qq{\n},
+        qq* *, qq{\n},
+        qq*Download this package from CPAN as Test::Ranger.*, qq{\n},
+        qq*For help, choose from Help menu or type: *,
+        qq*<span weight = "bold">perldoc test-ranger</span>*, qq{\n},
+        qq* *, qq{\n},
+        qq*This application is written using Perl 5 and Gtk+.*,
+#~         qq*             *,
+#~         qq*             *,
+#~         qq*             *,
+#~         qq*             *,
+    ; ##
+    
 #~     say 'about';
-    
-    
-    
-    
-    
-    
+        
+    _modal_dialog(
+        undef,
+        'info',
+        $text,
+        'ok',
+    );
     
     return $cs;
 }; ## _help_about
+
+#=========# INTERNAL ROUTINE
+#
+#   _modal_dialog();     # short
+#       
+# Purpose   : Displays a modal dialog and exits on user click of button.
+# Parms     : 
+#       $parent       : parent window or undef
+#       $icon         : 'info', 'warning', 'error', 'question'
+#       $text         : plain text or pango markup
+#       $button_type  : 'none', 'ok', 'close', 'cancel', 'yes-no', 'ok-cancel'
+# Reads     : $cs
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _modal_dialog {
+#~     my $cs          = shift;
+#~     my $mw          = $cs->get_mw();
+    
+    my ( $parent, $icon, $text, $button_type ) = @_;
+ 
+    my $dialog = Gtk2::MessageDialog->new_with_markup (
+                    $parent,
+                    [qw/modal destroy-with-parent/],
+                    $icon,
+                    $button_type,
+                    sprintf "$text"
+                ); ##
+        
+    my $return_value = $dialog->run;
+    
+    #destroy the dialog as it comes out of the 'run' loop   
+    $dialog->destroy;
+    
+    return $return_value;
+}; ## _modal_dialog
 
 #=========# GTK SETUP ROUTINE
 #
@@ -406,7 +470,7 @@ sub _do_ {
     return $cs;
 }; ## _do_
 
-#=========# INTERNAL ROUTINE
+#=========# GTK CALLBACK
 #
 #   _exit();     # short
 #       
