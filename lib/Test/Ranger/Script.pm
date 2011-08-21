@@ -218,6 +218,27 @@ sub _setup_menus {
     # Edit menu
     
     
+    
+    
+    # Help menu
+    my $help_menu       = Gtk2::Menu->new;
+    
+    # Help:About
+    my $help_about      = Gtk2::ImageMenuItem->new_from_stock(
+                            'gtk-about',        # stock item
+                            undef,              # Gtk2::AccelGroup
+                        );
+    $help_about->signal_connect('activate' => sub{_help_about($cs)} );
+    $help_menu->append($help_about);
+    
+    my $menubar_help    = Gtk2::MenuItem->new('_Help');
+    $menubar_help->set_submenu ($help_menu);
+    $menubar->append($menubar_help);
+
+    ## Help menu
+    
+    ## end all the individual menus
+    
     # Pack the complete menubar into the display area, at the top
     $vbox1->pack_start( $menubar, FALSE, FALSE, 0 );
                         #( $widget, $expand:bool, $fill:bool, $padding:int )
@@ -333,6 +354,35 @@ sub _setup_hotkeys {
         
     return $cs;
 }; ## _setup_hotkeys
+
+#=========# GTK SETUP ROUTINE
+#
+#   _help_about($cs);     # short
+#       
+# Purpose   : Display application information
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _help_about {
+    my $cs          = shift;
+    my $mw          = $cs->get_mw();
+    
+#~     say 'about';
+    
+    
+    
+    
+    
+    
+    
+    return $cs;
+}; ## _help_about
 
 #=========# GTK SETUP ROUTINE
 #
