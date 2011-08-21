@@ -86,12 +86,12 @@ sub main {
     $mw->set_position('center_always');
     $mw->set_default_size ($mw_width, $mw_height);    # initial size
     
-#~ my @accel_groups    = Gtk2::AccelGroups->from_object ($mw);
-#~ ### @accel_groups
-    
     
     # Initial setup of all GUI elements
     _setup($cs);
+    
+#~ my @accel_groups    = Gtk2::AccelGroups->from_object ($mw);
+#~ ### @accel_groups
     
     # Go!
     $mw->show();
@@ -100,7 +100,7 @@ sub main {
     return $cs;
 }; ## main
 
-#=========# GTK SETUP METHOD
+#=========# GTK SETUP ROUTINE
 #
 #   _setup($cs);
 #       
@@ -129,6 +129,9 @@ sub _setup {
     
     # Menu bar
     _setup_menus($cs);      # initial menus on launch
+    
+    # Keyboard accelerators (hotkeys)
+    _setup_hotkeys($cs);    # initial hotkeys on launch
     
     # Panes
 #~     _setup_panes($cs);      # initial window panes
@@ -159,7 +162,7 @@ sub _setup {
     return $cs;
 }; ## _setup
 
-#=========# GTK SETUP METHOD
+#=========# GTK SETUP ROUTINE
 #
 #   _setup_menus($cs);     # initial menus on launch
 #       
@@ -178,10 +181,6 @@ sub _setup_menus {
     my $mw              = $cs->get_mw();
     my $vbox1           = $cs->{-vbox1};
     
-    my $control_key     = 'control-mask';
-    my $keycode_q       = 113;
-    my $flag_visible    = 'visible';
-    
     # Entire main menubar
     my $menubar         = Gtk2::MenuBar->new;
     $cs->{-menubar}     = $menubar;
@@ -190,18 +189,13 @@ sub _setup_menus {
     my $file_menu       = Gtk2::Menu->new;
     
     # File:Quit
-    my $quit_accel      = Gtk2::AccelGroup->new;
-    $quit_accel->connect(
-                            $keycode_q,         # $key:int (see demo/kbd.pl)
-                            $control_key,       # modifier
-                            $flag_visible,      # flags
-                            sub{_exit()},       # callback
-                        );
+    #   The $dummy_accel does nothing except provoke display of Ctrl-Q.
+    #   See _setup_hotkeys() to see what actually makes the hotkey work. 
+    my $dummy_accel     = Gtk2::AccelGroup->new;
     my $file_quit       = Gtk2::ImageMenuItem->new_from_stock(
                             'gtk-quit',         # stock item
-                            $quit_accel,        # Gtk2::AccelGroup
+                            $dummy_accel,       # Gtk2::AccelGroup
                         );
-#~     $file_quit->set_accel_group($quit_accel);    #segfaults!
     $file_quit->signal_connect('activate' => sub{_exit()} );
     $file_menu->append($file_quit);
     
@@ -237,7 +231,7 @@ sub _setup_menus {
     return $cs;
 }; ## _setup_menus
 
-#=========# GTK SETUP METHOD
+#=========# GTK SETUP ROUTINE
 #
 #   _setup_panes($cs);     # initial window panes
 #       
@@ -306,7 +300,41 @@ sub _setup_panes {
     return $cs;
 }; ## _setup_panes
 
-#=========# GTK SETUP METHOD
+#=========# GTK SETUP ROUTINE
+#
+#   _setup_hotkeys($cs);     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup_hotkeys {
+    my $cs          = shift;
+    my $mw          = $cs->get_mw();
+    
+    my $control_key     = 'control-mask';       # Ctr-...
+    my $keycode_q       = 113;                  # ...Q
+    my $flag_visible    = 'visible';
+    
+    my $quit_accel      = Gtk2::AccelGroup->new;
+    $quit_accel->connect(
+                            $keycode_q,         # $key:int (see demo/kbd.pl)
+                            $control_key,       # modifier
+                            $flag_visible,      # flags
+                            sub{_exit()},       # callback
+                        );
+    $mw->add_accel_group($quit_accel);
+    
+    return $cs;
+}; ## _setup_hotkeys
+
+#=========# GTK SETUP ROUTINE
 #
 #   _do_();     # short
 #       
