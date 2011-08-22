@@ -244,10 +244,10 @@ sub _setup_menus {
     $vbox1->pack_start( $menubar, FALSE, FALSE, 0 );
                         #( $widget, $expand:bool, $fill:bool, $padding:int )
     
-    # Emergency exit button
-    my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
-    $exit_button->signal_connect( 'clicked' => sub {_exit()} );
-    $vbox1->pack_start( $exit_button, FALSE, FALSE, 0 );
+#~     # Emergency exit button
+#~     my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
+#~     $exit_button->signal_connect( 'clicked' => sub {_exit()} );
+#~     $vbox1->pack_start( $exit_button, FALSE, FALSE, 0 );
     
     
     return $cs;
@@ -270,6 +270,16 @@ sub _setup_menus {
 sub _setup_panes {
     my $cs          = shift;
     my $mw          = $cs->get_mw();
+    
+    # Outermost box includes menubar and everything else
+    my $vbox1           = $cs->{-vbox1};
+    
+    # Side-by-side panes
+    my $hbox2           = Gtk2::HBox->new( TRUE, 5 ); 
+                        #( $homo:bool, $spacing:int )
+    # $homo = "TRUE means setting $expand TRUE for all packed-in widgets"
+    $cs->{-hbox2}   = $hbox2;
+    
     
     my $sash1           ;       # outer, horizontal sash
     my $sash2           ;       # inner, vertical sash (top)
@@ -375,7 +385,8 @@ sub _help_about {
     my $mw          = $cs->get_mw();
     
     my $text        = join q{},
-        qq*<span foreground = "blue" size = "large">Test Ranger*, qq{\n},
+        qq*<span foreground = "blue" size = "x-large" weight = "bold">*,
+        qq*Test Ranger*, qq{\n},
         qq* </span>*, qq{\n},
         qq*<span weight = "bold">Version $VERSION</span>*, qq{\n},
         qq* *, qq{\n},
@@ -399,7 +410,7 @@ sub _help_about {
 #~     say 'about';
         
     _modal_dialog(
-        undef,
+        $mw,
         'info',
         $text,
         'ok',
