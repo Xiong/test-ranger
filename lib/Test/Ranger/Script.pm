@@ -135,7 +135,7 @@ sub _setup {
     _setup_hotkeys($cs);    # initial hotkeys on launch
     
     # Panes
-#~     _setup_panes($cs);      # initial window panes
+    _setup_panes($cs);      # initial window panes
     
     
     
@@ -274,60 +274,77 @@ sub _setup_panes {
     # Outermost box includes menubar and everything else
     my $vbox1           = $cs->{-vbox1};
     
-    # Side-by-side panes
-    my $hbox2           = Gtk2::HBox->new( TRUE, 5 ); 
-                        #( $homo:bool, $spacing:int )
-    # $homo = "TRUE means setting $expand TRUE for all packed-in widgets"
-    $cs->{-hbox2}   = $hbox2;
+    # Top-and-bottom panes
+    my $panebox1        = Gtk2::VPaned->new;
+    $vbox1->pack_start( $panebox1, TRUE, TRUE, 0 );
+                        #( $widget, $expand:bool, $fill:bool, $padding:int )
+    
+    # Side-by-side panes inside top
+    my $panebox2        = Gtk2::HPaned->new;
+    $panebox1->pack1( $panebox2, TRUE, TRUE );
+                        #( $widget, $resize:bool, $shrink:bool )
+
+    # Dummy labels for checkout
+    my $label_left_pane     = 'left';
+    my $label_right_pane    = 'right';
+    my $label_bottom_pane   = 'bottom';
+    
+    my $left_pane           = Gtk2::Label->new;
+    $left_pane->set_markup($label_left_pane);
+    my $right_pane           = Gtk2::Label->new;
+    $right_pane->set_markup($label_right_pane);
+    my $bottom_pane           = Gtk2::Label->new;
+    $bottom_pane->set_markup($label_bottom_pane);
+    
+    $panebox2->pack1( $left_pane   , TRUE, TRUE );
+    $panebox2->pack2( $right_pane  , TRUE, TRUE );
+    $panebox1->pack2( $bottom_pane , TRUE, TRUE );
     
     
-    my $sash1           ;       # outer, horizontal sash
-    my $sash2           ;       # inner, vertical sash (top)
     
-    my $pane1           ;       # left
-    my $pane2           ;       # right
-    my $pane3           ;       # bottom
     
-    # 'vertical' pane orientation means a horizontal sash
-    $sash1              = $mw->Panedwindow( -orient => 'vertical' );
-    $sash1->pack(
-        -side       => 'top',
-        -expand     => 'yes',
-        -fill       => 'both',
-        -padx       => 2,
-        -pady       => 2,
-    );
     
-    # $sash2 fills the top area within $sash1
-    $sash2              = $sash1->Panedwindow;
-    $sash2->pack(
-        -side       => 'top',
-        -expand     => 'yes',
-        -fill       => 'both',
-        -padx       => 2,
-        -pady       => 2,
-    );
-    
-    # top left is child of $sash2
-    $pane1              = $sash2->Label(
-                            -text       => 'left',
-                            -background => 'yellow',
-                        );
-    
-    # top right is child of $sash2
-    $pane2              = $sash2->Label(
-                            -text       => 'right',
-                            -background => 'cyan',
-                        );
-    
-    # bottom is child of $sash1
-    $pane3              = $sash1->Label(
-                            -text       => 'bottom',
-                            -background => 'red',
-                        );
-    
-    $sash2->add( $pane1, $pane2 );
-    $sash1->add( $sash2, $pane3 );
+#~         # # # OLD TK STUFF
+#~     # 'vertical' pane orientation means a horizontal sash
+#~     $sash1              = $mw->Panedwindow( -orient => 'vertical' );
+#~     $sash1->pack(
+#~         -side       => 'top',
+#~         -expand     => 'yes',
+#~         -fill       => 'both',
+#~         -padx       => 2,
+#~         -pady       => 2,
+#~     );
+#~     
+#~     # $sash2 fills the top area within $sash1
+#~     $sash2              = $sash1->Panedwindow;
+#~     $sash2->pack(
+#~         -side       => 'top',
+#~         -expand     => 'yes',
+#~         -fill       => 'both',
+#~         -padx       => 2,
+#~         -pady       => 2,
+#~     );
+#~     
+#~     # top left is child of $sash2
+#~     $pane1              = $sash2->Label(
+#~                             -text       => 'left',
+#~                             -background => 'yellow',
+#~                         );
+#~     
+#~     # top right is child of $sash2
+#~     $pane2              = $sash2->Label(
+#~                             -text       => 'right',
+#~                             -background => 'cyan',
+#~                         );
+#~     
+#~     # bottom is child of $sash1
+#~     $pane3              = $sash1->Label(
+#~                             -text       => 'bottom',
+#~                             -background => 'red',
+#~                         );
+#~     
+#~     $sash2->add( $pane1, $pane2 );
+#~     $sash1->add( $sash2, $pane3 );
         
     return $cs;
 }; ## _setup_panes
