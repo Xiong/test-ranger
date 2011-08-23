@@ -86,8 +86,7 @@ sub main {
     $mw->set_border_width(5);
     $mw->set_position('center_always');
     $mw->set_default_size ($mw_width, $mw_height);    # initial size
-    
-    
+        
     # Initial setup of all GUI elements
     _setup($cs);
     
@@ -433,7 +432,7 @@ sub _help_about {
         'ok',
     );
     
-    return $cs;
+    return FALSE;       # propagate this signal
 }; ## _help_about
 
 #=========# INTERNAL ROUTINE
@@ -516,6 +515,7 @@ sub _exit {
     
     Gtk2->main_quit;
     
+    return TRUE;        # do not propagate this signal
 }; ## _exit
 
 #=========# INTERNAL ROUTINE
