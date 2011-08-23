@@ -24,6 +24,7 @@ use Glib                        # Gtk constants
     'TRUE', 'FALSE',
 #    'GDK_CONTROL_MASK',
 ; ## Glib
+use Gnome2::Vte;
 
 ## use
 
@@ -135,6 +136,10 @@ sub _setup {
     
     # Panes
     _setup_panes($cs);      # initial window panes
+    
+    # Terminal
+    _setup_terminal($cs);   # virtual terminal emulator
+    
     
     
     
@@ -288,71 +293,49 @@ sub _setup_panes {
     $panebox1->pack2( $panebox3, TRUE, TRUE );
                         #( $widget, $resize:bool, $shrink:bool )
 
-    # Dummy labels for checkout
-    my $label_A_pane        = 'A';
-    my $label_B_pane        = 'B';
-    my $label_C_pane        = 'C';
-    my $label_D_pane        = 'D';
+    # Create a VBox for each pane
+    my $A_pane      = Gtk2::VBox->new( FALSE, 5 ); 
+    my $B_pane      = Gtk2::VBox->new( FALSE, 5 ); 
+    my $C_pane      = Gtk2::VBox->new( FALSE, 5 ); 
+    my $D_pane      = Gtk2::VBox->new( FALSE, 5 ); 
+                        #( $homo:bool, $spacing:int )
+    # $homo = "TRUE means setting $expand TRUE for all packed-in widgets"
     
-    my $A_pane           = Gtk2::Label->new;
-    $A_pane->set_markup($label_A_pane);
-    my $B_pane           = Gtk2::Label->new;
-    $B_pane->set_markup($label_B_pane);
-    my $C_pane           = Gtk2::Label->new;
-    $C_pane->set_markup($label_C_pane);
-    my $D_pane           = Gtk2::Label->new;
-    $D_pane->set_markup($label_D_pane);
-    
+    # Pack the panes into where they go.
     $panebox2->pack1( $A_pane, TRUE, TRUE );
     $panebox2->pack2( $B_pane, TRUE, TRUE );
     $panebox3->pack1( $C_pane, TRUE, TRUE );
     $panebox3->pack2( $D_pane, TRUE, TRUE );
     
+    # Dummy labels for checkout         - disable soon
+    my $label_A_pane        = 'A';
+    my $label_B_pane        = 'B';
+    my $label_C_pane        = 'C';
+    my $label_D_pane        = 'D';
+    
+    my $A_dummy           = Gtk2::Label->new;
+    $A_dummy->set_markup($label_A_pane);
+    my $B_dummy           = Gtk2::Label->new;
+    $B_dummy->set_markup($label_B_pane);
+    my $C_dummy           = Gtk2::Label->new;
+    $C_dummy->set_markup($label_C_pane);
+    my $D_dummy           = Gtk2::Label->new;
+    $D_dummy->set_markup($label_D_pane);
+    
+    $A_pane->pack_start( $A_dummy, FALSE, FALSE, 0 );
+    $B_pane->pack_start( $B_dummy, FALSE, FALSE, 0 );
+    $C_pane->pack_start( $C_dummy, FALSE, FALSE, 0 );
+    $D_pane->pack_start( $D_dummy, FALSE, FALSE, 0 );
+                        #( $widget, $expand:bool, $fill:bool, $padding:int )
+    
+    # Store the panes and Vboxes for later access
+    $cs->{'-A_pane'}    = $A_pane;
+    $cs->{'-B_pane'}    = $B_pane;
+    $cs->{'-C_pane'}    = $C_pane;
+    $cs->{'-D_pane'}    = $D_pane;
     
     
     
-    
-#~         # # # OLD TK STUFF
-#~     # 'vertical' pane orientation means a horizontal sash
-#~     $sash1              = $mw->Panedwindow( -orient => 'vertical' );
-#~     $sash1->pack(
-#~         -side       => 'top',
-#~         -expand     => 'yes',
-#~         -fill       => 'both',
-#~         -padx       => 2,
-#~         -pady       => 2,
-#~     );
-#~     
-#~     # $sash2 fills the top area within $sash1
-#~     $sash2              = $sash1->Panedwindow;
-#~     $sash2->pack(
-#~         -side       => 'top',
-#~         -expand     => 'yes',
-#~         -fill       => 'both',
-#~         -padx       => 2,
-#~         -pady       => 2,
-#~     );
-#~     
-#~     # top left is child of $sash2
-#~     $pane1              = $sash2->Label(
-#~                             -text       => 'left',
-#~                             -background => 'yellow',
-#~                         );
-#~     
-#~     # top right is child of $sash2
-#~     $pane2              = $sash2->Label(
-#~                             -text       => 'right',
-#~                             -background => 'cyan',
-#~                         );
-#~     
-#~     # bottom is child of $sash1
-#~     $pane3              = $sash1->Label(
-#~                             -text       => 'bottom',
-#~                             -background => 'red',
-#~                         );
-#~     
-#~     $sash2->add( $pane1, $pane2 );
-#~     $sash1->add( $sash2, $pane3 );
         
     return $cs;
 }; ## _setup_panes
@@ -483,6 +466,51 @@ sub _modal_dialog {
     
     return $return_value;
 }; ## _modal_dialog
+
+#=========# GTK SETUP ROUTINE
+#
+#   _setup_terminal($cs);     # short
+#       
+# Purpose   : Create a virtual terminal emulator widget.
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup_terminal {
+    my $cs          = shift;
+    my $mw          = $cs->get_mw();
+    my $term_pane   = $cs->{'-D_pane'};
+    
+    # create things
+    my $scrollbar = Gtk2::VScrollbar->new;
+    my $hbox = Gtk2::HBox->new;
+    my $terminal = Gnome2::Vte::Terminal->new;
+    
+    # set up scrolling
+    $scrollbar->set_adjustment ($terminal->get_adjustment);
+    
+    # lay 'em out
+    $term_pane->add ($hbox);
+    $hbox->pack_start ($terminal, TRUE, TRUE, 0);
+    $hbox->pack_start ($scrollbar, FALSE, FALSE, 0);
+#~     $window->show_all;
+    
+    # hook 'em up
+    $terminal->fork_command ('/bin/bash', ['bash', '-login'], undef,
+                           '/tmp', FALSE, FALSE, FALSE);
+#~     $terminal->signal_connect (child_exited => sub { Gtk2->main_quit });
+#~     $window->signal_connect (delete_event =>
+#~                            sub { Gtk2->main_quit; FALSE });
+    
+    
+    
+    return $cs;
+}; ## _setup_terminal
 
 #=========# GTK SETUP ROUTINE
 #
