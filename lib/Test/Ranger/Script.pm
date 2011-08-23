@@ -122,10 +122,10 @@ sub _setup {
     $mw->set_title("Test Ranger");
     
     # Outermost box: first item is menubar
-    my $vbox1       = Gtk2::VBox->new( FALSE, 5 ); 
+    my $vbox0       = Gtk2::VBox->new( FALSE, 5 ); 
                         #( $homo:bool, $spacing:int )
     # $homo = "TRUE means setting $expand TRUE for all packed-in widgets"
-    $cs->{-vbox1}   = $vbox1;
+    $cs->{-vbox0}   = $vbox0;
     
     # Menu bar
     _setup_menus($cs);      # initial menus on launch
@@ -156,8 +156,8 @@ sub _setup {
 
     
     # Display everything
-    $vbox1->show_all();
-    $mw->add($vbox1);
+    $vbox0->show_all();
+    $mw->add($vbox0);
 
     return $cs;
 }; ## _setup
@@ -179,7 +179,7 @@ sub _setup {
 sub _setup_menus {
     my $cs              = shift;
     my $mw              = $cs->get_mw();
-    my $vbox1           = $cs->{-vbox1};
+    my $vbox0           = $cs->{-vbox0};
     
     # Entire main menubar
     my $menubar         = Gtk2::MenuBar->new;
@@ -240,13 +240,13 @@ sub _setup_menus {
     ## end all the individual menus
     
     # Pack the complete menubar into the display area, at the top
-    $vbox1->pack_start( $menubar, FALSE, FALSE, 0 );
+    $vbox0->pack_start( $menubar, FALSE, FALSE, 0 );
                         #( $widget, $expand:bool, $fill:bool, $padding:int )
     
 #~     # Emergency exit button
 #~     my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
 #~     $exit_button->signal_connect( 'clicked' => sub {_exit()} );
-#~     $vbox1->pack_start( $exit_button, FALSE, FALSE, 0 );
+#~     $vbox0->pack_start( $exit_button, FALSE, FALSE, 0 );
     
     
     return $cs;
@@ -271,33 +271,42 @@ sub _setup_panes {
     my $mw          = $cs->get_mw();
     
     # Outermost box includes menubar and everything else
-    my $vbox1           = $cs->{-vbox1};
+    my $vbox0           = $cs->{-vbox0};
     
-    # Top-and-bottom panes
+    # Top-and-bottom panes inside outermost vbox0
     my $panebox1        = Gtk2::VPaned->new;
-    $vbox1->pack_start( $panebox1, TRUE, TRUE, 0 );
+    $vbox0->pack_start( $panebox1, TRUE, TRUE, 0 );
                         #( $widget, $expand:bool, $fill:bool, $padding:int )
     
-    # Side-by-side panes inside top
+    # Side-by-side panes inside top of panebox1
     my $panebox2        = Gtk2::HPaned->new;
     $panebox1->pack1( $panebox2, TRUE, TRUE );
                         #( $widget, $resize:bool, $shrink:bool )
 
+    # Top-and-bottom panes inside bottom of panebox1
+    my $panebox3        = Gtk2::VPaned->new;
+    $panebox1->pack2( $panebox3, TRUE, TRUE );
+                        #( $widget, $resize:bool, $shrink:bool )
+
     # Dummy labels for checkout
-    my $label_left_pane     = 'left';
-    my $label_right_pane    = 'right';
-    my $label_bottom_pane   = 'bottom';
+    my $label_A_pane        = 'A';
+    my $label_B_pane        = 'B';
+    my $label_C_pane        = 'C';
+    my $label_D_pane        = 'D';
     
-    my $left_pane           = Gtk2::Label->new;
-    $left_pane->set_markup($label_left_pane);
-    my $right_pane           = Gtk2::Label->new;
-    $right_pane->set_markup($label_right_pane);
-    my $bottom_pane           = Gtk2::Label->new;
-    $bottom_pane->set_markup($label_bottom_pane);
+    my $A_pane           = Gtk2::Label->new;
+    $A_pane->set_markup($label_A_pane);
+    my $B_pane           = Gtk2::Label->new;
+    $B_pane->set_markup($label_B_pane);
+    my $C_pane           = Gtk2::Label->new;
+    $C_pane->set_markup($label_C_pane);
+    my $D_pane           = Gtk2::Label->new;
+    $D_pane->set_markup($label_D_pane);
     
-    $panebox2->pack1( $left_pane   , TRUE, TRUE );
-    $panebox2->pack2( $right_pane  , TRUE, TRUE );
-    $panebox1->pack2( $bottom_pane , TRUE, TRUE );
+    $panebox2->pack1( $A_pane, TRUE, TRUE );
+    $panebox2->pack2( $B_pane, TRUE, TRUE );
+    $panebox3->pack1( $C_pane, TRUE, TRUE );
+    $panebox3->pack2( $D_pane, TRUE, TRUE );
     
     
     
