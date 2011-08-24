@@ -498,14 +498,26 @@ sub _setup_terminal {
     $term_pane->add ($hbox);
     $hbox->pack_start ($terminal, TRUE, TRUE, 0);
     $hbox->pack_start ($scrollbar, FALSE, FALSE, 0);
-#~     $window->show_all;
     
     # hook 'em up
-    $terminal->fork_command ('/bin/bash', ['bash', '-login'], undef,
-                           '/tmp', FALSE, FALSE, FALSE);
+    my $command     = '/bin/bash';          # shell to start
+    my $arg_ref     = ['bash', '-login'];   # ?
+    my $env_ref     = undef;                # copy from parent if undef?
+    my $directory   = '',                   # 'foo' is relative to parent
+    my $lastlog     = FALSE;                # ?
+    my $utmp        = FALSE;                # ?
+    my $wtmp        = FALSE;                # ?
+    $terminal->fork_command (
+        $command,
+        $arg_ref,
+        $env_ref,
+        $directory,
+        $lastlog,
+        $utmp,
+        $wtmp,
+    );
+    
 #~     $terminal->signal_connect (child_exited => sub { Gtk2->main_quit });
-#~     $window->signal_connect (delete_event =>
-#~                            sub { Gtk2->main_quit; FALSE });
     
     
     
