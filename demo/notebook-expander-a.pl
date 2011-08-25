@@ -1,14 +1,19 @@
-#!/run/bin/perl -w
+#!/run/bin/perl
 
+use 5.010000;
 use strict;
+use warnings;
 use Gtk2 '-init';
 use Glib qw/TRUE FALSE/; 
+
+use Devel::Comments '###';
 
 #standard window creation, placement, and signal connecting
 my $window = Gtk2::Window->new('toplevel');
 $window->signal_connect('delete_event' => sub { Gtk2->main_quit; });
 $window->set_border_width(5);
 $window->set_position('center_always');
+_setup_hotkeys();
 
 #add and show the vbox
 $window->add(&ret_vbox);
@@ -22,7 +27,7 @@ sub ret_vbox {
 my $vbox = Gtk2::VBox->new(FALSE,5);
 
     #create a instance of the Gtk2::Expander class
-    my $expander = Gtk2::Expander->new_with_mnemonic('Expand Me');
+    my $expander = Gtk2::Expander->new_with_mnemonic('Close Me');
     
     #create the child that we want to add to it.
     #----------------------------------------------
@@ -35,6 +40,10 @@ my $vbox = Gtk2::VBox->new(FALSE,5);
     #-------------------------------------------------
     my $nb = &ret_notebook;
     $nb->show_all;
+
+    my $initially_expanded      = TRUE;
+    $expander->set_expanded ($initially_expanded);
+    $expander->add($nb);
     
     $expander->signal_connect_after('activate' => sub {
             
@@ -47,6 +56,7 @@ my $vbox = Gtk2::VBox->new(FALSE,5);
             $expander->remove($nb);
             $window->resize(4,4);   
         }
+#~ say STDERR $expander->get_expanded;
         return FALSE;
     }); 
     
@@ -71,7 +81,7 @@ $vbox_nb->set_size_request (500, 300);
     #pre-set some properties
     $nb->set_scrollable (TRUE); 
     $nb->popup_enable;
-        for (0..10) { 
+        for (0..3) { 
     
         my $child = Gtk2::Frame->new("Frame of Tab $_");
     
@@ -82,13 +92,15 @@ $vbox_nb->set_size_request (500, 300);
         my $hbox = Gtk2::HBox->new(FALSE,0);
         $hbox->pack_start(Gtk2::Label->new("Tab $_"),FALSE,FALSE,0);
     
-            my $btn = Gtk2::Button->new('');
+#~             my $btn = Gtk2::Button->new('');
+            my $btn = Gtk2::Button->new();
             $btn->set_image(Gtk2::Image->new_from_stock('gtk-close','menu'));
             $btn->signal_connect('clicked' => sub {
             
                 $nb->remove_page ($nb->page_num($child)); 
             });
             
+        #### $btn
         $hbox->pack_end($btn,FALSE,FALSE,0);
         $hbox->show_all;
     #________
@@ -163,4 +175,26 @@ sub nb_controls {
     
     return $table;
 
-}
+};
+
+
+sub _setup_hotkeys {
+#~     my $cs          = shift;
+#~     my $mw          = $cs->get_mw();
+    
+    my $control_key     = 'control-mask';       # Ctr-...
+    my $keycode_q       = 113;                  # ...Q
+    my $flag_visible    = 'visible';
+    
+    my $quit_accel      = Gtk2::AccelGroup->new;
+    $quit_accel->connect(
+                            $keycode_q,         # $key:int (see demo/kbd.pl)
+                            $control_key,       # modifier
+                            $flag_visible,      # flags
+                            sub{ Gtk2->main_quit; },       # callback
+                        );
+#~     $mw->add_accel_group($quit_accel);
+    $window->add_accel_group($quit_accel);
+        
+#~     return $cs;
+}; ## _setup_hotkeys
