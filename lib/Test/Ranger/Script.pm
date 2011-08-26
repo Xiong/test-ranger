@@ -84,7 +84,7 @@ sub main {
     
     # Standard window placement and signal connecting
     $mw->signal_connect( 'delete_event' => sub{_exit()} );
-    $mw->set_border_width(5);
+    $mw->set_border_width(0);
     $mw->set_position('center_always');
     $mw->set_default_size ($mw_width, $mw_height);    # initial size
         
