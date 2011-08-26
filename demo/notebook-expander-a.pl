@@ -8,6 +8,10 @@ use Glib qw/TRUE FALSE/;
 
 use Devel::Comments '###';
 
+# Configuration
+my $button_relief_style = 'none';   # 'none', 'half', 'normal' (default)
+
+
 #standard window creation, placement, and signal connecting
 my $window = Gtk2::Window->new('toplevel');
 $window->signal_connect('delete_event' => sub { Gtk2->main_quit; });
@@ -73,6 +77,8 @@ sub ret_notebook {
 #and some widgets to manipulate the Notebook's
 #properties.
 
+
+
 my $vbox_nb = Gtk2::VBox->new(FALSE,5);
 $vbox_nb->set_size_request (500, 300);
 
@@ -93,13 +99,14 @@ $vbox_nb->set_size_request (500, 300);
         $hbox->pack_start(Gtk2::Label->new("Tab $_"),FALSE,FALSE,0);
     
 #~             my $btn = Gtk2::Button->new('');
-            my $btn = Gtk2::Button->new();
-            $btn->set_image(Gtk2::Image->new_from_stock('gtk-close','menu'));
-            $btn->signal_connect('clicked' => sub {
-            
+        my $btn = Gtk2::Button->new();
+        $btn->set_image(Gtk2::Image->new_from_stock('gtk-close','menu'));
+        $btn->signal_connect('clicked' => 
+            sub {
                 $nb->remove_page ($nb->page_num($child)); 
             });
-            
+        $btn->set_relief( $button_relief_style );
+        
         #### $btn
         $hbox->pack_end($btn,FALSE,FALSE,0);
         $hbox->show_all;
