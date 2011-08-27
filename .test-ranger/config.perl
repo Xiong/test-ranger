@@ -17,9 +17,12 @@ use Glib                        # Gtk constants
 
 # for each Frame
 -frame_type             => 'etched-in',     # framing of panes
-#~ -frame_type             => 'out',     # framing of panes
-#~ -frame_labels           => [ 'A', 'B', 'C', 'D' ],  # label the frame
--frame_labels           => [ '0', '1', '2', '3' ],  # label the frame
+#~ -frame_type             => 'none',          # framing of panes
+
+#~ -frame_labels           => [ 'A', 'B', 'C', 'D' ],  # label the frames
+-frame_labels           => [ '0', '1', '2', '3' ],  # label the frames
+#~ -frame_labels           => '',                      # don't label the frames
+#~ -frame_labels           => [''],                    # don't label the frames
 
 # for each Pane (VBox)
 -pane_homo              => FALSE,       # expand all children

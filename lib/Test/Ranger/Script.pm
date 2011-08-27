@@ -277,8 +277,13 @@ sub _setup_panes {
     
     my @frames          ;
     my $frame_type      = $cs->{-config}{-frame_type};
-    my @frame_labels    = @{ $cs->{-config}{-frame_labels} };
-    
+    my @frame_labels    ;
+    my $ref             = $cs->{-config}{-frame_labels};
+    if ($ref) {                             # $ref might be undef
+        if ( @$ref && join q{}, @$ref) {    # @ref might be false or empty
+            @frame_labels = @$ref;
+        };
+    };
     my @panes           ;
     my $pane_homo       = $cs->{-config}{-pane_homo};
     my $pane_spacing    = $cs->{-config}{-pane_spacing};

@@ -194,8 +194,8 @@ sub get_pane {
     my $frame_number    = shift;
     my @frames          = @{ $cs->{-frames} };
 #### @frames
-    my $pane            ;
     
+    # Frames are numbered in order of creation.
     my $frame           = $frames[$frame_number]
         or _crash( 'get_pane_0', "frame_number: $frame_number" );
     
