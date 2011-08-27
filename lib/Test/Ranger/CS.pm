@@ -144,7 +144,7 @@ sub get_config {
     # For each path, load the file if exists.
     for (@paths) {
         my $path        = $_;
-### Loading config file: $path
+#### Loading config file: $path
         my $fh = IO::File->new("< $path")
             or next;            # not a problem if no config file found
         my $prev_fh         = select $fh;
@@ -173,6 +173,38 @@ sub get_config {
     return $cs;
     
 }; ## get_config
+
+#=========# OBJECT METHOD
+#
+#   $cs->get_pane($frame_number);     # get the pane in the frame
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# Find the pane currently inside a given frame, by frame number.
+#   
+sub get_pane {
+    my $cs              = shift;
+    my $frame_number    = shift;
+    my @frames          = @{ $cs->{-frames} };
+#### @frames
+    my $pane            ;
+    
+    my $frame           = $frames[$frame_number]
+        or _crash( 'get_pane_0', "frame_number: $frame_number" );
+    
+    # Find the VBox, which is the requested pane.
+    my $pane        = $frame->get_child();    
+#### $pane
+    
+    return $pane;
+}; ## get_pane
 
 #=========# OBJECT METHOD
 #
@@ -220,6 +252,9 @@ sub _crash {
         ],
         get_config_1    => [
             'No config file found; searched:',
+        ],
+        get_pane_0      => [
+            'Tried to get a nonexistent pane:',
         ],
         put_mw_0        => [
             'Tried to store main Window from an undefined reference',
