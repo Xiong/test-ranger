@@ -293,13 +293,11 @@ sub _setup_panes {
     $panebox1->pack2( $panebox3, TRUE, TRUE );
                         #( $widget, $resize:bool, $shrink:bool )
 
-    # Create a VBox for each pane
-    my $A_pane      = Gtk2::VBox->new( FALSE, 5 ); 
-    my $B_pane      = Gtk2::VBox->new( FALSE, 5 ); 
-    my $C_pane      = Gtk2::VBox->new( FALSE, 5 ); 
-    my $D_pane      = Gtk2::VBox->new( FALSE, 5 ); 
-                        #( $homo:bool, $spacing:int )
-    # $homo = "TRUE means setting $expand TRUE for all packed-in widgets"
+    # Create a Frame for each pane
+    my $A_pane      = Gtk2::Frame->new( 'A' ); 
+    my $B_pane      = Gtk2::Frame->new( 'B' ); 
+    my $C_pane      = Gtk2::Frame->new( 'C' ); 
+    my $D_pane      = Gtk2::Frame->new( 'D' ); 
     
     # Pack the panes into where they go.
     $panebox2->pack1( $A_pane, TRUE, TRUE );
@@ -307,32 +305,44 @@ sub _setup_panes {
     $panebox3->pack1( $C_pane, TRUE, TRUE );
     $panebox3->pack2( $D_pane, TRUE, TRUE );
     
+    # Put inside VBox "boxes" inside the outside Frame "panes". 
+    my $A_box      = Gtk2::VBox->new( FALSE, 5 ); 
+    my $B_box      = Gtk2::VBox->new( FALSE, 5 ); 
+    my $C_box      = Gtk2::VBox->new( FALSE, 5 ); 
+    my $D_box      = Gtk2::VBox->new( FALSE, 5 ); 
+                        #( $homo:bool, $spacing:int )
+    # $homo = "TRUE means setting $expand TRUE for all packed-in widgets"
+    $A_pane->add($A_box);
+    $B_pane->add($B_box);
+    $C_pane->add($C_box);
+    $D_pane->add($D_box);
+    
     # Dummy labels for checkout         - disable soon
-    my $label_A_pane        = 'A';
-    my $label_B_pane        = 'B';
-    my $label_C_pane        = 'C';
-    my $label_D_pane        = 'D';
+    my $label_A        = 'A';
+    my $label_B        = 'B';
+    my $label_C        = 'C';
+    my $label_D        = 'D';
     
     my $A_dummy           = Gtk2::Label->new;
-    $A_dummy->set_markup($label_A_pane);
+    $A_dummy->set_markup($label_A);
     my $B_dummy           = Gtk2::Label->new;
-    $B_dummy->set_markup($label_B_pane);
+    $B_dummy->set_markup($label_B);
     my $C_dummy           = Gtk2::Label->new;
-    $C_dummy->set_markup($label_C_pane);
+    $C_dummy->set_markup($label_C);
     my $D_dummy           = Gtk2::Label->new;
-    $D_dummy->set_markup($label_D_pane);
+    $D_dummy->set_markup($label_D);
     
-    $A_pane->pack_start( $A_dummy, FALSE, FALSE, 0 );
-    $B_pane->pack_start( $B_dummy, FALSE, FALSE, 0 );
-    $C_pane->pack_start( $C_dummy, FALSE, FALSE, 0 );
-    $D_pane->pack_start( $D_dummy, FALSE, FALSE, 0 );
-                        #( $widget, $expand:bool, $fill:bool, $padding:int )
+#~     $A_box->pack_start( $A_dummy, FALSE, FALSE, 0 );
+#~     $B_box->pack_start( $B_dummy, FALSE, FALSE, 0 );
+#~     $C_box->pack_start( $C_dummy, FALSE, FALSE, 0 );
+#~     $D_box->pack_start( $D_dummy, FALSE, FALSE, 0 );
+#~                         #( $widget, $expand:bool, $fill:bool, $padding:int )
     
     # Store the panes and Vboxes for later access
-    $cs->{'-A_pane'}    = $A_pane;
-    $cs->{'-B_pane'}    = $B_pane;
-    $cs->{'-C_pane'}    = $C_pane;
-    $cs->{'-D_pane'}    = $D_pane;
+    $cs->{'-A_box'}    = $A_box;
+    $cs->{'-B_box'}    = $B_box;
+    $cs->{'-C_box'}    = $C_box;
+    $cs->{'-D_box'}    = $D_box;
     
     
     
@@ -484,20 +494,20 @@ sub _modal_dialog {
 sub _setup_terminal {
     my $cs          = shift;
     my $mw          = $cs->get_mw();
-    my $term_pane   = $cs->{'-D_pane'};
+    my $term_box    = $cs->{'-D_box'};
     
     # create things
-    my $scrollbar = Gtk2::VScrollbar->new;
-    my $hbox = Gtk2::HBox->new;
-    my $terminal = Gnome2::Vte::Terminal->new;
+    my $scrollbar   = Gtk2::VScrollbar->new;
+    my $hbox        = Gtk2::HBox->new;
+    my $terminal    = Gnome2::Vte::Terminal->new;
     
     # set up scrolling
     $scrollbar->set_adjustment ($terminal->get_adjustment);
     
     # lay 'em out
-    $term_pane->add ($hbox);
-    $hbox->pack_start ($terminal, TRUE, TRUE, 0);
-    $hbox->pack_start ($scrollbar, FALSE, FALSE, 0);
+    $term_box->add($hbox);
+    $hbox->pack_start($terminal, TRUE, TRUE, 0);
+    $hbox->pack_start($scrollbar, FALSE, FALSE, 0);
     
     # hook 'em up
     my $command     = '/bin/bash';          # shell to start
