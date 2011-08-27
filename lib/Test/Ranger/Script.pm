@@ -274,6 +274,7 @@ sub _setup_menus {
 sub _setup_panes {
     my $cs          = shift;
     my $mw          = $cs->get_mw();
+    my $frame_type  = 'etched-in';
     
     # Outermost box includes menubar and everything else
     my $vbox0           = $cs->{-vbox0};
@@ -298,6 +299,10 @@ sub _setup_panes {
     my $B_pane      = Gtk2::Frame->new( 'B' ); 
     my $C_pane      = Gtk2::Frame->new( 'C' ); 
     my $D_pane      = Gtk2::Frame->new( 'D' ); 
+    $A_pane->set_shadow_type ($frame_type);
+    $B_pane->set_shadow_type ($frame_type);
+    $C_pane->set_shadow_type ($frame_type);
+    $D_pane->set_shadow_type ($frame_type);
     
     # Pack the panes into where they go.
     $panebox2->pack1( $A_pane, TRUE, TRUE );
