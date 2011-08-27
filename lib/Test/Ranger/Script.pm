@@ -22,7 +22,6 @@ use List::MoreUtils qw(
 use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
 use Glib                        # Gtk constants
     'TRUE', 'FALSE',
-#    'GDK_CONTROL_MASK',
 ; ## Glib
 use Gnome2::Vte;
 
@@ -32,14 +31,12 @@ use Gnome2::Vte;
 use Devel::Comments '###';
 
 #============================================================================#
-
 # Constants
 
 # Command line options
 #~ dlock( my $option_oneshot     = '-1');    # execute from a script
 
 #----------------------------------------------------------------------------#
-
 # Globals
 
 # Debug and test hashref set in caller
@@ -67,16 +64,19 @@ our $Debug;
 # Most routines in this module expect $cs as a param and return it. 
 # 
 sub main {    
-    my $mw          ;                       # Tk MainWindow object
     my $cs          ;                       # my pseudo-global football
+    my $mw          ;                       # Gtk main Window object
+    
+    # Create the football
+    $cs             = Test::Ranger::CS->new;
+    
+    # Load cascading configurations from config files.
+    $cs->get_config();
     
     # defaults
     my $mw_width    = 400;
     my $mw_height   = 400;
     
-    
-    # Create the football
-    $cs             = Test::Ranger::CS->new;
     
     # Create the main Window
     $mw             = Gtk2::Window->new ('toplevel');

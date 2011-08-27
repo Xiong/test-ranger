@@ -8,8 +8,27 @@ use version 0.89; our $VERSION = qv('v0.0.4');
 
 #use parent qw{  };             # inherits from UNIVERSAL only
 
+use File::Spec;
+use File::Spec::Functions qw(
+    catdir
+    catfile
+    catpath
+    splitpath
+    curdir
+    rootdir
+    updir
+    canonpath
+);
+use Cwd;
+use IO::File;
+
 use Data::Dumper;               # value stringification toolbox
+
+# gtk-perl modules; see http://gtk2-perl.sourceforge.net/doc/pod/
 use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
+use Glib                        # Gtk constants
+    'TRUE', 'FALSE',
+; ## Glib
 
 # use for debug only
 use Devel::Comments '###';      # debug only                             #~
@@ -59,6 +78,123 @@ sub init {
 };
 ######## /init ########
 
+#=========# OBJECT METHOD
+#
+#   $cs->get_config( 'all' );     # get configurations from files
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub get_config {
+    my $cs              = shift;
+    my %config          ;
+    
+    # Figure out the four possible config file paths.
+    my $folder_name     = 'test-ranger';
+    my $default_name    = 'default_config';
+    my $file_name       = 'config.perl';
+    my $system_folder   = 'etc';
+    my $user_folder     = q{.} . $folder_name;
+    my $project_folder  = q{.} . $folder_name;
+    my $rootdir         = File::Spec->rootdir();
+    my $homedir         = $ENV{'HOME'};
+    my $currentdir      = getcwd();
+    
+    my @paths           ;
+    
+    push @paths,    File::Spec->catfile(        # defaults
+                            $rootdir,
+                            $system_folder,
+                            $folder_name,
+                            $default_name 
+                    ),
+    
+                    File::Spec->catfile(        # system-wide
+                            $rootdir,
+                            $system_folder,
+                            $folder_name,
+                            $file_name 
+                    ),
+                    
+                    File::Spec->catfile(        # user
+                            $homedir,
+                            $user_folder,
+                            $file_name 
+                    ),
+                    
+                    File::Spec->catfile(        # project
+                            $currentdir,
+                            $project_folder,
+                            $file_name 
+                    ),
+                    
+    ; ## push
+    
+    # Store paths in football.
+    $cs->{-config_paths}    = \@paths; 
+    
+    # For each path, load the file if exists.
+    for (@paths) {
+        my $path        = $_;
+### Loading config file: $path
+        my $fh = IO::File->new("< $path")
+            or next;            # not a problem if no config file found
+        my $prev_fh         = select $fh;
+        local $/            = undef;            # slurp
+        select $prev_fh;
+        my $file_contents   = <$fh>;
+#### $file_contents
+        my %temp            = eval $file_contents;
+        _crash( 'get_config_0', $path, q{}, $@ ) if $@;    
+#### %temp
+        
+        %config             = ( %config, %temp );
+#### %config
+#### '------'
+        
+        
+        close $fh;
+    };
+    # ... but it's bad if no configuration found at all.
+    _crash( 'get_config_1', @paths, q{} ) if ( not scalar keys %config );    
+    
+### Configuration: %config    
+    
+    # Store configuration.
+    $cs->{-config}          = \%config;
+    return $cs;
+    
+}; ## get_config
+
+#=========# OBJECT METHOD
+#
+#   $obj->method( '-parm' => $value, );     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub method {
+    
+    
+    
+}; ## method
+
 ######## INTERNAL UTILITY ########
 #
 #   _crash( $errkey, @more );      # fatal out of internal error
@@ -78,6 +214,12 @@ sub _crash {
     my $error       = {
         init_0          => [ 
             'Odd number of args in init()', 
+        ],
+        get_config_0    => [
+            'Error evaluating config file:',
+        ],
+        get_config_1    => [
+            'No config file found; searched:',
         ],
         put_mw_0        => [
             'Tried to store main Window from an undefined reference',
@@ -153,12 +295,12 @@ sub put_mw {
     
 #### $mw    
     # $mw must be a defined reference
-    _crash('put_mw_0') if not defined $mw;
+    _crash( 'put_mw_0' ) if not defined $mw;
     
     # $mw must be a Gtk main Window
 #~     TODO: is this a valid Gtk main Window?
 #~     _crash('put_mw_1') if not ( $mw = eval{ $mw->MainWindow(); } );
-    _crash('put_mw_2', $@) if $@;    
+    _crash( 'put_mw_2', $@ ) if $@;    
     
     $cs->{ -mw }    = $mw;
     
