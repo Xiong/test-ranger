@@ -16,7 +16,8 @@ use Glib                        # Gtk constants
 #~ -mw_anchor              => 'center',        # placement
 
 # for each Frame
--frame_type             => 'etched-in',     # framing of panes
+#~ -frame_type             => 'etched-in',     # framing of panes
+-frame_type             => 'in',            # framing of panes
 #~ -frame_type             => 'none',          # framing of panes
 
 #~ -frame_labels           => [ 'A', 'B', 'C', 'D' ],  # label the frames
@@ -31,3 +32,6 @@ use Glib                        # Gtk constants
 # specific Frame defaults
 # You may specify a Frame by number 0..3 or by letter 'A'..'D'
 -terminal_frame         => 'D',         # pane to create terminal windows
+#~ -terminal_frame         => '1',         # pane to create terminal windows
+
+
