@@ -34,16 +34,43 @@ use Glib qw/TRUE FALSE/;
     $mw->signal_connect('delete_event' => sub { Gtk2->main_quit; });
     $mw->set_border_width(5);
     $mw->set_position('center_always');
+    _setup_hotkeys();
     
+    # Add a definite thing. 
+    my $vbox0           = Gtk2::VBox->new();
+    $mw->add($vbox0);
+
+    my $button1          = Gtk2::Button->new('Dummy1');
+    $vbox0->pack_start($button1, FALSE, FALSE, 0);
     
-    
-    
+    my $button2          = Gtk2::Button->new('Dummy2');
+    $vbox0->pack_start($button2, FALSE, FALSE, 0);
     
     
     # Show and run.
     $mw->show_all();
     Gtk2->main();
 
+sub _setup_hotkeys {
+#~     my $cs          = shift;
+#~     my $mw          = $cs->get_mw();
+    
+    my $control_key     = 'control-mask';       # Ctr-...
+    my $keycode_q       = 113;                  # ...Q
+    my $flag_visible    = 'visible';
+    
+    my $quit_accel      = Gtk2::AccelGroup->new;
+    $quit_accel->connect(
+                            $keycode_q,         # $key:int (see demo/kbd.pl)
+                            $control_key,       # modifier
+                            $flag_visible,      # flags
+                            sub{ Gtk2->main_quit; },       # callback
+                        );
+    $mw->add_accel_group($quit_accel);
+#~     $window->add_accel_group($quit_accel);
+        
+#~     return $cs;
+}; ## _setup_hotkeys
 
 
 __DATA__
