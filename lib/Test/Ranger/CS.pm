@@ -256,8 +256,10 @@ sub _crash {
 # LIST KEYS HERE:
 # 
 # -mw                           # Gtk main Window object
-
-
+# -config                       # basic configurations loaded from file
+#   -mw_initial_V               # main Window starting size Vertical   (px)
+#   -mw_initial_H               # main Window starting size Horizontal (px)
+#   -mw_anchor                  # where main Window is anchored on screen
 
 #=========# OBJECT METHOD
 #

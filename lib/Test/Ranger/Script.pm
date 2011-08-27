@@ -73,10 +73,10 @@ sub main {
     # Load cascading configurations from config files.
     $cs->get_config();
     
-    # defaults
-    my $mw_width    = 400;
-    my $mw_height   = 400;
-    
+    # main Window configuration
+    my $mw_width    = $cs->{-config}{-mw_initial_H};
+    my $mw_height   = $cs->{-config}{-mw_initial_V};
+    my $mw_anchor   = $cs->{-config}{-mw_anchor};
     
     # Create the main Window
     $mw             = Gtk2::Window->new ('toplevel');
@@ -85,7 +85,7 @@ sub main {
     # Standard window placement and signal connecting
     $mw->signal_connect( 'delete_event' => sub{_exit()} );
     $mw->set_border_width(0);
-    $mw->set_position('center_always');
+    $mw->set_position( $mw_anchor );
     $mw->set_default_size ($mw_width, $mw_height);    # initial size
         
     # Initial setup of all GUI elements

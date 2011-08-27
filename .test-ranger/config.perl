@@ -1,2 +1,5 @@
 -mw_initial_V           => 300,
 -mw_initial_H           => 300,
+-mw_anchor              => 'none',
+#~ -mw_anchor              => 'center-always',
+#~ -mw_anchor              => 'center',
