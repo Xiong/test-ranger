@@ -39,12 +39,22 @@ use Glib qw/TRUE FALSE/;
     # Add a definite thing. 
     my $vbox0           = Gtk2::VBox->new();
     $mw->add($vbox0);
-
-    my $button1          = Gtk2::Button->new('Dummy1');
+    
+    # Dummy1
+    my $button1         = Gtk2::Button->new('Dummy1');
     $vbox0->pack_start($button1, FALSE, FALSE, 0);
     
-    my $button2          = Gtk2::Button->new('Dummy2');
-    $vbox0->pack_start($button2, FALSE, FALSE, 0);
+    # Dummy2
+    my $button2         = Gtk2::Button->new('Dummy2');
+    my $shadow_type     = 'none';
+    my $frame_a         = Gtk2::Frame->new();
+    $frame_a->add($button2);
+    $frame_a->set_shadow_type ($shadow_type);
+    $vbox0->pack_start($frame_a, FALSE, FALSE, 0);
+    
+    # Dummy3
+    my $button3         = Gtk2::Button->new('Dummy3');
+    $vbox0->pack_start($button3, FALSE, FALSE, 0);
     
     
     # Show and run.
