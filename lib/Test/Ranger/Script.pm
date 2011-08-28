@@ -279,8 +279,9 @@ sub _setup_panes {
     my $frame_type      = $cs->{-config}{-frame_type};
     my @frame_labels    ;
     my $ref             = $cs->{-config}{-frame_labels};
+#~     my $ref             = '';
     if ($ref) {                             # $ref might be undef
-        if ( @$ref && join q{}, @$ref) {    # @ref might be false or empty
+        if ( ref $ref && join q{}, @$ref) {     # @ref might be false or empty
             @frame_labels = @$ref;
         };
     };

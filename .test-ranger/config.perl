@@ -21,7 +21,8 @@ use Glib                        # Gtk constants
 #~ -frame_type             => 'none',          # framing of panes
 
 #~ -frame_labels           => [ 'A', 'B', 'C', 'D' ],  # label the frames
--frame_labels           => [ '0', '1', '2', '3' ],  # label the frames
+#~ -frame_labels           => [ '0', '1', '2', '3' ],  # label the frames
+#~ -frame_labels           => 'b',                     # nonsense - don't ship!
 #~ -frame_labels           => '',                      # don't label the frames
 #~ -frame_labels           => [''],                    # don't label the frames
 
