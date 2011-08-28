@@ -22,7 +22,6 @@ use List::MoreUtils qw(
 use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
 use Glib                        # Gtk constants
     'TRUE', 'FALSE',
-#    'GDK_CONTROL_MASK',
 ; ## Glib
 use Gnome2::Vte;
 
@@ -32,14 +31,12 @@ use Gnome2::Vte;
 use Devel::Comments '###';
 
 #============================================================================#
-
 # Constants
 
 # Command line options
 #~ dlock( my $option_oneshot     = '-1');    # execute from a script
 
 #----------------------------------------------------------------------------#
-
 # Globals
 
 # Debug and test hashref set in caller
@@ -67,16 +64,19 @@ our $Debug;
 # Most routines in this module expect $cs as a param and return it. 
 # 
 sub main {    
-    my $mw          ;                       # Tk MainWindow object
     my $cs          ;                       # my pseudo-global football
-    
-    # defaults
-    my $mw_width    = 400;
-    my $mw_height   = 400;
-    
+    my $mw          ;                       # Gtk main Window object
     
     # Create the football
     $cs             = Test::Ranger::CS->new;
+    
+    # Load cascading configurations from config files.
+    $cs->get_config();
+    
+    # main Window configuration
+    my $mw_width    = $cs->{-config}{-mw_initial_H};
+    my $mw_height   = $cs->{-config}{-mw_initial_V};
+    my $mw_anchor   = $cs->{-config}{-mw_anchor};
     
     # Create the main Window
     $mw             = Gtk2::Window->new ('toplevel');
@@ -85,7 +85,7 @@ sub main {
     # Standard window placement and signal connecting
     $mw->signal_connect( 'delete_event' => sub{_exit()} );
     $mw->set_border_width(0);
-    $mw->set_position('center_always');
+    $mw->set_position( $mw_anchor );
     $mw->set_default_size ($mw_width, $mw_height);    # initial size
         
     # Initial setup of all GUI elements
@@ -272,56 +272,73 @@ sub _setup_menus {
 # ____
 # 
 sub _setup_panes {
-    my $cs          = shift;
-    my $mw          = $cs->get_mw();
-    my $frame_type  = 'etched-in';
+    my $cs              = shift;
+    my $mw              = $cs->get_mw();
+    
+    my @frames          ;
+    my $frame_type      = $cs->{-config}{-frame_type};
+    my @frame_labels    ;
+    my $ref             = $cs->{-config}{-frame_labels};
+#~     my $ref             = '';
+    if ($ref) {                             # $ref might be undef
+        if ( ref $ref && join q{}, @$ref) {     # @ref might be false or empty
+            @frame_labels = @$ref;
+        };
+    };
+    my @panes           ;
+    my $pane_homo       = $cs->{-config}{-pane_homo};
+    my $pane_spacing    = $cs->{-config}{-pane_spacing};
     
     # Outermost box includes menubar and everything else
     my $vbox0           = $cs->{-vbox0};
     
-    # Top-and-bottom panes inside outermost vbox0
+    # Top-and-bottom frames inside outermost vbox0
     my $panebox1        = Gtk2::VPaned->new;
     $vbox0->pack_start( $panebox1, TRUE, TRUE, 0 );
                         #( $widget, $expand:bool, $fill:bool, $padding:int )
     
-    # Side-by-side panes inside top of panebox1
+    # Side-by-side frames inside top of panebox1
     my $panebox2        = Gtk2::HPaned->new;
     $panebox1->pack1( $panebox2, TRUE, TRUE );
                         #( $widget, $resize:bool, $shrink:bool )
 
-    # Top-and-bottom panes inside bottom of panebox1
+    # Top-and-bottom frames inside bottom of panebox1
     my $panebox3        = Gtk2::VPaned->new;
     $panebox1->pack2( $panebox3, TRUE, TRUE );
                         #( $widget, $resize:bool, $shrink:bool )
 
     # Create a Frame for each pane
-    my $A_pane      = Gtk2::Frame->new( 'A' ); 
-    my $B_pane      = Gtk2::Frame->new( 'B' ); 
-    my $C_pane      = Gtk2::Frame->new( 'C' ); 
-    my $D_pane      = Gtk2::Frame->new( 'D' ); 
-    $A_pane->set_shadow_type ($frame_type);
-    $B_pane->set_shadow_type ($frame_type);
-    $C_pane->set_shadow_type ($frame_type);
-    $D_pane->set_shadow_type ($frame_type);
+    my $A_frame     = Gtk2::Frame->new(); 
+    my $B_frame     = Gtk2::Frame->new(); 
+    my $C_frame     = Gtk2::Frame->new(); 
+    my $D_frame     = Gtk2::Frame->new();
+    push @frames, $A_frame, $B_frame, $C_frame, $D_frame; 
     
-    # Pack the panes into where they go.
-    $panebox2->pack1( $A_pane, TRUE, TRUE );
-    $panebox2->pack2( $B_pane, TRUE, TRUE );
-    $panebox3->pack1( $C_pane, TRUE, TRUE );
-    $panebox3->pack2( $D_pane, TRUE, TRUE );
+    # Style each frame
+    for (@frames) {
+        my $frame   = $_;
+        $frame->set_shadow_type($frame_type);
+        if (@frame_labels) {
+            $frame->set_label( shift @frame_labels);
+        };
+    };
     
-    # Put inside VBox "boxes" inside the outside Frame "panes". 
-    my $A_box      = Gtk2::VBox->new( FALSE, 5 ); 
-    my $B_box      = Gtk2::VBox->new( FALSE, 5 ); 
-    my $C_box      = Gtk2::VBox->new( FALSE, 5 ); 
-    my $D_box      = Gtk2::VBox->new( FALSE, 5 ); 
-                        #( $homo:bool, $spacing:int )
+    # Pack the frames into where they go.
+    $panebox2->pack1( $A_frame, TRUE, TRUE );
+    $panebox2->pack2( $B_frame, TRUE, TRUE );
+    $panebox3->pack1( $C_frame, TRUE, TRUE );
+    $panebox3->pack2( $D_frame, TRUE, TRUE );
+    
+    # Put inside VBox "panes" inside the outside Frame "frames". 
+    for (@frames) {
+        my $frame   = $_;
+        my $pane    = Gtk2::VBox->new( $pane_homo, $pane_spacing );
+                            #( $homo:bool, $spacing:int )
     # $homo = "TRUE means setting $expand TRUE for all packed-in widgets"
-    $A_pane->add($A_box);
-    $B_pane->add($B_box);
-    $C_pane->add($C_box);
-    $D_pane->add($D_box);
-    
+        $frame->add($pane);
+        push @panes, $pane;
+    };
+        
     # Dummy labels for checkout         - disable soon
     my $label_A        = 'A';
     my $label_B        = 'B';
@@ -337,19 +354,21 @@ sub _setup_panes {
     my $D_dummy           = Gtk2::Label->new;
     $D_dummy->set_markup($label_D);
     
-#~     $A_box->pack_start( $A_dummy, FALSE, FALSE, 0 );
-#~     $B_box->pack_start( $B_dummy, FALSE, FALSE, 0 );
-#~     $C_box->pack_start( $C_dummy, FALSE, FALSE, 0 );
-#~     $D_box->pack_start( $D_dummy, FALSE, FALSE, 0 );
+#~     $A_pane->pack_start( $A_dummy, FALSE, FALSE, 0 );
+#~     $B_pane->pack_start( $B_dummy, FALSE, FALSE, 0 );
+#~     $C_pane->pack_start( $C_dummy, FALSE, FALSE, 0 );
+#~     $D_pane->pack_start( $D_dummy, FALSE, FALSE, 0 );
 #~                         #( $widget, $expand:bool, $fill:bool, $padding:int )
     
-    # Store the panes and Vboxes for later access
-    $cs->{'-A_box'}    = $A_box;
-    $cs->{'-B_box'}    = $B_box;
-    $cs->{'-C_box'}    = $C_box;
-    $cs->{'-D_box'}    = $D_box;
+    # Set specific frame defaults.
+    # These will control where new tabs are put.
+    my $term_frame      = $cs->{-config}{-terminal_frame};
+    $term_frame        =~ tr/ABCD/0123/;
+    $cs->{-term_frame}  = $term_frame;
     
-    
+    # Store the Frames and VBox panes for later access
+    $cs->{-frames}      = \@frames;
+    $cs->{-panes}       = \@panes;
     
         
     return $cs;
@@ -499,7 +518,8 @@ sub _modal_dialog {
 sub _setup_terminal {
     my $cs          = shift;
     my $mw          = $cs->get_mw();
-    my $term_box    = $cs->{'-D_box'};
+    my $term_frame  = $cs->{-term_frame};
+    my $term_pane   = $cs->get_pane($term_frame);
     
     # create things
     my $scrollbar   = Gtk2::VScrollbar->new;
@@ -510,7 +530,7 @@ sub _setup_terminal {
     $scrollbar->set_adjustment ($terminal->get_adjustment);
     
     # lay 'em out
-    $term_box->add($hbox);
+    $term_pane->add($hbox);
     $hbox->pack_start($terminal, TRUE, TRUE, 0);
     $hbox->pack_start($scrollbar, FALSE, FALSE, 0);
     
