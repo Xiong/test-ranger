@@ -548,8 +548,10 @@ sub _setup_terminal {
     $hbox->pack_start($scrollbar,   FALSE,  FALSE,  0);
     
     # Set colors
-    my $max       = 65535;
-    my $bg_color    = $cs->get_color_of( [$max, $max, $max, 0] );
+    my $max         = 0xffff;
+    my $yellow      = $cs->get_color_of( [$max, $max, 0xdddd, 0] );
+#~     my $bg_color    = $cs->get_color_of( [$max, $max, $max, 0] );
+    my $bg_color    = $yellow;
     my $fg_color    = $cs->get_color_of( [0, 0, 0, 0] );
     
     # A 16-element array(ref) of Gtk2::Gdk::Color objects.
