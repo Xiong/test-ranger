@@ -36,3 +36,8 @@ use Glib                        # Gtk constants
 #~ -terminal_frame         => '1',         # pane to create terminal windows
 
 
+
+# terminal widget settings
+-terminal_color_background      => undef,
+
+

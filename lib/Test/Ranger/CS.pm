@@ -208,6 +208,40 @@ sub get_pane {
 
 #=========# OBJECT METHOD
 #
+#   $obj->get_color_of( '-parm' => $value, );     # short
+#       
+# Purpose   : Turns an ill-behaved color spec into a well-behaved one.
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub get_color_of {
+    my $cs              = shift;
+    my $color_spec      = shift;
+    my $color           ;
+#~     my $color           = Gtk2::Gdk::Color->new(0, 0, 0, 0);
+    
+    if ( substr $color_spec, 0, 1 eq '-' ) {    # requested from config hash
+        _crash();        
+    }
+    elsif ( ref $color_spec && scalar @$color_spec ) {  # array of integers
+        $color           = Gtk2::Gdk::Color->new(@$color_spec);
+    }
+    else {
+        _crash();
+    };
+    
+    return $color;
+}; ## get_color_of
+
+#=========# OBJECT METHOD
+#
 #   $obj->method( '-parm' => $value, );     # short
 #       
 # Purpose   : ____
@@ -268,8 +302,13 @@ sub _crash {
     };
     
     # find and expand error
-    push @lines, $errkey;
-    push @lines, @{ $error->{$errkey} };
+    if ($errkey) {
+        push @lines, $errkey;
+        push @lines, @{ $error->{$errkey} };
+    }
+    else {
+        push @lines, 'Unimplemented error';
+    };
     push @lines, @_;
     $text           = $prepend . join $indent, @lines;
     

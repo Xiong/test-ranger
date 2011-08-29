@@ -141,14 +141,25 @@ sub _setup {
     _setup_terminal($cs);   # virtual terminal emulator
     
     
+    # Futz around here.
+
+#    # Set colors
+#    my $max       = 65535;
+##~     my $bg_color    = $cs->get_color_of('-terminal_bg_color');
+#    my $bg_color    = $cs->get_color_of( [$max, $max, $max, 0] );
+##~     my $bg_color    = $cs->get_color_of( [0, 0, 0, 0] );
+#### $bg_color
+    
+##~     $terminal->set_background_tint_color($bg_color);
+##~     $terminal->set_background_saturation($max);
     
     
-#~     # Emergency exit button
-#~     my $exit_button ;
-#~     $exit_button    = $mw->Button(
-#~         -text => "Exit", -command => \&_exit
-#~     );
-#~     $exit_button->pack;
+#    # Emergency exit button
+#    my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
+#    $exit_button->signal_connect( 'clicked' => sub {_exit()} );
+#    $vbox0->pack_start( $exit_button, FALSE, FALSE, 0 );
+    
+#    $exit_button->modify_bg('normal', $bg_color);
     
 #~     # demo grab keysym -- debug only
 #~     $mw->bind('<KeyPress>' => \&print_keysym);
@@ -520,6 +531,7 @@ sub _setup_terminal {
     my $mw          = $cs->get_mw();
     my $term_frame  = $cs->{-term_frame};
     my $term_pane   = $cs->get_pane($term_frame);
+    my $vbox        = Gtk2::VBox->new;
     
     # create things
     my $scrollbar   = Gtk2::VScrollbar->new;
@@ -530,9 +542,22 @@ sub _setup_terminal {
     $scrollbar->set_adjustment ($terminal->get_adjustment);
     
     # lay 'em out
-    $term_pane->add($hbox);
-    $hbox->pack_start($terminal, TRUE, TRUE, 0);
-    $hbox->pack_start($scrollbar, FALSE, FALSE, 0);
+    $term_pane->add($vbox);
+    $vbox->pack_start($hbox,        FALSE,  FALSE,  0);
+    $hbox->pack_start($terminal,    TRUE,   TRUE,   0);
+    $hbox->pack_start($scrollbar,   FALSE,  FALSE,  0);
+    
+    # Set colors
+    my $max       = 65535;
+    my $bg_color    = $cs->get_color_of( [$max, $max, $max, 0] );
+    my $fg_color    = $cs->get_color_of( [0, 0, 0, 0] );
+    
+    # A 16-element array(ref) of Gtk2::Gdk::Color objects.
+    my $palette_ref     = [];
+    for (0..15) { push @$palette_ref, $cs->get_color_of( [0, 0, 0, 0] ) };
+    
+    $terminal->set_colors( $fg_color, $bg_color, $palette_ref );
+    
     
     # hook 'em up
     my $command     = '/bin/bash';          # shell to start
@@ -554,10 +579,25 @@ sub _setup_terminal {
     
 #~     $terminal->signal_connect (child_exited => sub { Gtk2->main_quit });
     
+    # Test feed button
+    my $feed_button     = Gtk2::Button->new_with_mnemonic('_Feed');
+    $feed_button->signal_connect( 'clicked' => \&test_feed, $terminal );
+    $vbox->pack_start( $feed_button, FALSE, FALSE, 0 );
     
     
     return $cs;
 }; ## _setup_terminal
+
+# scratch test feed sub
+sub test_feed {
+    my $self        = shift;
+    my $terminal    = shift;
+    my $feed        = 'ls';
+    
+    $terminal->feed_child($feed);
+    
+    return FALSE;       # propagate this signal
+};
 
 #=========# GTK SETUP ROUTINE
 #
