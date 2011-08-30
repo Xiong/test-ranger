@@ -8,6 +8,11 @@ use version 0.89; our $VERSION = qv('v0.0.4');
 
 #use parent qw{  };             # inherits from UNIVERSAL only
 
+use Scalar::Util qw(
+    looks_like_number
+);
+#    weaken isweak reftype refaddr blessed isvstring readonly tainted 
+#    dualvar looks_like_number openhandle set_prototype 
 use List::MoreUtils qw(
     any all none notall
 );
@@ -238,7 +243,7 @@ sub get_pane {
 #   '-some_thing'       Get from config file(s)
 #   [ $r, $g, $b ]      Directly specify each value
 #   'name'              Specify using a named color defined in method
-#   0xRGB               Shorthand CSS-like spec; integer 0..0xfff
+#   RGB                 Shorthand CSS-like spec; three hex digits
 #
 sub get_color_of {
     my $cs              = shift;
@@ -259,15 +264,26 @@ sub get_color_of {
         'gray'              => [ $lit,      $lit,       $lit,       0 ],
     );
     my $color           ;
-#~     my $color           = Gtk2::Gdk::Color->new(0, 0, 0, 0);
+#     my $color           = Gtk2::Gdk::Color->new(0, 0, 0, 0);
     
     if ( substr $color_spec, 0, 1 eq '-' ) {    # requested from config hash
-        _crash();        
+        _crash( 'get_color_of_1', $color_spec ) 
+            if not defined $cs->{-config}{$color_spec};        
     }
     elsif ( ref $color_spec eq 'ARRAY' ) {      # array of...
         my @ary = @$color_spec;
-        _crash('get_color_of_0') 
-            if notall{ $_ >= 0 and $_ <= $max } @ary;   # 0..$max
+        
+        # check validity of each element
+        for (@ary) {
+            # can I do arithmetic on this element?
+            _crash( 'get_color_of_2', $color_spec, "\'$_\'" ) 
+                if not looks_like_number($_);
+            # is element within range?
+            _crash( 'get_color_of_2', $color_spec, "\'$_\'" ) 
+                if not ( $_ >= 0 and $_ <= $max );   # 0..$max
+        };
+        
+        # okay
         $color   = Gtk2::Gdk::Color->new(@ary);
     }
     elsif ( defined $named_color{$color_spec} ) {   # named in method
@@ -281,7 +297,7 @@ sub get_color_of {
         $color   = Gtk2::Gdk::Color->new( $r, $g, $b, 0 );        
     }
     else {
-        _crash('get_color_of_0');
+        _crash( 'get_color_of_0', $color_spec );
     };
     
     return $color;
@@ -348,6 +364,12 @@ sub _crash {
         ],
         get_color_of_0  => [
             'Bad color specification',
+        ],
+        get_color_of_1  => [
+            'No color specification in configuration',
+        ],
+        get_color_of_2  => [
+            'Color specification not arrayref of \'double\' integers',
         ],
     };
     
