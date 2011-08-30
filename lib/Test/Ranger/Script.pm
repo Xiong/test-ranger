@@ -549,8 +549,9 @@ sub _setup_terminal {
     
     # Set colors
 #~     my $bg_color    = $cs->get_color_of( 'straw' );
-    my $bg_color    = $cs->get_color_of( ['straw', 7] );
-    my $fg_color    = $cs->get_color_of( 'black' );
+#~     my $fg_color    = $cs->get_color_of( 'black' );
+    my $bg_color    = $cs->get_color_of( '-terminal_color_background' );
+    my $fg_color    = $cs->get_color_of( '-terminal_color_foreground' );
     
 #    # A 16-element array(ref) of Gtk2::Gdk::Color objects.
 #    my $palette_ref     = [];

@@ -1,5 +1,6 @@
 package Test::Ranger::CS;       # pseudo-global football of state
 
+use 5.010000;
 use strict;
 use warnings;
 use Carp;
@@ -266,21 +267,25 @@ sub get_color_of {
     my $color           ;
 #     my $color           = Gtk2::Gdk::Color->new(0, 0, 0, 0);
     
-    if ( substr $color_spec, 0, 1 eq '-' ) {    # requested from config hash
-        _crash( 'get_color_of_1', $color_spec ) 
-            if not defined $cs->{-config}{$color_spec};        
+#### $color_spec
+    if ( substr ($color_spec, 0, 1) eq '-' ) {    # requested from config hash
+        _crash( 'get_color_of_1', $color_spec, '') 
+            if not defined $cs->{-config}{$color_spec};
+#### $cs->{-config}{$color_spec};
+        # recursive call
+        $color  = $cs->get_color_of( $cs->{-config}{$color_spec} );
     }
-    elsif ( ref $color_spec eq 'ARRAY' ) {      # array of...
+    elsif ( ref $color_spec eq 'ARRAY' ) {                  # array of...
         my @ary = @$color_spec;
         
         # check validity of each element
         for (@ary) {
             # can I do arithmetic on this element?
-            _crash( 'get_color_of_2', $color_spec, "\'$_\'" ) 
+            _crash( 'get_color_of_2', $color_spec, $_, '') 
                 if not looks_like_number($_);
             # is element within range?
-            _crash( 'get_color_of_2', $color_spec, "\'$_\'" ) 
-                if not ( $_ >= 0 and $_ <= $max );   # 0..$max
+            _crash( 'get_color_of_2', $color_spec, $_, '') 
+                if not ( $_ >= 0 and $_ <= $max );          #   0..$max
         };
         
         # okay

@@ -38,6 +38,7 @@ use Glib                        # Gtk constants
 
 
 # terminal widget settings
--terminal_color_background      => undef,
+-terminal_color_background      => 'straw',
+-terminal_color_foreground      => 'black',
 
 
