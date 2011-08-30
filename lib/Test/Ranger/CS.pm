@@ -8,6 +8,15 @@ use version 0.89; our $VERSION = qv('v0.0.4');
 
 #use parent qw{  };             # inherits from UNIVERSAL only
 
+use List::MoreUtils qw(
+    any all none notall
+);
+#    any all none notall true false firstidx first_index 
+#    lastidx last_index insert_after insert_after_string 
+#    apply after after_incl before before_incl indexes 
+#    firstval first_value lastval last_value each_array
+#    each_arrayref pairwise natatime mesh zip uniq minmax
+
 use File::Spec;
 use File::Spec::Functions qw(
     catdir
@@ -208,33 +217,71 @@ sub get_pane {
 
 #=========# OBJECT METHOD
 #
-#   $obj->get_color_of( '-parm' => $value, );     # short
+#   $cs->get_color_of( $color_spec );     # string, number, or arrayref
 #       
 # Purpose   : Turns an ill-behaved color spec into a well-behaved one.
-# Parms     : ____
+# Parms     : $cs           : self
+#           : $color_spec   : string, number, or arrayref
 # Reads     : ____
-# Returns   : ____
+# Returns   : $color        : Gtk2::Gdk::Color
 # Invokes   : ____
 # Writes    : ____
 # Throws    : ____
 # See also  : ____
 # 
-# ____
+# The legitimate Gtk2::Gdk::Color object is an array of four elements; 
+#   each element must be an integer in the range 0..0xffff (0..65535).
+# This array is [ R, G, B, x ] where x is, so far, unknown and can be undef. 
 #   
+# This method converts various kinds of arguments into such an object.
+# Acceptable arguments: 
+#   '-some_thing'       Get from config file(s)
+#   [ $r, $g, $b ]      Directly specify each value
+#   'name'              Specify using a named color defined in method
+#   0xRGB               Shorthand CSS-like spec; integer 0..0xfff
+#
 sub get_color_of {
     my $cs              = shift;
     my $color_spec      = shift;
+    my $hex             = qr/[0-9]|[a-f]|[A-F]/;   # match valid hex digit
+    my $max             = 0xffff;   # top of range is C double
+    my $lit             = 0xbbbb;   # a light shade
+    my %named_color     = (
+    #   'name'                   Red        Green       Blue        ??
+        'white'             => [ $max,      $max,       $max,       0 ],
+        'black'             => [ 0,         0,          0,          0 ],
+        'red'               => [ $max,      0,          0,          0 ],
+        'green'             => [ 0,         $max,       0,          0 ],
+        'blue'              => [ 0,         0,          $max,       0 ],
+        'cyan'              => [ 0,         $max,       $max,       0 ],
+        'mauve'             => [ $max,      $lit,       $max,       0 ],
+        'straw'             => [ $max,      $max,       $lit,       0 ],
+        'gray'              => [ $lit,      $lit,       $lit,       0 ],
+    );
     my $color           ;
 #~     my $color           = Gtk2::Gdk::Color->new(0, 0, 0, 0);
     
     if ( substr $color_spec, 0, 1 eq '-' ) {    # requested from config hash
         _crash();        
     }
-    elsif ( ref $color_spec && scalar @$color_spec ) {  # array of integers
-        $color           = Gtk2::Gdk::Color->new(@$color_spec);
+    elsif ( ref $color_spec eq 'ARRAY' ) {      # array of...
+        my @ary = @$color_spec;
+        _crash('get_color_of_0') 
+            if notall{ $_ >= 0 and $_ <= $max } @ary;   # 0..$max
+        $color   = Gtk2::Gdk::Color->new(@ary);
+    }
+    elsif ( defined $named_color{$color_spec} ) {   # named in method
+        $color   = Gtk2::Gdk::Color->new( @{ $named_color{$color_spec} } );
+    }
+    elsif ( $color_spec =~ m/($hex)($hex)($hex)/ ) {  # looks like CSS...
+        # expand 'f' to 'ffff' = 65535
+        my $r   = hex $1 x 4;
+        my $g   = hex $2 x 4;
+        my $b   = hex $3 x 4;
+        $color   = Gtk2::Gdk::Color->new( $r, $g, $b, 0 );        
     }
     else {
-        _crash();
+        _crash('get_color_of_0');
     };
     
     return $color;
@@ -298,6 +345,9 @@ sub _crash {
         ],
         put_mw_2        => [
             'Not a Gtk object',
+        ],
+        get_color_of_0  => [
+            'Bad color specification',
         ],
     };
     

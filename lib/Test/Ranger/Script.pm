@@ -549,17 +549,22 @@ sub _setup_terminal {
     
     # Set colors
     my $max         = 0xffff;
-    my $yellow      = $cs->get_color_of( [$max, $max, 0xdddd, 0] );
+#~     my $yellow      = $cs->get_color_of( [$max, $max, 0xbbbb, 0] );
+#~     my $bg_color    = $yellow;
 #~     my $bg_color    = $cs->get_color_of( [$max, $max, $max, 0] );
-    my $bg_color    = $yellow;
+    my $bg_color    = $cs->get_color_of( 'straw' );
+#~     my $bg_color    = $cs->get_color_of( '07b' );
     my $fg_color    = $cs->get_color_of( [0, 0, 0, 0] );
     
-    # A 16-element array(ref) of Gtk2::Gdk::Color objects.
-    my $palette_ref     = [];
-    for (0..15) { push @$palette_ref, $cs->get_color_of( [0, 0, 0, 0] ) };
+#    # A 16-element array(ref) of Gtk2::Gdk::Color objects.
+#    my $palette_ref     = [];
+#    for (0..15) { push @$palette_ref, $cs->get_color_of( [0, 0, 0, 0] ) };
+#     $terminal->set_colors( $fg_color, $bg_color, $palette_ref );
+
+#~     $terminal->set_colors( $fg_color, $bg_color, undef ); # no good!
+    $terminal->set_colors( $fg_color, $bg_color, [] ); # okay
     
-    $terminal->set_colors( $fg_color, $bg_color, $palette_ref );
-    
+#~     $terminal -> set_default_colors();      # reset to white-on-black
     
     # hook 'em up
     my $command     = '/bin/bash';          # shell to start
