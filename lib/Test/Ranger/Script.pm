@@ -564,8 +564,8 @@ sub _setup_terminal {
     
     # hook 'em up
     my $command     = '/bin/bash';          # shell to start
-    my $arg_ref     = ['bash', '-login'];   # ?
-    my $env_ref     = undef;                # copy from parent if undef?
+    my $arg_ref     = ['bash', '-login'];   # ARGV?
+    my $env_ref     = undef;                # ENV?
     my $directory   = '',                   # 'foo' is relative to parent
     my $lastlog     = FALSE;                # ?
     my $utmp        = FALSE;                # ?
@@ -598,6 +598,7 @@ sub test_feed {
     my $feed        = 'ls';
     
     $terminal->feed_child($feed);
+    $terminal->grab_focus();
     
     return FALSE;       # propagate this signal
 };
