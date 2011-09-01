@@ -11,9 +11,9 @@ use Glib                        # Gtk constants
 # main Window
 -mw_initial_V           => 300,             # initial height
 -mw_initial_H           => 300,             # initial width
--mw_anchor              => 'none',          # placement
+#~ -mw_anchor              => 'none',          # placement
 #~ -mw_anchor              => 'center-always', # placement
-#~ -mw_anchor              => 'center',        # placement
+-mw_anchor              => 'center',        # placement
 
 # for each Frame
 #~ -frame_type             => 'etched-in',     # framing of panes

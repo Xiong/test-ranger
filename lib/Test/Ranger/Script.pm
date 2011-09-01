@@ -652,12 +652,9 @@ sub logger {
     $terminal->signal_handler_disconnect( $id );
     
     # Start logging
-    my $script_helper 
-        = '/home/xiong/projects/test-ranger/bin/script-helper.sh';
-    my $bash    = '/bin/bash';
-#### $script_helper
-#### $bash
-    $terminal->feed_child( $script_helper . qq{\n} );
+    my $command 
+        = qq{script -f};
+    $terminal->feed_child( $command . qq{\n} );
     
     return FALSE;       # propagate this signal
 };
