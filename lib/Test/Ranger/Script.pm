@@ -174,7 +174,10 @@ sub _setup {
     # Display everything
     $vbox0->show_all();
     $mw->add($vbox0);
-
+    
+    
+    
+    
     return $cs;
 }; ## _setup
 
@@ -537,6 +540,7 @@ sub _setup_terminal {
     my $scrollbar   = Gtk2::VScrollbar->new;
     my $hbox        = Gtk2::HBox->new;
     my $terminal    = Gnome2::Vte::Terminal->new;
+    $cs->{-terminal}    = $terminal;
     
     # set up scrolling
     $scrollbar->set_adjustment ($terminal->get_adjustment);
@@ -564,7 +568,12 @@ sub _setup_terminal {
     
     # hook 'em up
     my $command     = '/bin/bash';          # shell to start
+#~     my $command     = '/usr/bin/script -a STDOUT ';          # shell to start
+#~     my $command     = '/home/xiong/projects/test-ranger/bin/script-helper.sh ';          # shell to start
+#~     say `ls $command`;
     my $arg_ref     = ['bash', '-login'];   # ARGV?
+#~     my $arg_ref     = ['script', '-login'];   # ARGV?
+#~     my $arg_ref     = ['script-helper.sh', '-login'];   # ARGV?
     my $env_ref     = undef;                # ENV?
     my $directory   = '',                   # 'foo' is relative to parent
     my $lastlog     = FALSE;                # ?
@@ -582,10 +591,36 @@ sub _setup_terminal {
     
 #~     $terminal->signal_connect (child_exited => sub { Gtk2->main_quit });
     
+    
+    # Start logging
+    my $id  ;
+       $id  = $terminal->signal_connect( 'text-inserted' => 
+        \&logger, $cs 
+    ); ## terminal signal
+#### $id
+    $cs->{-terminal_connect_id}{$terminal} = $id;
+    
     # Test feed button
     my $feed_button     = Gtk2::Button->new_with_mnemonic('_Feed');
     $feed_button->signal_connect( 'clicked' => \&test_feed, $terminal );
     $vbox->pack_start( $feed_button, FALSE, FALSE, 0 );
+    
+#~     # Test echo box
+#~     my $echo_buf        = Gtk2::TextBuffer->new();
+#~     my $echo_view       = Gtk2::TextView->new_with_buffer($echo_buf);
+#~     my $buffer_ball     = {
+#~                             -echo_buf       => $echo_buf,
+#~                             -previous_row   => 0,
+#~                             -previous_col   => 0,
+#~                             -row_count      => 0,
+#~                         };
+#~     
+#~     $terminal->signal_connect( 'text-inserted' => 
+#~         \&test_echo, $buffer_ball 
+#~     ); ## terminal signal
+#~     
+#~     $vbox->pack_start( $echo_view, FALSE, FALSE, 0 );
+    
     
     
     return $cs;
@@ -602,6 +637,76 @@ sub test_feed {
     
     return FALSE;       # propagate this signal
 };
+
+# scratch logger
+sub logger {
+    my $terminal    = shift;
+    my $cs          = shift;
+    my $id          = $cs->{-terminal_connect_id}{$terminal};
+#### Begin scratch logger
+#### $terminal
+#### $cs
+#### $id
+    
+    # Disconnect the signal immediately
+    $terminal->signal_handler_disconnect( $id );
+    
+    # Start logging
+    my $script_helper 
+        = '/home/xiong/projects/test-ranger/bin/script-helper.sh';
+    my $bash    = '/bin/bash';
+#### $script_helper
+#### $bash
+    $terminal->feed_child( $script_helper . qq{\n} );
+    
+    return FALSE;       # propagate this signal
+};
+
+# scratch echo sub
+sub test_echo {
+#### @_    
+    my $terminal    = shift;
+    my $self        = shift;
+#~     my $parms       = shift;
+#~     my $self        = shift @$parms;
+#~     my $data        = shift @$parms;
+### $terminal
+### $self
+    
+    my $row_count   = $terminal->get_row_count();
+### $row_count
+#~     return FALSE
+#~         if $self->{-row_count} == $row_count;   # number of lines unchanged
+    
+    my $old_row     = $self->{-row_count};
+    my $new_row     = $row_count;
+    my $max_col     = 80;
+    
+#~     my $start_row   = $old_row;
+#~     my $end_row     = $new_row;
+    my $start_row   = 0;
+    my $end_row     = 1;
+    my $start_col   = 0;
+    my $end_col     = $max_col;
+    
+    
+    my @list        = $terminal->get_text_range(
+                        $start_row,             # start row
+                        $start_col,             # start col
+                        $end_row,               # end row
+                        $end_col,               # end col
+                        \&dummy,                # callback
+                                                # callback argument
+                    );
+    my $text        = $list[0];
+### $text
+    
+    
+    $self->{-row_count}     = $row_count;
+    return FALSE;       # propagate this signal
+};
+
+sub dummy {1};
 
 #=========# GTK SETUP ROUTINE
 #

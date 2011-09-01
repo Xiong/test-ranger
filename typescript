@@ -1,0 +1,16 @@
+Script started on Thu 01 Sep 2011 02:43:46 PM PDT
+]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ /home/xiong/projects/test-ranger/bin/script-helpper.sh[A]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ [K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cls -l
+total 40
+drwxr-xr-x  2 xiong xiong 4096 2011-09-01 10:00 [0m[01;34mbin[0m
+drwxr-xr-x  2 xiong xiong 4096 2011-08-27 19:04 [01;34mdemo[0m
+-rw-r--r--  1 xiong xiong    0 2011-08-19 05:01 dummy
+drwxr-xr-x  2 xiong xiong 4096 2011-08-27 09:31 [01;34mfile[0m
+drwxr-xr-x 11 xiong xiong 4096 2011-08-30 07:10 [01;34mhold[0m
+drwxr-xr-x  3 xiong xiong 4096 2010-11-28 09:21 [01;34mlib[0m
+-rw-r--r--  1 xiong xiong 1299 2010-09-15 15:44 README
+drwxr-xr-x  9 xiong xiong 4096 2011-08-15 09:46 [01;34mt[0m
+drwxr-xr-x  2 xiong xiong 4096 2011-08-27 09:11 [01;34mtop[0m
+-rw-r--r--  1 xiong xiong  365 2011-09-01 14:43 typescript
+drwxr-xr-x  2 xiong xiong 4096 2011-08-27 09:11 [01;34mutil[0m
+[m]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ 
