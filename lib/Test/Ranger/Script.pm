@@ -83,7 +83,7 @@ sub main {
     $cs->put_mw( $mw );                     # store the Gtk main Window object
     
     # Standard window placement and signal connecting
-    $mw->signal_connect( 'delete_event' => sub{_exit()} );
+    $mw->signal_connect( 'delete_event' => sub{_exit($cs)} );
     $mw->set_border_width(0);
     $mw->set_position( $mw_anchor );
     $mw->set_default_size ($mw_width, $mw_height);    # initial size
@@ -156,7 +156,7 @@ sub _setup {
     
 #    # Emergency exit button
 #    my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
-#    $exit_button->signal_connect( 'clicked' => sub {_exit()} );
+#    $exit_button->signal_connect( 'clicked' => sub {_exit($cs)} );
 #    $vbox0->pack_start( $exit_button, FALSE, FALSE, 0 );
     
 #    $exit_button->modify_bg('normal', $bg_color);
@@ -215,7 +215,7 @@ sub _setup_menus {
                             'gtk-quit',         # stock item
                             $dummy_accel,       # Gtk2::AccelGroup
                         );
-    $file_quit->signal_connect('activate' => sub{_exit()} );
+    $file_quit->signal_connect('activate' => sub{_exit($cs)} );
     $file_menu->append($file_quit);
     
     # File:Open...
@@ -264,7 +264,7 @@ sub _setup_menus {
     
 #~     # Emergency exit button
 #~     my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
-#~     $exit_button->signal_connect( 'clicked' => sub {_exit()} );
+#~     $exit_button->signal_connect( 'clicked' => sub {_exit($cs)} );
 #~     $vbox0->pack_start( $exit_button, FALSE, FALSE, 0 );
     
     
@@ -415,7 +415,7 @@ sub _setup_hotkeys {
                             $keycode_q,         # $key:int (see demo/kbd.pl)
                             $control_key,       # modifier
                             $flag_visible,      # flags
-                            sub{_exit()},       # callback
+                            sub{_exit($cs)},    # callback
                         );
     $mw->add_accel_group($quit_accel);
         
@@ -656,6 +656,9 @@ sub logger {
         = qq{script -f};
     $terminal->feed_child( $command . qq{\n} );
     
+    # Register this subshell in football for later 'exit'-ing.
+    push @{ $cs->{-term_with_subshell} }, $terminal;
+    
     return FALSE;       # propagate this signal
 };
 
@@ -729,7 +732,7 @@ sub _do_ {
 
 #=========# GTK CALLBACK
 #
-#   _exit();     # short
+#   _exit($cs);     # short
 #       
 # Purpose   : Quit, leave, exit, go bye-bye.
 # Parms     : ____
@@ -742,7 +745,26 @@ sub _do_ {
 # ____
 # 
 sub _exit {
+    my $cs          = shift;
     
+    # Exit all terminal subshells that were created programmatically...
+    # ... if there are any subshells registered in the football.
+    if ( 
+           defined   $cs->{-term_with_subshell} 
+        && scalar @{ $cs->{-term_with_subshell} } 
+    ) {
+        my   @term_with_subshell    = @{ $cs->{-term_with_subshell} };
+        for (@term_with_subshell) {
+            my $terminal    = $_;
+            my $feed        = "exit\n";     # shell 'exit' command
+            $terminal->feed_child($feed);
+        };
+    };
+    
+    # Wait a little to allow stuff to settle down. 
+    sleep(1);
+    
+    # Quit from main loop and do Gtk2 cleanup.
     Gtk2->main_quit;
     
     return TRUE;        # do not propagate this signal
