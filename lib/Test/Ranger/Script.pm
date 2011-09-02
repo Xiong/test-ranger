@@ -19,6 +19,8 @@ use List::MoreUtils qw(
     each_arrayref pairwise natatime mesh zip uniq minmax
 );
 
+use POSIX qw( mkfifo );
+
 use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
 use Glib                        # Gtk constants
     'TRUE', 'FALSE',
@@ -592,13 +594,14 @@ sub _setup_terminal {
 #~     $terminal->signal_connect (child_exited => sub { Gtk2->main_quit });
     
     
-    # Start logging
-    my $id  ;
-       $id  = $terminal->signal_connect( 'text-inserted' => 
-        \&logger, $cs 
+    # Start logging on first display of bash prompt.
+    my $id  = $terminal->signal_connect( 'text-inserted' => 
+        \&make_logger, $cs 
     ); ## terminal signal
 #### $id
+    # Store $id to disconnect this signal after first reception. 
     $cs->{-terminal_connect_id}{$terminal} = $id;
+    
     
     # Test feed button
     my $feed_button     = Gtk2::Button->new_with_mnemonic('_Feed');
@@ -638,29 +641,85 @@ sub test_feed {
     return FALSE;       # propagate this signal
 };
 
-# scratch logger
-sub logger {
+#=========# GTK CALLBACK
+#
+#   make_logger($cs);     # short
+#       
+# Purpose   : Use a named pipe and 'script(1)' to carry away 
+#             terminal session traffic to an internal routine. 
+#             (This now, for debug purposes, STDOUT.)
+# Parms     : $terminal : terminal instance to log
+#             $cs       : football
+#             $id       : id of *this* handler
+# Reads     : $cs->{-terminal_connect_id}{$terminal}
+# Signal    : 'text-inserted'
+# Returns   : propagate
+# Writes    : ____
+# Throws    : ____
+# See also  : _setup_terminal()
+# 
+# The logger is started in the terminal /post facto/, after bash starts.
+# So wait until the first signal, disconnect the signal, and start logger. 
+# 
+# 'script' grabs all traffic and writes it to a "file", 
+#   which is a named pipe created by 'mkfifo'. 
+# Either of reader or writer will block until 
+#   the other is also connected to the same pipe. 
+# So, create the listener as a child first; then invoke 'script'. 
+# 
+sub make_logger {
     my $terminal    = shift;
     my $cs          = shift;
     my $id          = $cs->{-terminal_connect_id}{$terminal};
-#### Begin scratch logger
+#### Begin make_logger
 #### $terminal
 #### $cs
 #### $id
     
-    # Disconnect the signal immediately
+    # Disconnect the signal immediately after first reception.
     $terminal->signal_handler_disconnect( $id );
+    
+    # Create, then listen-in on named pipe. 
+    
+    # Create pipe.
+    my $pipe        = "tr_pipe_$id";        # arbitrary but unique (?)
+    mkfifo( $pipe, 0700 ) 
+        or die "mkfifo $pipe failed: $!";
+#~     my $ls = `ls -l`;
+#~ ### $ls
+    
+    # Fork, to avoid hang up waiting for the other half of the pipe.
+    my $pid     = fork;
+    if (not defined $pid) { die 'Failed to fork.' };
+    # Am I parent or child?
+    if   ( $pid ) {         # parent
+        
+    } 
+    else {                  # child
+        # Open pipe. 
+        open my $fh, '<', $pipe
+            or die "Failed to open $pipe for reading ", $!;
+    
+        while (<$fh>) {
+            print '=== ', $_;
+        };
+        close $fh
+            or die "Failed to close $pipe for reading ", $!;
+        exit(0);
+    };
+    
+    
     
     # Start logging
     my $command 
-        = qq{script -f};
+        = qq{script -f -a $pipe};
     $terminal->feed_child( $command . qq{\n} );
     
     # Register this subshell in football for later 'exit'-ing.
     push @{ $cs->{-term_with_subshell} }, $terminal;
     
     return FALSE;       # propagate this signal
-};
+}; ## make_logger
 
 # scratch echo sub
 sub test_echo {
