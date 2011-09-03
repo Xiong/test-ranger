@@ -685,8 +685,6 @@ sub make_logger {
     my $pipe        = "tr_pipe_$id";        # arbitrary but unique (?)
     mkfifo( $pipe, 0700 ) 
         or die "mkfifo $pipe failed: $!";
-#~     my $ls = `ls -l`;
-#~ ### $ls
     
     # Fork, to avoid hang up waiting for the other half of the pipe.
     my $pid     = fork;
@@ -707,8 +705,6 @@ sub make_logger {
             or die "Failed to close $pipe for reading ", $!;
         exit(0);
     };
-    
-    
     
     # Start logging
     my $command 
