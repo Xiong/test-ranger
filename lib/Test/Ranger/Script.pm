@@ -19,7 +19,7 @@ use List::MoreUtils qw(
     each_arrayref pairwise natatime mesh zip uniq minmax
 );
 
-use POSIX qw( mkfifo );
+use POSIX qw( mkfifo :sys_wait_h );
 
 use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
 use Glib                        # Gtk constants
@@ -542,7 +542,7 @@ sub _setup_terminal {
     my $scrollbar   = Gtk2::VScrollbar->new;
     my $hbox        = Gtk2::HBox->new;
     my $terminal    = Gnome2::Vte::Terminal->new;
-    $cs->{-terminal}    = $terminal;
+#~     $cs->{-terminal}    = $terminal;
     
     # set up scrolling
     $scrollbar->set_adjustment ($terminal->get_adjustment);
@@ -645,7 +645,7 @@ sub test_feed {
 #
 #   make_logger($cs);     # short
 #       
-# Purpose   : Use a named pipe and 'script(1)' to carry away 
+# Purpose   : Use a fifo and 'script(1)' to carry away 
 #             terminal session traffic to an internal routine. 
 #             (This now, for debug purposes, STDOUT.)
 # Parms     : $terminal : terminal instance to log
@@ -662,9 +662,9 @@ sub test_feed {
 # So wait until the first signal, disconnect the signal, and start logger. 
 # 
 # 'script' grabs all traffic and writes it to a "file", 
-#   which is a named pipe created by 'mkfifo'. 
+#   which is a fifo ("named pipe") created by POSIX::mkfifo(). 
 # Either of reader or writer will block until 
-#   the other is also connected to the same pipe. 
+#   the other is also connected to the same fifo. 
 # So, create the listener as a child first; then invoke 'script'. 
 # 
 sub make_logger {
@@ -679,36 +679,37 @@ sub make_logger {
     # Disconnect the signal immediately after first reception.
     $terminal->signal_handler_disconnect( $id );
     
-    # Create, then listen-in on named pipe. 
+    # Create, then listen-in on fifo... 
     
-    # Create pipe.
-    my $pipe        = "tr_pipe_$id";        # arbitrary but unique (?)
-    mkfifo( $pipe, 0700 ) 
-        or die "mkfifo $pipe failed: $!";
+    # Create fifo.
+    my $fifo        = "tr_fifo_$id";        # arbitrary but unique (?)
+    mkfifo( $fifo, 0700 ) 
+        or die "mkfifo $fifo failed: $!";
+    push @{ $cs->{-fifos} }, $fifo;
     
-    # Fork, to avoid hang up waiting for the other half of the pipe.
+    # Fork, to avoid hang up waiting for the other half of the fifo.
     my $pid     = fork;
     if (not defined $pid) { die 'Failed to fork.' };
     # Am I parent or child?
     if   ( $pid ) {         # parent
-        
+        push @{ $cs->{-child_pid} }, $pid;
     } 
     else {                  # child
-        # Open pipe. 
-        open my $fh, '<', $pipe
-            or die "Failed to open $pipe for reading ", $!;
+        # Open fifo. 
+        open my $fh, '<', $fifo
+            or die "Failed to open $fifo for reading ", $!;
     
         while (<$fh>) {
-            print '=== ', $_;
+#~             print '=== ', $_;        # capture and parse TODO
         };
         close $fh
-            or die "Failed to close $pipe for reading ", $!;
+            or die "Failed to close $fifo for reading ", $!;
         exit(0);
     };
     
     # Start logging
     my $command 
-        = qq{script -f -a $pipe};
+        = qq{script -f -a $fifo};
     $terminal->feed_child( $command . qq{\n} );
     
     # Register this subshell in football for later 'exit'-ing.
@@ -815,9 +816,35 @@ sub _exit {
             $terminal->feed_child($feed);
         };
     };
+    sleep(1);       # Wait a little to allow stuff to settle down. 
     
-    # Wait a little to allow stuff to settle down. 
-    sleep(1);
+    # Delete any fifo "named pipes". 
+#### $cs
+    if (   defined   $cs->{-fifos} 
+        && scalar @{ $cs->{-fifos} }
+    ) {
+        for ( @{ $cs->{-fifos} } ) {
+            my $fifo            = $_;
+            my $return_value    = `unlink $fifo`;
+            # TODO: This doesn't catch the warning.
+            warn "Failed to unlink $fifo: $return_value" if $return_value;
+        };
+    };
+    
+    # Reap zombies, if any.
+### $cs
+    if (   defined   $cs->{-child_pid} 
+        && scalar @{ $cs->{-child_pid} }
+    ) {
+        for ( @{ $cs->{-child_pid} } ) {
+            my $pid             = $_;
+            my $return_value    = waitpid( $pid, WNOHANG );
+            warn "Failed to reap $pid: $return_value, $?" 
+                if ( $return_value != $pid );
+        };
+    };
+    
+    
     
     # Quit from main loop and do Gtk2 cleanup.
     Gtk2->main_quit;
