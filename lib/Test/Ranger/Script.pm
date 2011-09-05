@@ -832,7 +832,7 @@ sub _exit {
     };
     
     # Reap zombies, if any.
-### $cs
+#### $cs
     if (   defined   $cs->{-child_pid} 
         && scalar @{ $cs->{-child_pid} }
     ) {
