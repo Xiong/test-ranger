@@ -19,6 +19,8 @@ use List::MoreUtils qw(
     each_arrayref pairwise natatime mesh zip uniq minmax
 );
 
+use POSIX qw( mkfifo :sys_wait_h );
+
 use Gtk2;                       # Gtk+ GUI toolkit : Do not -init in modules!
 use Glib                        # Gtk constants
     'TRUE', 'FALSE',
@@ -83,7 +85,7 @@ sub main {
     $cs->put_mw( $mw );                     # store the Gtk main Window object
     
     # Standard window placement and signal connecting
-    $mw->signal_connect( 'delete_event' => sub{_exit()} );
+    $mw->signal_connect( 'delete_event' => sub{_exit($cs)} );
     $mw->set_border_width(0);
     $mw->set_position( $mw_anchor );
     $mw->set_default_size ($mw_width, $mw_height);    # initial size
@@ -141,14 +143,25 @@ sub _setup {
     _setup_terminal($cs);   # virtual terminal emulator
     
     
+    # Futz around here.
+
+#    # Set colors
+#    my $max       = 65535;
+##~     my $bg_color    = $cs->get_color_of('-terminal_bg_color');
+#    my $bg_color    = $cs->get_color_of( [$max, $max, $max, 0] );
+##~     my $bg_color    = $cs->get_color_of( [0, 0, 0, 0] );
+#### $bg_color
+    
+##~     $terminal->set_background_tint_color($bg_color);
+##~     $terminal->set_background_saturation($max);
     
     
-#~     # Emergency exit button
-#~     my $exit_button ;
-#~     $exit_button    = $mw->Button(
-#~         -text => "Exit", -command => \&_exit
-#~     );
-#~     $exit_button->pack;
+#    # Emergency exit button
+#    my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
+#    $exit_button->signal_connect( 'clicked' => sub {_exit($cs)} );
+#    $vbox0->pack_start( $exit_button, FALSE, FALSE, 0 );
+    
+#    $exit_button->modify_bg('normal', $bg_color);
     
 #~     # demo grab keysym -- debug only
 #~     $mw->bind('<KeyPress>' => \&print_keysym);
@@ -163,7 +176,10 @@ sub _setup {
     # Display everything
     $vbox0->show_all();
     $mw->add($vbox0);
-
+    
+    
+    
+    
     return $cs;
 }; ## _setup
 
@@ -201,7 +217,7 @@ sub _setup_menus {
                             'gtk-quit',         # stock item
                             $dummy_accel,       # Gtk2::AccelGroup
                         );
-    $file_quit->signal_connect('activate' => sub{_exit()} );
+    $file_quit->signal_connect('activate' => sub{_exit($cs)} );
     $file_menu->append($file_quit);
     
     # File:Open...
@@ -250,7 +266,7 @@ sub _setup_menus {
     
 #~     # Emergency exit button
 #~     my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
-#~     $exit_button->signal_connect( 'clicked' => sub {_exit()} );
+#~     $exit_button->signal_connect( 'clicked' => sub {_exit($cs)} );
 #~     $vbox0->pack_start( $exit_button, FALSE, FALSE, 0 );
     
     
@@ -401,7 +417,7 @@ sub _setup_hotkeys {
                             $keycode_q,         # $key:int (see demo/kbd.pl)
                             $control_key,       # modifier
                             $flag_visible,      # flags
-                            sub{_exit()},       # callback
+                            sub{_exit($cs)},    # callback
                         );
     $mw->add_accel_group($quit_accel);
         
@@ -520,24 +536,47 @@ sub _setup_terminal {
     my $mw          = $cs->get_mw();
     my $term_frame  = $cs->{-term_frame};
     my $term_pane   = $cs->get_pane($term_frame);
+    my $vbox        = Gtk2::VBox->new;
     
     # create things
     my $scrollbar   = Gtk2::VScrollbar->new;
     my $hbox        = Gtk2::HBox->new;
     my $terminal    = Gnome2::Vte::Terminal->new;
+#~     $cs->{-terminal}    = $terminal;
     
     # set up scrolling
     $scrollbar->set_adjustment ($terminal->get_adjustment);
     
     # lay 'em out
-    $term_pane->add($hbox);
-    $hbox->pack_start($terminal, TRUE, TRUE, 0);
-    $hbox->pack_start($scrollbar, FALSE, FALSE, 0);
+    $term_pane->add($vbox);
+    $vbox->pack_start($hbox,        FALSE,  FALSE,  0);
+    $hbox->pack_start($terminal,    TRUE,   TRUE,   0);
+    $hbox->pack_start($scrollbar,   FALSE,  FALSE,  0);
+    
+    # Set colors
+#~     my $bg_color    = $cs->get_color_of( 'straw' );
+#~     my $fg_color    = $cs->get_color_of( 'black' );
+    my $bg_color    = $cs->get_color_of( '-terminal_color_background' );
+    my $fg_color    = $cs->get_color_of( '-terminal_color_foreground' );
+    
+#    # A 16-element array(ref) of Gtk2::Gdk::Color objects.
+#    my $palette_ref     = [];
+#    for (0..15) { push @$palette_ref, $cs->get_color_of( [0, 0, 0, 0] ) };
+#    $terminal->set_colors( $fg_color, $bg_color, $palette_ref );
+
+    $terminal->set_colors( $fg_color, $bg_color, [] ); # okay
+    
+#~     $terminal -> set_default_colors();      # reset to white-on-black
     
     # hook 'em up
     my $command     = '/bin/bash';          # shell to start
-    my $arg_ref     = ['bash', '-login'];   # ?
-    my $env_ref     = undef;                # copy from parent if undef?
+#~     my $command     = '/usr/bin/script -a STDOUT ';          # shell to start
+#~     my $command     = '/home/xiong/projects/test-ranger/bin/script-helper.sh ';          # shell to start
+#~     say `ls $command`;
+    my $arg_ref     = ['bash', '-login'];   # ARGV?
+#~     my $arg_ref     = ['script', '-login'];   # ARGV?
+#~     my $arg_ref     = ['script-helper.sh', '-login'];   # ARGV?
+    my $env_ref     = undef;                # ENV?
     my $directory   = '',                   # 'foo' is relative to parent
     my $lastlog     = FALSE;                # ?
     my $utmp        = FALSE;                # ?
@@ -555,9 +594,175 @@ sub _setup_terminal {
 #~     $terminal->signal_connect (child_exited => sub { Gtk2->main_quit });
     
     
+    # Start logging on first display of bash prompt.
+    my $id  = $terminal->signal_connect( 'text-inserted' => 
+        \&make_logger, $cs 
+    ); ## terminal signal
+#### $id
+    # Store $id to disconnect this signal after first reception. 
+    $cs->{-terminal_connect_id}{$terminal} = $id;
+    
+    
+    # Test feed button
+    my $feed_button     = Gtk2::Button->new_with_mnemonic('_Feed');
+    $feed_button->signal_connect( 'clicked' => \&test_feed, $terminal );
+    $vbox->pack_start( $feed_button, FALSE, FALSE, 0 );
+    
+#~     # Test echo box
+#~     my $echo_buf        = Gtk2::TextBuffer->new();
+#~     my $echo_view       = Gtk2::TextView->new_with_buffer($echo_buf);
+#~     my $buffer_ball     = {
+#~                             -echo_buf       => $echo_buf,
+#~                             -previous_row   => 0,
+#~                             -previous_col   => 0,
+#~                             -row_count      => 0,
+#~                         };
+#~     
+#~     $terminal->signal_connect( 'text-inserted' => 
+#~         \&test_echo, $buffer_ball 
+#~     ); ## terminal signal
+#~     
+#~     $vbox->pack_start( $echo_view, FALSE, FALSE, 0 );
+    
+    
     
     return $cs;
 }; ## _setup_terminal
+
+# scratch test feed sub
+sub test_feed {
+    my $self        = shift;
+    my $terminal    = shift;
+    my $feed        = 'ls';
+    
+    $terminal->feed_child($feed);
+    $terminal->grab_focus();
+    
+    return FALSE;       # propagate this signal
+};
+
+#=========# GTK CALLBACK
+#
+#   make_logger($cs);     # short
+#       
+# Purpose   : Use a fifo and 'script(1)' to carry away 
+#             terminal session traffic to an internal routine. 
+#             (This now, for debug purposes, STDOUT.)
+# Parms     : $terminal : terminal instance to log
+#             $cs       : football
+#             $id       : id of *this* handler
+# Reads     : $cs->{-terminal_connect_id}{$terminal}
+# Signal    : 'text-inserted'
+# Returns   : propagate
+# Writes    : ____
+# Throws    : ____
+# See also  : _setup_terminal()
+# 
+# The logger is started in the terminal /post facto/, after bash starts.
+# So wait until the first signal, disconnect the signal, and start logger. 
+# 
+# 'script' grabs all traffic and writes it to a "file", 
+#   which is a fifo ("named pipe") created by POSIX::mkfifo(). 
+# Either of reader or writer will block until 
+#   the other is also connected to the same fifo. 
+# So, create the listener as a child first; then invoke 'script'. 
+# 
+sub make_logger {
+    my $terminal    = shift;
+    my $cs          = shift;
+    my $id          = $cs->{-terminal_connect_id}{$terminal};
+#### Begin make_logger
+#### $terminal
+#### $cs
+#### $id
+    
+    # Disconnect the signal immediately after first reception.
+    $terminal->signal_handler_disconnect( $id );
+    
+    # Create, then listen-in on fifo... 
+    
+    # Create fifo.
+    my $fifo        = "tr_fifo_$id";        # arbitrary but unique (?)
+    mkfifo( $fifo, 0700 ) 
+        or die "mkfifo $fifo failed: $!";
+    push @{ $cs->{-fifos} }, $fifo;
+    
+    # Fork, to avoid hang up waiting for the other half of the fifo.
+    my $pid     = fork;
+    if (not defined $pid) { die 'Failed to fork.' };
+    # Am I parent or child?
+    if   ( $pid ) {         # parent
+        push @{ $cs->{-child_pid} }, $pid;
+    } 
+    else {                  # child
+        # Open fifo. 
+        open my $fh, '<', $fifo
+            or die "Failed to open $fifo for reading ", $!;
+    
+        while (<$fh>) {
+#~             print '=== ', $_;        # capture and parse TODO
+        };
+        close $fh
+            or die "Failed to close $fifo for reading ", $!;
+        exit(0);
+    };
+    
+    # Start logging
+    my $command 
+        = qq{script -f -a $fifo};
+    $terminal->feed_child( $command . qq{\n} );
+    
+    # Register this subshell in football for later 'exit'-ing.
+    push @{ $cs->{-term_with_subshell} }, $terminal;
+    
+    return FALSE;       # propagate this signal
+}; ## make_logger
+
+# scratch echo sub
+sub test_echo {
+#### @_    
+    my $terminal    = shift;
+    my $self        = shift;
+#~     my $parms       = shift;
+#~     my $self        = shift @$parms;
+#~     my $data        = shift @$parms;
+### $terminal
+### $self
+    
+    my $row_count   = $terminal->get_row_count();
+### $row_count
+#~     return FALSE
+#~         if $self->{-row_count} == $row_count;   # number of lines unchanged
+    
+    my $old_row     = $self->{-row_count};
+    my $new_row     = $row_count;
+    my $max_col     = 80;
+    
+#~     my $start_row   = $old_row;
+#~     my $end_row     = $new_row;
+    my $start_row   = 0;
+    my $end_row     = 1;
+    my $start_col   = 0;
+    my $end_col     = $max_col;
+    
+    
+    my @list        = $terminal->get_text_range(
+                        $start_row,             # start row
+                        $start_col,             # start col
+                        $end_row,               # end row
+                        $end_col,               # end col
+                        \&dummy,                # callback
+                                                # callback argument
+                    );
+    my $text        = $list[0];
+### $text
+    
+    
+    $self->{-row_count}     = $row_count;
+    return FALSE;       # propagate this signal
+};
+
+sub dummy {1};
 
 #=========# GTK SETUP ROUTINE
 #
@@ -583,7 +788,7 @@ sub _do_ {
 
 #=========# GTK CALLBACK
 #
-#   _exit();     # short
+#   _exit($cs);     # short
 #       
 # Purpose   : Quit, leave, exit, go bye-bye.
 # Parms     : ____
@@ -596,7 +801,52 @@ sub _do_ {
 # ____
 # 
 sub _exit {
+    my $cs          = shift;
     
+    # Exit all terminal subshells that were created programmatically...
+    # ... if there are any subshells registered in the football.
+    if ( 
+           defined   $cs->{-term_with_subshell} 
+        && scalar @{ $cs->{-term_with_subshell} } 
+    ) {
+        my   @term_with_subshell    = @{ $cs->{-term_with_subshell} };
+        for (@term_with_subshell) {
+            my $terminal    = $_;
+            my $feed        = "exit\n";     # shell 'exit' command
+            $terminal->feed_child($feed);
+        };
+    };
+    sleep(1);       # Wait a little to allow stuff to settle down. 
+    
+    # Delete any fifo "named pipes". 
+#### $cs
+    if (   defined   $cs->{-fifos} 
+        && scalar @{ $cs->{-fifos} }
+    ) {
+        for ( @{ $cs->{-fifos} } ) {
+            my $fifo            = $_;
+            my $return_value    = `unlink $fifo`;
+            # TODO: This doesn't catch the warning.
+            warn "Failed to unlink $fifo: $return_value" if $return_value;
+        };
+    };
+    
+    # Reap zombies, if any.
+### $cs
+    if (   defined   $cs->{-child_pid} 
+        && scalar @{ $cs->{-child_pid} }
+    ) {
+        for ( @{ $cs->{-child_pid} } ) {
+            my $pid             = $_;
+            my $return_value    = waitpid( $pid, WNOHANG );
+            warn "Failed to reap $pid: $return_value, $?" 
+                if ( $return_value != $pid );
+        };
+    };
+    
+    
+    
+    # Quit from main loop and do Gtk2 cleanup.
     Gtk2->main_quit;
     
     return TRUE;        # do not propagate this signal

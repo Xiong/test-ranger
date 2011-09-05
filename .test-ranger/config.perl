@@ -11,9 +11,9 @@ use Glib                        # Gtk constants
 # main Window
 -mw_initial_V           => 300,             # initial height
 -mw_initial_H           => 300,             # initial width
--mw_anchor              => 'none',          # placement
+#~ -mw_anchor              => 'none',          # placement
 #~ -mw_anchor              => 'center-always', # placement
-#~ -mw_anchor              => 'center',        # placement
+-mw_anchor              => 'center',        # placement
 
 # for each Frame
 #~ -frame_type             => 'etched-in',     # framing of panes
@@ -34,5 +34,11 @@ use Glib                        # Gtk constants
 # You may specify a Frame by number 0..3 or by letter 'A'..'D'
 -terminal_frame         => 'D',         # pane to create terminal windows
 #~ -terminal_frame         => '1',         # pane to create terminal windows
+
+
+
+# terminal widget settings
+-terminal_color_background      => 'straw',
+-terminal_color_foreground      => 'black',
 
 
