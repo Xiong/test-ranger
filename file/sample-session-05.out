@@ -1,0 +1,7 @@
+Script started on Wed 07 Sep 2011 12:20:49 AM PDT
+xiong@oz:~/projects/test-ranger$ perl -E 'say "42",;This"section"left"intentionally"blank.";'
+42This section left intentionally blank.
+exitg@oz:~/projects/test-ranger$ perl -E 'say "42", "This section left intentionally blank.";'
+exit
+
+Script done on Wed 07 Sep 2011 12:22:12 AM PDT

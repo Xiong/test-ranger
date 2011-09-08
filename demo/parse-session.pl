@@ -27,7 +27,8 @@ use Cwd;
 use Smart::Comments '###', '####';
 
 #
-my $session_file    = 'file/sample-session-01';
+my $session_file    = 'file/sample-session-03';
+say "Session: $session_file";
 open my $fh, '<', $session_file
     or die "Couldn't open $session_file for reading ", $!;
 while (<$fh>) {

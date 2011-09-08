@@ -1,0 +1,7 @@
+Script started on Wed 07 Sep 2011 12:18:30 AM PDT
+]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ perl -E ''s'a'y' '"'"';'4";'2";'
+42
+]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ exit
+exit
+
+Script done on Wed 07 Sep 2011 12:19:15 AM PDT
