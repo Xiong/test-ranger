@@ -743,12 +743,13 @@ sub _parse_script {
     
     # Apply monster regex. No, I don't quite know what it does. 
     $text          =~ s/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g;
-    
-    # Further process through 'col(1)'. This strips colors?
-    $text           = `col -b $text`;   # -b: Do not print backspaces.
-    die "Bad col $?"
-        if $?;
 ### $text
+    
+#~     # Further process through 'col(1)'. 
+#~     $text           = `col -b $text`;   # -b: Do not print backspaces.
+#~     die "Bad col $?"
+#~         if $?;
+#### $text
     
     return 1;
 }; ## _parse_script
