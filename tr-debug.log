@@ -1,0 +1,40 @@
+
+### 0: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
+### 1: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
+### m: ''
+### 2: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
+### 3: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
+### X: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
+### $: undef
+
+### 0: ']0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ exit'
+### 1: 'xiong@oz:~/projects/test-ranger$ exit'
+### m: ''
+### 2: 'xiong@oz:~/projects/test-ranger$ exit'
+### 3: 'exit'
+### X: 'exit'
+### $: 'xiong@oz:~/projects/test-ranger$ '
+
+### 0: 'exit'
+### 1: 'exit'
+### m: ''
+### 2: 'exit'
+### 3: 'exit'
+### X: 'exit'
+### $: undef
+
+### 0: ''
+### 1: ''
+### m: ''
+### 2: ''
+### 3: ''
+### X: ''
+### $: undef
+
+### 0: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
+### 1: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
+### m: ''
+### 2: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
+### 3: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
+### X: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
+### $: undef
