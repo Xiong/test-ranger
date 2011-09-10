@@ -1,0 +1,26 @@
+Script started on Tue 06 Sep 2011 07:18:10 PM PDT
+]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ exit[2Plsexitssh beyond@beyondeuclid.comexit[Kssh beyond@beyondeuclid.com
+Last login: Tue Sep  6 22:14:30 2011 from netblock-72-25-91-244.dslextreme.com
+ -==============================-
+-= Managed Servers by Singlehop =-
+ -==============================-
+-jailshell: /sbin/consoletype: No such file or directory
+beyond@beyondeuclid.com [~]# ls
+[00m[01;34m.[00m/                                       [01;34m.cpcpan[00m/          [00m.inodesdist[00m                               [01;34mpublic_html.old[00m/
+[01;34m..[00m/                                      [00mdailyreport_off[00m   [00m.lastlogin[00m                                [00m.rnd[00m
+[01;36maccess-logs[00m@                             [00m.dns[00m              [01;34mmail[00m/                                     [00ms_imapstatus[00m
+[01;31mbackup-8.15.2011_16-23-04_beyond.tar.gz[00m  [00m.emacs[00m            [00m.mailscanner[00m                              [01;34m.softaculous[00m/
+[00m.bash_history[00m                            [01;34metc[00m/              [01;34m.matplotlib[00m/                              [01;34m.spamassassin[00m/
+[00m.bash_logout[00m                             [01;34m.fantasticodata[00m/  [01;34m.MirrorSearch[00m/                            [00m.spamassassinenable[00m
+[00m.bash_profile[00m                            [00m.filter[00m           [01;34m.mozilla[00m/                                 [01;34m.ssh[00m/
+[00m.bashrc[00m                                  [01;34m.fontconfig[00m/      [00m.my.cnf[00m                                   [01;34mssl[00m/
+[00m.contactemail[00m                            [00m.ftpquota[00m         [00m.my.DC07d4Y4TzeAcvp1djOe59pwgT5Rnlvicnf.[00m  [01;34mtmp[00m/
+[01;34m.cpaddons[00m/                               [01;34m.gnupg[00m/           [01;34mperl[00m/                                     [01;34m.trash[00m/
+[01;34m.cpan[00m/                                   [00m.htaccess[00m         [01;34mperl5[00m/                                    [01;32mWaldo.pm[00m*
+[01;34m.cpanel[00m/                                 [01;34m.htpasswds[00m/       [00mphp.ini[00m                                   [01;36mwww[00m@
+[01;34m.cpanel.old[00m/                             [01;32mindex.pl[00m*         [01;34mpublic_ftp[00m/                               [00m.zshrc[00m
+[00mcpbackup-exclude.conf[00m                    [00m.inodes[00m           [01;34mpublic_html[00m/
+[mbeyond@beyondeuclid.com [~]# exit
+logout
+[H[2JConnection to beyondeuclid.com closed.
+]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ 

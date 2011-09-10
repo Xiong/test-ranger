@@ -1,0 +1,7 @@
+Script started on Wed 07 Sep 2011 09:45:39 PM PDT
+]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ exitperl -E 'say "42", "This section left intentionally blank.";'
+42This section left intentionally blank.
+]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ perl -E 'say "42", "This section left intentionally blank.";'[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cexit[K
+exit
+
+Script done on Wed 07 Sep 2011 09:45:53 PM PDT

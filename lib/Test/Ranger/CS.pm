@@ -181,7 +181,7 @@ sub get_config {
     # ... but it's bad if no configuration found at all.
     _crash( 'get_config_1', @paths, q{} ) if ( not scalar keys %config );    
     
-### Configuration: %config    
+#### Configuration: %config    
     
     # Store configuration.
     $cs->{-config}          = \%config;

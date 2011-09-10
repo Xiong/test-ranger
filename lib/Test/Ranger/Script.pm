@@ -31,6 +31,7 @@ use Gnome2::Vte;
 
 # Alternate uses
 use Devel::Comments '###';
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 # Constants
@@ -85,7 +86,7 @@ sub main {
     $cs->put_mw( $mw );                     # store the Gtk main Window object
     
     # Standard window placement and signal connecting
-    $mw->signal_connect( 'delete_event' => sub{_exit($cs)} );
+    $mw->signal_connect( 'delete_event' => sub{quit($cs)} );
     $mw->set_border_width(0);
     $mw->set_position( $mw_anchor );
     $mw->set_default_size ($mw_width, $mw_height);    # initial size
@@ -158,7 +159,7 @@ sub _setup {
     
 #    # Emergency exit button
 #    my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
-#    $exit_button->signal_connect( 'clicked' => sub {_exit($cs)} );
+#    $exit_button->signal_connect( 'clicked' => sub {quit($cs)} );
 #    $vbox0->pack_start( $exit_button, FALSE, FALSE, 0 );
     
 #    $exit_button->modify_bg('normal', $bg_color);
@@ -217,7 +218,7 @@ sub _setup_menus {
                             'gtk-quit',         # stock item
                             $dummy_accel,       # Gtk2::AccelGroup
                         );
-    $file_quit->signal_connect('activate' => sub{_exit($cs)} );
+    $file_quit->signal_connect('activate' => sub{quit($cs)} );
     $file_menu->append($file_quit);
     
     # File:Open...
@@ -266,7 +267,7 @@ sub _setup_menus {
     
 #~     # Emergency exit button
 #~     my $exit_button     = Gtk2::Button->new_with_mnemonic('_Quit');
-#~     $exit_button->signal_connect( 'clicked' => sub {_exit($cs)} );
+#~     $exit_button->signal_connect( 'clicked' => sub {quit($cs)} );
 #~     $vbox0->pack_start( $exit_button, FALSE, FALSE, 0 );
     
     
@@ -417,7 +418,7 @@ sub _setup_hotkeys {
                             $keycode_q,         # $key:int (see demo/kbd.pl)
                             $control_key,       # modifier
                             $flag_visible,      # flags
-                            sub{_exit($cs)},    # callback
+                            sub{quit($cs)},     # callback
                         );
     $mw->add_accel_group($quit_accel);
         
@@ -700,7 +701,7 @@ sub make_logger {
             or die "Failed to open $fifo for reading ", $!;
     
         while (<$fh>) {
-#~             print '=== ', $_;        # capture and parse TODO
+            _parse_script( $cs, $_ );       # parse lines of 'script(1)'
         };
         close $fh
             or die "Failed to close $fifo for reading ", $!;
@@ -718,6 +719,94 @@ sub make_logger {
     return FALSE;       # propagate this signal
 }; ## make_logger
 
+#=========# INTERNAL CHILD ROUTINE
+#
+#   _parse_script( $cs, $text );     # parse lines of 'script(1)'
+#       
+# Purpose   : Clean up escapes and dispatch script output for further action.
+# Parms     : $cs           : football
+#             $text         : captured string
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# The shell command 'script(1)' captures *everything* from the terminal.
+# We must strip out the useless stuff, process the codes, and see what's what.
+#
+# The procedure is modeled on:
+# http://www.ncssm.edu/~cs/index.php?loc=logging.html&callPrintLinuxSupport=1
+# 
+sub _parse_script {
+    my $cs          = shift;
+    my $text        = shift;
+    my $matches     ;
+    my $prompt      ;
+    my $bel         = '\x07';       # ASCII BEL ("bell")
+    
+    #---# Begin cleanup #---#
+    
+    # Drop trailing newlines            # debug only?
+    $text          =~ s/[(\n)(\x0d)(\x0a)]+$//g;
+    
+my $t0 = $text;                                                     # debug
+    # Apply monster regex. No, I don't quite know what it does. 
+    #                       Gets rid of escape sequences. 
+    $text      =~ s/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g;
+    
+my $t1 = $text;                                                     # debug
+    # Recombine backspace chars with the chars they deleted. 
+    # Loop recursive regex until all gone. 
+    while (
+        $matches = $text      =~ s/[^(\b)](?R)?[\b]//g  # no semi here!
+    ) {1};
+    
+my $t2 = $text;                                                     # debug
+    # Recognize and strip out prompt.
+    if ( $text      =~ s/(^.*[^\$#][\$#]\s)// ) {
+        $prompt     = $1;
+    };
+    
+my $t3 = $text;                                                     # debug
+    # Discard BEL characters.
+    $text       =~ s/(?:$bel)+//g;
+    
+##### 0: $t0
+##### 1: $t1
+##### m: $matches
+##### 2: $t2
+##### 3: $t3
+##### X: $text
+##### $: $prompt
+    
+    #---# End cleanup #---#
+    
+    # Now decide what to do with the extracted poop -- if anything
+    if    ( $prompt && $text ) {        # a command was entered
+        ### Command: $text
+        
+    } 
+    elsif ( 0 ) {
+        
+    } 
+    else {
+        # do nothing if not recognized
+    };
+    
+    
+    
+    
+    
+    
+    
+    return 1;
+}; ## _parse_script
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # scratch echo sub
 sub test_echo {
 #### @_    
@@ -763,6 +852,8 @@ sub test_echo {
 };
 
 sub dummy {1};
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 
 #=========# GTK SETUP ROUTINE
 #
@@ -788,7 +879,7 @@ sub _do_ {
 
 #=========# GTK CALLBACK
 #
-#   _exit($cs);     # short
+#   quit($cs);     # short
 #       
 # Purpose   : Quit, leave, exit, go bye-bye.
 # Parms     : ____
@@ -800,8 +891,8 @@ sub _do_ {
 # 
 # ____
 # 
-sub _exit {
-    my $cs          = shift;
+sub quit {
+    my $cs                  = shift;
     
     # Exit all terminal subshells that were created programmatically...
     # ... if there are any subshells registered in the football.
@@ -827,20 +918,19 @@ sub _exit {
             my $fifo            = $_;
             my $return_value    = `unlink $fifo`;
             # TODO: This doesn't catch the warning.
-            warn "Failed to unlink $fifo: $return_value" if $return_value;
+            warn "Failed to unlink $fifo: $return_value $?" 
+                if $return_value || $?;
         };
     };
     
     # Reap zombies, if any.
-### $cs
+#### $cs
     if (   defined   $cs->{-child_pid} 
         && scalar @{ $cs->{-child_pid} }
     ) {
         for ( @{ $cs->{-child_pid} } ) {
             my $pid             = $_;
-            my $return_value    = waitpid( $pid, WNOHANG );
-            warn "Failed to reap $pid: $return_value, $?" 
-                if ( $return_value != $pid );
+            _reap_bloody( $cs, $pid );      # reap child; kill it if needed 
         };
     };
     
@@ -850,7 +940,56 @@ sub _exit {
     Gtk2->main_quit;
     
     return TRUE;        # do not propagate this signal
-}; ## _exit
+}; ## quit
+
+#=========# INTERNAL ROUTINE
+#
+#   _reap_bloody( $cs, $pid );     # reap child; kill it if needed
+#       
+# Purpose   : Try to reap the child; 
+#               if this fails, sleep a little and try again; 
+#               if it still won't reap, kill it, reap it, and emit a warning. 
+# Parms     : $cs           : football
+#             $pid          : process ID of child to reap
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : warns if it had to kill the child
+# See also  : _quit()
+# 
+# ____
+# 
+sub _reap_bloody {
+    my $cs              = shift;
+    my $pid             = shift;
+    my $max_wait        = 5;    # number of times && seconds to wait
+    my $return_value    ;
+    my $kill_signal     = 'KILL';
+    
+    # Try reaping a few times.
+    for (0..$max_wait) {
+        $return_value    = waitpid( $pid, WNOHANG );
+        last if ( $return_value == $pid );   #successful reap
+        sleep(1);
+    }; ## for $max_wait
+    
+    # If successful, return; we're done. 
+    return $pid if ( $return_value == $pid );
+    
+    # Kill stubborn child. 
+    kill $kill_signal, $pid;
+    warn "Had to kill $pid: $return_value $!";
+    sleep(1);
+    
+    # Now reap it for sure. (?)
+    $return_value    = waitpid( $pid, WNOHANG );    
+    if ( $return_value != $pid ) {  # stubborn child didn't reap!
+            warn "Failed to reap $pid: $return_value $!";
+            return 0;                       # unsuccessful reap
+    };
+    
+    return 1;                               # bloody reap
+}; ## _reap_bloody
 
 #=========# INTERNAL ROUTINE
 #
