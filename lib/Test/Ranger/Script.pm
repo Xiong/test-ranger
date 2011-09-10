@@ -762,11 +762,7 @@ my $t1 = $text;
     
 my $t2 = $text;
     # Recognize and strip out prompt.
-#~     if ( $text      =~ s/(\$)// ) {
-#~     if ( $text      =~ s/(^[.]*[\$]\s)// ) {
-    if ( $text      =~ s/(^.*[\$]\s)// ) {
-#~     if ( $text      =~ s/([.]*\$)// ) {
-#~     if ( $text      =~ s/([r]*\$)// ) {
+    if ( $text      =~ s/(^.*[\$#]\s)// ) {
         $prompt     = $1;
     };
     

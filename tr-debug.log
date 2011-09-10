@@ -1,19 +1,51 @@
 
-### 0: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
-### 1: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
+### 0: 'Script started on Fri 09 Sep 2011 11:07:32 PM PDT'
+### 1: 'Script started on Fri 09 Sep 2011 11:07:32 PM PDT'
 ### m: ''
-### 2: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
-### 3: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
-### X: 'Script started on Fri 09 Sep 2011 10:58:41 PM PDT'
+### 2: 'Script started on Fri 09 Sep 2011 11:07:32 PM PDT'
+### 3: 'Script started on Fri 09 Sep 2011 11:07:32 PM PDT'
+### X: 'Script started on Fri 09 Sep 2011 11:07:32 PM PDT'
 ### $: undef
 
-### 0: ']0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ exit'
-### 1: 'xiong@oz:~/projects/test-ranger$ exit'
+### 0: ']0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ sudo su'
+### 1: 'xiong@oz:~/projects/test-ranger$ sudo su'
 ### m: ''
-### 2: 'xiong@oz:~/projects/test-ranger$ exit'
+### 2: 'xiong@oz:~/projects/test-ranger$ sudo su'
+### 3: 'sudo su'
+### X: 'sudo su'
+### $: 'xiong@oz:~/projects/test-ranger$ '
+
+### 0: ']0;root@oz: /home/xiong/projects/test-rangerroot@oz:/home/xiong/projects/test-ranger# l[Kmm[K[Kls'
+### 1: 'root@oz:/home/xiong/projects/test-ranger# lmmls'
+### m: ''
+### 2: 'root@oz:/home/xiong/projects/test-ranger# ls'
+### 3: 'ls'
+### X: 'ls'
+### $: 'root@oz:/home/xiong/projects/test-ranger# '
+
+### 0: '[0m[01;34mbin[0m   [01;34mfile[0m  [01;34mlib[0m        play.log  [01;34mt[0m    tr-debug.log  [01;34mutil[0m'
+### 1: 'bin   file  lib        play.log  t    tr-debug.log  util'
+### m: ''
+### 2: 'bin   file  lib        play.log  t    tr-debug.log  util'
+### 3: 'bin   file  lib        play.log  t    tr-debug.log  util'
+### X: 'bin   file  lib        play.log  t    tr-debug.log  util'
+### $: undef
+
+### 0: '[01;34mdemo[0m  [01;34mhold[0m  parse.log  README    [01;34mtop[0m  [40;33mtr_fifo_45[0m'
+### 1: 'demo  hold  parse.log  README    top  tr_fifo_45'
+### m: ''
+### 2: 'demo  hold  parse.log  README    top  tr_fifo_45'
+### 3: 'demo  hold  parse.log  README    top  tr_fifo_45'
+### X: 'demo  hold  parse.log  README    top  tr_fifo_45'
+### $: undef
+
+### 0: '[m]0;root@oz: /home/xiong/projects/test-rangerroot@oz:/home/xiong/projects/test-ranger# exit'
+### 1: 'root@oz:/home/xiong/projects/test-ranger# exit'
+### m: ''
+### 2: 'root@oz:/home/xiong/projects/test-ranger# exit'
 ### 3: 'exit'
 ### X: 'exit'
-### $: 'xiong@oz:~/projects/test-ranger$ '
+### $: 'root@oz:/home/xiong/projects/test-ranger# '
 
 ### 0: 'exit'
 ### 1: 'exit'
@@ -21,20 +53,4 @@
 ### 2: 'exit'
 ### 3: 'exit'
 ### X: 'exit'
-### $: undef
-
-### 0: ''
-### 1: ''
-### m: ''
-### 2: ''
-### 3: ''
-### X: ''
-### $: undef
-
-### 0: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
-### 1: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
-### m: ''
-### 2: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
-### 3: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
-### X: 'Script done on Fri 09 Sep 2011 10:58:43 PM PDT'
 ### $: undef
