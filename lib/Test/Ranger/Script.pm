@@ -810,11 +810,11 @@ my $t3 = $text;                                                     # debug
     # Now decide what to do with the extracted poop -- if anything
     return if not $text;                # nothing left after cleanup
     if    ( $prompt && $text ) {        # a command was entered
-        ### Command: $text
-#~         $cs->put_db_command(
-#~             -command        => $text,
-#~             -terminal       => $term_id,
-#~         );
+### Command: $text
+        $cs->db_history_add(            # add command to history database
+            -command        => $text,
+            -term_id        => $term_id,
+        );
     } 
     elsif ( 0 ) {
         
