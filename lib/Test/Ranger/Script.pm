@@ -543,7 +543,12 @@ sub _setup_terminal {
     my $scrollbar   = Gtk2::VScrollbar->new;
     my $hbox        = Gtk2::HBox->new;
     my $terminal    = Gnome2::Vte::Terminal->new;
-#~     $cs->{-terminal}    = $terminal;
+    
+    # Remember this terminal.
+    $cs->{-terminals}       = {} if not defined $cs->{-terminals};      # init
+    $cs->{-next_term_id}    = 0  if not defined $cs->{-next_term_id};   # init
+    my $term_id     = $cs->{-next_term_id}++;
+    $cs->{-terminals}{$term_id}{-vte} = $terminal; 
     
     # set up scrolling
     $scrollbar->set_adjustment ($terminal->get_adjustment);
@@ -571,12 +576,7 @@ sub _setup_terminal {
     
     # hook 'em up
     my $command     = '/bin/bash';          # shell to start
-#~     my $command     = '/usr/bin/script -a STDOUT ';          # shell to start
-#~     my $command     = '/home/xiong/projects/test-ranger/bin/script-helper.sh ';          # shell to start
-#~     say `ls $command`;
     my $arg_ref     = ['bash', '-login'];   # ARGV?
-#~     my $arg_ref     = ['script', '-login'];   # ARGV?
-#~     my $arg_ref     = ['script-helper.sh', '-login'];   # ARGV?
     my $env_ref     = undef;                # ENV?
     my $directory   = '',                   # 'foo' is relative to parent
     my $lastlog     = FALSE;                # ?
@@ -591,17 +591,16 @@ sub _setup_terminal {
         $utmp,
         $wtmp,
     );
-    
-#~     $terminal->signal_connect (child_exited => sub { Gtk2->main_quit });
-    
-    
+        
     # Start logging on first display of bash prompt.
-    my $id  = $terminal->signal_connect( 'text-inserted' => 
+    my $sig_id  = $terminal->signal_connect( 'text-inserted' => 
         \&make_logger, $cs 
     ); ## terminal signal
-#### $id
-    # Store $id to disconnect this signal after first reception. 
-    $cs->{-terminal_connect_id}{$terminal} = $id;
+#### $sig_id
+    
+    # Store $sig_id to disconnect this signal after first reception. 
+#~     $cs->{-terminal_connect_id}{$terminal}  = $sig_id;
+    $cs->{-terminals}{$term_id}{-sig_id}    = $sig_id; 
     
     
     # Test feed button
@@ -651,7 +650,7 @@ sub test_feed {
 #             (This now, for debug purposes, STDOUT.)
 # Parms     : $terminal : terminal instance to log
 #             $cs       : football
-#             $id       : id of *this* handler
+#             $sig_id       : id of *this* handler
 # Reads     : $cs->{-terminal_connect_id}{$terminal}
 # Signal    : 'text-inserted'
 # Returns   : propagate
@@ -671,19 +670,35 @@ sub test_feed {
 sub make_logger {
     my $terminal    = shift;
     my $cs          = shift;
-    my $id          = $cs->{-terminal_connect_id}{$terminal};
-#### Begin make_logger
-#### $terminal
-#### $cs
-#### $id
+    my $terms       = $cs->{-terminals};
+    my $bogus       = 0xffff;
+    my $term_id     = $bogus;
+    
+#~ ### Begin make_logger
+#~ ### $terminal
+#~ ### $cs
+    # Find current terminal's $term_id.
+    for ( keys %$terms ) { 
+        if ( $terms->{$_}{-vte} eq $terminal ) {
+            $term_id    = $_;
+            last;
+        };
+    };
+    die "Unregistered terminal $terminal ", $!
+        if ( $term_id == $bogus );
+    
     
     # Disconnect the signal immediately after first reception.
-    $terminal->signal_handler_disconnect( $id );
+    my $sig_id      = $cs->{-terminals}{$term_id}{-sig_id};
+#~     my $sig_shadow      = $cs->{-terminal_connect_id}{$terminal};
+    $terminal->signal_handler_disconnect( $sig_id );
+#### $sig_id
+#~ ### $sig_shadow
     
     # Create, then listen-in on fifo... 
     
     # Create fifo.
-    my $fifo        = "tr_fifo_$id";        # arbitrary but unique (?)
+    my $fifo        = "tr_fifo_$term_id";        # arbitrary but unique
     mkfifo( $fifo, 0700 ) 
         or die "mkfifo $fifo failed: $!";
     push @{ $cs->{-fifos} }, $fifo;
@@ -701,7 +716,11 @@ sub make_logger {
             or die "Failed to open $fifo for reading ", $!;
     
         while (<$fh>) {
-            _parse_script( $cs, $_ );       # parse lines of 'script(1)'
+            _parse_script( 
+                -cs         => $cs, 
+                -text       => $_,
+                -term_id    => $term_id, 
+            );
         };
         close $fh
             or die "Failed to close $fifo for reading ", $!;
@@ -714,6 +733,7 @@ sub make_logger {
     $terminal->feed_child( $command . qq{\n} );
     
     # Register this subshell in football for later 'exit'-ing.
+    # TODO: Do we need this? Or should we work off $cs->{-terminals}?
     push @{ $cs->{-term_with_subshell} }, $terminal;
     
     return FALSE;       # propagate this signal
@@ -724,8 +744,9 @@ sub make_logger {
 #   _parse_script( $cs, $text );     # parse lines of 'script(1)'
 #       
 # Purpose   : Clean up escapes and dispatch script output for further action.
-# Parms     : $cs           : football
-#             $text         : captured string
+# Parms     : -cs       : TR::CS    : football
+#             -text     : string    : raw capture
+#             -term_id  : int       : originating terminal
 # Reads     : ____
 # Returns   : ____
 # Writes    : ____
@@ -739,8 +760,12 @@ sub make_logger {
 # http://www.ncssm.edu/~cs/index.php?loc=logging.html&callPrintLinuxSupport=1
 # 
 sub _parse_script {
-    my $cs          = shift;
-    my $text        = shift;
+    die "_parse_script: Odd number of arguments: ", @_, $! 
+        if ( scalar @_ % 2 );       # an even number modulo 2 is zero: false
+    my %args        = @_;
+    my $cs          = $args{-cs};           # football
+    my $text        = $args{-text};         # grabbed typescript
+    my $term_id     = $args{-term_id};      # terminal id not signal id
     my $matches     ;
     my $prompt      ;
     my $bel         = '\x07';       # ASCII BEL ("bell")
@@ -783,9 +808,13 @@ my $t3 = $text;                                                     # debug
     #---# End cleanup #---#
     
     # Now decide what to do with the extracted poop -- if anything
+    return if not $text;                # nothing left after cleanup
     if    ( $prompt && $text ) {        # a command was entered
         ### Command: $text
-        
+#~         $cs->put_db_command(
+#~             -command        => $text,
+#~             -terminal       => $term_id,
+#~         );
     } 
     elsif ( 0 ) {
         
