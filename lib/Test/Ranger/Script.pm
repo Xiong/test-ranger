@@ -30,7 +30,8 @@ use Gnome2::Vte;
 ## use
 
 # Alternate uses
-use Devel::Comments '###';
+#~ use Devel::Comments '###';
+use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 # Constants
@@ -740,16 +741,49 @@ sub make_logger {
 sub _parse_script {
     my $cs          = shift;
     my $text        = shift;
+    my $matches     ;
+    my $prompt      ;
+    my $bel         = '\x07';       # ASCII BEL ("bell")
     
+    # Drop trailing newlines            # debug only
+    $text          =~ s/[(\n)(\x0d)(\x0a)]+$//g;
+    
+my $t0 = $text;
     # Apply monster regex. No, I don't quite know what it does. 
-    $text          =~ s/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g;
-### $text
+    #                       Gets rid of escape sequences. 
+    $text      =~ s/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g;
     
-#~     # Further process through 'col(1)'. 
-#~     $text           = `col -b $text`;   # -b: Do not print backspaces.
-#~     die "Bad col $?"
-#~         if $?;
-#### $text
+my $t1 = $text;
+    # Recombine backspace chars with the chars they deleted. 
+    # Loop recursive regex until all gone. 
+    while (
+        $matches = $text      =~ s/[^(\b)](?R)?[\b]//g  # no semi here!
+    ) {1};
+    
+my $t2 = $text;
+    # Recognize and strip out prompt.
+#~     if ( $text      =~ s/(\$)// ) {
+#~     if ( $text      =~ s/(^[.]*[\$]\s)// ) {
+    if ( $text      =~ s/(^.*[\$]\s)// ) {
+#~     if ( $text      =~ s/([.]*\$)// ) {
+#~     if ( $text      =~ s/([r]*\$)// ) {
+        $prompt     = $1;
+    };
+    
+my $t3 = $text;
+    # Discard BEL characters.
+    $text       =~ s/(?:$bel)+//g;
+    
+    
+    
+##### 0: $t0
+##### 1: $t1
+##### m: $matches
+##### 2: $t2
+##### 3: $t3
+##### X: $text
+##### $: $prompt
+    
     
     return 1;
 }; ## _parse_script
