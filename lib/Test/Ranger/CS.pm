@@ -310,6 +310,35 @@ sub get_color_of {
 
 #=========# OBJECT METHOD
 #
+#    $cs->db_history_add(            # add command to history database
+#        -command        => $command,
+#        -term_id        => $term_id,
+#    );
+#       
+# Purpose   : ____
+# Parms     : -command  : string    : text of command to add
+#             -term_id  : int       : $cs->{-terminals}{-term_id}
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub db_history_add {
+    my $cs  = shift;
+    
+    
+    
+    
+    
+    return 1;
+}; ## db_history_add
+
+#=========# OBJECT METHOD
+#
 #   $obj->method( '-parm' => $value, );     # short
 #       
 # Purpose   : ____
