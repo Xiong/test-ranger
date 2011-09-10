@@ -30,8 +30,8 @@ use Gnome2::Vte;
 ## use
 
 # Alternate uses
-#~ use Devel::Comments '###';
-use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
+use Devel::Comments '###';
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 # Constants
@@ -745,32 +745,32 @@ sub _parse_script {
     my $prompt      ;
     my $bel         = '\x07';       # ASCII BEL ("bell")
     
-    # Drop trailing newlines            # debug only
+    #---# Begin cleanup #---#
+    
+    # Drop trailing newlines            # debug only?
     $text          =~ s/[(\n)(\x0d)(\x0a)]+$//g;
     
-my $t0 = $text;
+my $t0 = $text;                                                     # debug
     # Apply monster regex. No, I don't quite know what it does. 
     #                       Gets rid of escape sequences. 
     $text      =~ s/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g;
     
-my $t1 = $text;
+my $t1 = $text;                                                     # debug
     # Recombine backspace chars with the chars they deleted. 
     # Loop recursive regex until all gone. 
     while (
         $matches = $text      =~ s/[^(\b)](?R)?[\b]//g  # no semi here!
     ) {1};
     
-my $t2 = $text;
+my $t2 = $text;                                                     # debug
     # Recognize and strip out prompt.
-    if ( $text      =~ s/(^.*[\$#]\s)// ) {
+    if ( $text      =~ s/(^.*[^\$#][\$#]\s)// ) {
         $prompt     = $1;
     };
     
-my $t3 = $text;
+my $t3 = $text;                                                     # debug
     # Discard BEL characters.
     $text       =~ s/(?:$bel)+//g;
-    
-    
     
 ##### 0: $t0
 ##### 1: $t1
@@ -779,6 +779,25 @@ my $t3 = $text;
 ##### 3: $t3
 ##### X: $text
 ##### $: $prompt
+    
+    #---# End cleanup #---#
+    
+    # Now decide what to do with the extracted poop -- if anything
+    if    ( $prompt && $text ) {        # a command was entered
+        ### Command: $text
+        
+    } 
+    elsif ( 0 ) {
+        
+    } 
+    else {
+        # do nothing if not recognized
+    };
+    
+    
+    
+    
+    
     
     
     return 1;
