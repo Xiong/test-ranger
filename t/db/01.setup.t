@@ -7,6 +7,7 @@ use Test::Trap qw( :default );
 
 use Test::Ranger::DB;
 
+
 #============================================================================#
 # 
 # This script tests the setup and teardown of all following tests.
@@ -23,7 +24,7 @@ my $tc          = 0;
 #----------------------------------------------------------------------------#
 # EXECUTE
 
-trap{
+my @rv = trap{
     # SETUP
     my $db_name     = 'tr-test';
     my $msg         ;
@@ -39,6 +40,8 @@ trap{
 #----------------------------------------------------------------------------#
 # CHECK
 
+#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
+
 $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
 $expected   = 'return'; 
 $diag       = "$unit returned normally";
@@ -47,7 +50,7 @@ $tc++;
 
 $diag       = "$unit returned something";
 $trap->return_ok(
-    1,
+    0,
     $diag,
 );
 $tc++;
@@ -55,7 +58,7 @@ $tc++;
 $expected   = words(qw( created ));
 $diag       = "$unit created something";
 $trap->return_like(
-    1,
+    0,
     $expected,
     $diag,
 );
