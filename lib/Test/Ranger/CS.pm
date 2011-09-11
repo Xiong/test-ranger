@@ -531,10 +531,6 @@ around, like a football, to all our routines.
 
 Test::Ranger::CS implements the pseudo-global football as an object. 
 
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
-
 =head1 INTERFACE 
 
 =for author to fill in:
