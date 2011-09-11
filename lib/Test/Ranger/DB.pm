@@ -5,9 +5,9 @@ use strict;
 use warnings;
 use Carp;
 
-#use parent qw{  };             # inherits from UNIVERSAL only
-
 use version 0.89; our $VERSION = qv('v0.0.4');
+
+use parent 'Test::Ranger::CS';  # just for new() and init() methods
 
 # use for debug only
 use Devel::Comments '###';      # debug only                             #~
@@ -15,6 +15,76 @@ use Devel::Comments '###';      # debug only                             #~
 
 
 #============================================================================#
+
+#----------------------------------------------------------------------------#
+
+######## INTERNAL UTILITY ########
+#
+#   _crash( $errkey, @more );      # fatal out of internal error
+#       
+# Calls croak() with some message. 
+#   
+sub _crash {
+    my $errkey      = shift;            # remaining args are more lines
+    my $prepend     = __PACKAGE__;      # prepend to all errors
+       $prepend     = join q{}, q{# }, $prepend, q{: };
+    my $indent      = qq{\n} . q{ } x length $prepend;
+    
+    my @lines       ;
+    my $text        ;
+    
+    # define errors
+    my $error       = {
+        odd_args          => [ 
+            'Odd number of args in...', 
+        ],
+    };
+    
+    # find and expand error
+    if ($errkey) {
+        push @lines, $errkey;
+        push @lines, @{ $error->{$errkey} };
+    }
+    else {
+        push @lines, 'Unimplemented error';
+    };
+    push @lines, @_;
+    $text           = $prepend . join $indent, @lines;
+    
+    # now croak()
+    croak $text;
+    return 0;                   # should never get here, though
+};
+######## /_crash ########
+
+#=========# OBJECT METHOD
+#
+#   $msg    = $db->create( 
+#               -db_name    => 'tr',        # name of mysql database
+#           );
+#       
+# Purpose   : Create the 'tr' database if it does not exist.
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub create {
+    my $db          = shift;
+    _crash 'odd_args', 'create()', @_, $! 
+        if ( scalar @_ % 2 );       # an even number modulo 2 is zero: false
+    my %args        = @_;
+    my $db_name     = $args{-db_name};
+    
+    my $msg         ;
+    
+    return $msg;
+}; ## create
 
 
 
