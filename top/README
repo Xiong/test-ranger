@@ -4,25 +4,24 @@ Test-Ranger version 0.0.4
         That's what it's paid to do, after all."
                                           -- Larry Wall
 
-Perl module developers face a range of tasks not strictly Perl. 
+This is a comprehensive solution to several testing and development issues. 
+You can write more, better tests in less time; keep track of tests and their 
+performance; automate routine tasks and bookmark seldom-executed ones. You 
+will be able to spend more of your time writing more reliable production code.
 
-This is a comprehensive testing module compatible with Test::More and friends 
-within TAP::Harness. Helper scripts and templates are included to make 
-test-driven development quick, easy, and reliable. Test data structure is 
-open; choose from object-oriented methods or procedural/functional calls. 
+Test-Ranger consists of a GUI tool based loosely on the concept of an 
+orthogonal file manager, with configurable windowpanes and embedded terminals; 
+a set of templates and tools for building test scripts; a database interface 
+for managing large numbers of test scripts; an advanced history function; and 
+several examples and demos. 
 
-Tests themselves are formally untestable. All code conceals bugs. Do you want 
-to spend your time debugging tests or writing production code? 
-The Test::Ranger philosophy is to reduce the amount of code in a test script 
-and let test data (given inputs and wanted outputs) dominate. 
-
-Many hand-rolled test scripts examine expected output to see if it matches 
-expectations. Test::Ranger traps fatal exceptions cleanly and makes it easy 
-to check every execution for both expected and unexpected output. 
-
-Developers, please feel free to pull from: 
-http://github.com/Xiong/test-ranger
-and know that your comments are welcome. 
+The full-time professional Perl developer may find Test-Ranger needless, 
+having found other solutions. It is hoped that the part-timer, the student, 
+the developer coming to Perl from another language, and the lover of baroque 
+tools will appreciate the range of gadgetry. Buy-in is kept to a mininum; you 
+can use Test-Ranger for a few tasks or for more, without trashing your settled 
+approach to work. The GUI is highly plastic with most configurations exposed; 
+and extensive help and documentation is built in. 
 
 INSTALLATION
 
@@ -36,8 +35,8 @@ To install this module with Module::Build, run the following commands:
 
 DEPENDENCIES
 
-None.
-
+perl 5.10 or better, script(1), Gtk2. 
+For Perl module dependencies, please see Build.PL. 
 
 LICENSE
 
