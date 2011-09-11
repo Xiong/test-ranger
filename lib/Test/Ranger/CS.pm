@@ -506,11 +506,9 @@ __END__
 
 Test::Ranger::CS - class for 'context structure' football
 
-
 =head1 VERSION
 
 This document describes Test::Ranger::CS version 0.0.4
-
 
 =head1 SYNOPSIS
 
@@ -521,7 +519,6 @@ This document describes Test::Ranger::CS version 0.0.4
     Brief code example(s) here showing commonest usage(s).
     This section will be as far as many users bother reading
     so make it as educational and exeplary as possible.
-  
   
 =head1 DESCRIPTION
 
@@ -538,7 +535,6 @@ Test::Ranger::CS implements the pseudo-global football as an object.
     Write a full description of the module and its features here.
     Use subsections (=head2, =head3) as appropriate.
 
-
 =head1 INTERFACE 
 
 =for author to fill in:
@@ -546,7 +542,6 @@ Test::Ranger::CS implements the pseudo-global football as an object.
     interface. These normally consist of either subroutines that may be
     exported, or methods that may be called on objects belonging to the
     classes provided by the module.
-
 
 =head1 DIAGNOSTICS
 
