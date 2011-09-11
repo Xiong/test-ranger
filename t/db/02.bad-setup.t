@@ -43,7 +43,7 @@ $trap->did_die("$unit dies correctly when fed odd number of arguments");
 $tc++;
 
 $trap->die_like(
-    qr/odd/,
+    words(qw( odd args create )),
     "$unit emits expected error message",
 );
 $tc++;
@@ -61,5 +61,16 @@ $tc++;
 
 
 done_testing($tc);                      # declare plan after testing
+
+sub words {             # construct a regex that matches these strings
+    my @words   = @_;
+    my $regex   = q{};
+    
+    for (@words) {
+        $regex  = $regex . $_ . '.*';
+    };
+    
+    return qr/$regex/is;
+};
 
 
