@@ -7,6 +7,8 @@ use Test::Trap qw( :default );
 
 use Test::Ranger::DB;
 
+use DBI;                # Generic interface to a large number of databases
+use DBD::mysql;         # DBI driver for MySQL
 
 #============================================================================#
 # 
@@ -21,12 +23,13 @@ my $unit        = 'create(): ';
 my $diag        = $unit;
 my $tc          = 0;
 
+my $db_name     = 'tr-test';
+
 #----------------------------------------------------------------------------#
 # EXECUTE
 
 my @rv = trap{
     # SETUP
-    my $db_name     = 'tr-test';
     my $msg         ;
 
     my $db          = Test::Ranger::DB->new();
@@ -63,6 +66,10 @@ $trap->return_like(
     $diag,
 );
 $tc++;
+
+
+my $dsn = "DBI:mysql:$db_name";
+my $dbh = DBI->connect($dsn, $user, $pass);
 
 
 #----------------------------------------------------------------------------#

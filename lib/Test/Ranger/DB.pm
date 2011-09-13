@@ -9,6 +9,9 @@ use version 0.89; our $VERSION = qv('v0.0.4');
 
 use parent 'Test::Ranger::CS';  # just for new() and init() methods
 
+use DBI;                # Generic interface to a large number of databases
+use DBD::mysql;         # DBI driver for MySQL
+
 # use for debug only
 use Devel::Comments '###';      # debug only                             #~
 
@@ -83,6 +86,8 @@ sub create {
     
     my $msg         ;
     
+    
+    $msg            = 'Database Created.';      # fake only for debug only
     return $msg;
 }; ## create
 
