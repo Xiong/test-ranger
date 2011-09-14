@@ -91,6 +91,9 @@ $diag       = "$unit test connected to      $db_name";
 ok( $dbh, $diag );
 $tc++;
 
+
+
+
 $got        = $dbh->disconnect();
 $diag       = "$unit test disconnected";
 ok( $got, $diag );

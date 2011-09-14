@@ -9,8 +9,12 @@ BEGIN {
 }   
 
 BEGIN {
-    use Test::Ranger::DB;
+    use Test::Ranger::DB;   # Database interactions for Test-Ranger
+    use DBI;                # Generic interface to a large number of databases
+    #~ use DBD::mysql;         # DBI driver for MySQL
+    use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
+    use DBIx::RunSQL;       # run SQL to create a database schema
 }
 
-pass( 'Load module.' );
+pass( 'Load modules.' );
 diag( "Testing Test::Ranger::DB $Test::Ranger::DB::VERSION" );
