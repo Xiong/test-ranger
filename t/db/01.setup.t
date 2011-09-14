@@ -19,16 +19,21 @@ use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 # SETUP
 
 my $got         ;
-my $expected    ;
+my $want    ;
 my $unit        = 'create(): ';
 my $diag        = $unit;
 my $tc          = 0;
 
-my $db_name     = $ENV{tr_test_db_name}     //= 'file/db/tr_test_00';
+my $db_name     = $ENV{tr_test_db_name}     //= 'file/db/tr_test_01';
 my $user        ;   # not supported by SQLite
 my $pass        ;   # not supported by SQLite
 
 unlink $db_name;    # cleanup previous test DB file if any
+$got        = -f $db_name;      # is a plain file
+$want       = undef;            # want it to *not* exist
+$diag       = "$unit test unlinks existing  $db_name";
+is( $got, $want, $diag );
+$tc++;
 
 #----------------------------------------------------------------------------#
 # EXECUTE
@@ -51,9 +56,9 @@ my @rv = trap{
 #~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
 
 $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
-$expected   = 'return'; 
+$want       = 'return'; 
 $diag       = "$unit returned normally";
-is($got, $expected, $diag);
+is($got, $want, $diag);
 $tc++;
 
 $diag       = "$unit returned something";
@@ -63,24 +68,24 @@ $trap->return_ok(
 );
 $tc++;
 
-$expected   = words(qw( created ));
+$want       = words(qw( created ));
 $diag       = "$unit says it created something";
 $trap->return_like(
     0,
-    $expected,
+    $want,
     $diag,
 );
 $tc++;
 
 $got        = -f $db_name;      # is a plain file
-$diag       = "$unit test found          $db_name";
+$diag       = "$unit test found             $db_name";
 ok( $got, $diag );
 $tc++;
 
-my $dsn = "DBI:SQLite:$db_name";
-my $dbh = DBI->connect($dsn, $user, $pass);
+my $dsn     = "DBI:SQLite:$db_name";
+my $dbh     = DBI->connect($dsn, $user, $pass);
 #~ note($dbh);
-$diag       = "$unit test connected to   $db_name";
+$diag       = "$unit test connected to      $db_name";
 ok( $dbh, $diag );
 $tc++;
 
