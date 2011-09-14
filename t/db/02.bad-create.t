@@ -9,7 +9,8 @@ use Test::Ranger::DB;
 
 #============================================================================#
 # 
-# This script tests the _crash() error handler for 'odd_args' to create().
+# This script tests the _crash() error handler for 'unpaired' to create().
+# Was 'odd_args'.
 
 #----------------------------------------------------------------------------#
 # SETUP
@@ -29,7 +30,7 @@ trap{
     my $db          = Test::Ranger::DB->new();
     my $msg = $db->create(
         -db_name    => $db_name,
-        'foo',      # odd argument
+        'foo',      # unpaired argument
     );
 
 };
@@ -39,11 +40,11 @@ trap{
 
 #~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
 
-$trap->did_die("$unit dies correctly when fed odd number of arguments");
+$trap->did_die("$unit dies correctly when fed unpaired argument");
 $tc++;
 
 $trap->die_like(
-    words(qw( odd args create )),
+    words(qw( unpaired arg create )),
     "$unit emits expected error message",
 );
 $tc++;
