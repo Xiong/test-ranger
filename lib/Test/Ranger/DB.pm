@@ -40,8 +40,8 @@ sub _crash {
     
     # define errors
     my $error       = {
-        odd_args            => [ 
-            'Odd number of args in...', 
+        unpaired            => [ 
+            'Unpaired argument in call to...', 
         ],
         create_1            => [
             'No SQL file passed to create()',
@@ -49,7 +49,7 @@ sub _crash {
     };
     
     # find and expand error
-    if ($errkey) {
+    if ( $errkey && defined $error->{$errkey} ) {
         push @lines, $errkey;
         push @lines, @{ $error->{$errkey} };
     }
@@ -86,7 +86,7 @@ sub _crash {
 #   
 sub create {
     my $db          = shift;
-    _crash 'odd_args', 'create()', @_, $! 
+    _crash 'unpaired', 'create()', @_, $! 
         if ( scalar @_ % 2 );       # an even number modulo 2 is zero: false
     my %args        = @_;
     my $db_name     = $args{-db_name};
