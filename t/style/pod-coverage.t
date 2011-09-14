@@ -1,1 +1,0 @@
-/home/xiong/projects/test-ranger/t/all/pod-coverage.t
