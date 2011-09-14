@@ -10,7 +10,8 @@ use version 0.89; our $VERSION = qv('v0.0.4');
 use parent 'Test::Ranger::CS';  # just for new() and init() methods
 
 use DBI;                # Generic interface to a large number of databases
-use DBD::mysql;         # DBI driver for MySQL
+#~ use DBD::mysql;         # DBI driver for MySQL
+use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 
 # use for debug only
 use Devel::Comments '###';      # debug only                             #~
