@@ -11,6 +11,8 @@ use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 
+use Devel::Comments '###';                                  # debug only #~
+
 #============================================================================#
 # 
 # This script tests the setup and teardown of all following tests.
@@ -89,8 +91,10 @@ $diag       = "$unit test connected to      $db_name";
 ok( $dbh, $diag );
 $tc++;
 
-
-
+$got        = $dbh->disconnect();
+$diag       = "$unit test disconnected";
+ok( $got, $diag );
+$tc++;
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
