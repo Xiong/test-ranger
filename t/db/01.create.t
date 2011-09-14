@@ -27,6 +27,7 @@ my $diag        = $unit;
 my $tc          = 0;
 
 my $db_name     = $ENV{tr_test_db_name}     //= 'file/db/tr_test_01';
+my $sql_file    = $ENV{tr_sql_file}         //= 'file/db/tr_db.sql';
 my $user        ;   # not supported by SQLite
 my $pass        ;   # not supported by SQLite
 
@@ -47,7 +48,7 @@ my @rv = trap{
     my $db          = Test::Ranger::DB->new();
     $msg = $db->create(
         -db_name    => $db_name,
-        
+        -sql_file   => $sql_file,
     );
     return $msg;
 };

@@ -12,6 +12,7 @@ use parent 'Test::Ranger::CS';  # just for new() and init() methods
 use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
+use DBIx::RunSQL;       # run SQL to create a database schema
 
 # use for debug only
 use Devel::Comments '###';      # debug only                             #~
@@ -39,8 +40,11 @@ sub _crash {
     
     # define errors
     my $error       = {
-        odd_args          => [ 
+        odd_args            => [ 
             'Odd number of args in...', 
+        ],
+        create_1            => [
+            'No SQL file passed to create()',
         ],
     };
     
@@ -64,10 +68,12 @@ sub _crash {
 #=========# OBJECT METHOD
 #
 #   $msg    = $db->create( 
-#               -db_name    => 'tr',        # name of mysql database
+#               -db_name    => 'tr',        # (file)name of sqlite database
+#               -sql_file   => 'setup.sql', # setup file contains SQL syntax
+#               -verbose    => 1,           # print each SQL statement as run
 #           );
 #       
-# Purpose   : Create the 'tr' database if it does not exist.
+# Purpose   : Create a 'tr' database if it does not exist.
 # Parms     : ____
 # Reads     : ____
 # Returns   : ____
@@ -84,14 +90,20 @@ sub create {
         if ( scalar @_ % 2 );       # an even number modulo 2 is zero: false
     my %args        = @_;
     my $db_name     = $args{-db_name};
-    my $user        = $args{-db_user};      # not supported by SQLite
-    my $pass        = $args{-db_pass};      # not supported by SQLite
+#~     my $user        = $args{-db_user};      # not supported by SQLite
+#~     my $pass        = $args{-db_pass};      # not supported by SQLite
+    my $sql_file    = $args{-sql_file}
+        or _crash 'create_1', $!;
+    my $verbose     = $args{-verbose};
     
     my $msg         ;
     
-    my $dsn = "DBI:SQLite:$db_name";
-    my $dbh = DBI->connect($dsn, $user, $pass);
-    
+    my $dsn         = "DBI:SQLite:$db_name";
+    my $dbh         = DBIx::RunSQL->create(
+                dsn     => $dsn,
+                sql     => $sql_file,
+                verbose => $verbose,
+    );
     
     $msg            = 'Database Created.';      # fake only for debug only
     return $msg;
