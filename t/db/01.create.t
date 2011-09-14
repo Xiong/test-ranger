@@ -11,7 +11,7 @@ use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 
-use Devel::Comments '###';                                  # debug only #~
+#~ use Devel::Comments '###';                                  # debug only #~
 
 #============================================================================#
 # 
@@ -30,11 +30,12 @@ my $db_name     = $ENV{tr_test_db_name}     //= 'file/db/tr_test_01';
 my $sql_file    = $ENV{tr_sql_file}         //= 'file/db/tr_db.sql';
 my $user        ;   # not supported by SQLite
 my $pass        ;   # not supported by SQLite
+my $sql         ;
 
-unlink $db_name;    # cleanup previous test DB file if any
-$got        = -f $db_name;      # is a plain file
-$want       = undef;            # want it to *not* exist
-$diag       = "$unit test unlinks existing  $db_name";
+unlink $db_name;            # cleanup previous test DB file if any
+$got            = -f $db_name;      # is a plain file
+$want           = undef;            # want it to *not* exist
+$diag           = "$unit test unlinks existing  $db_name";
 is( $got, $want, $diag );
 $tc++;
 
@@ -87,13 +88,26 @@ $tc++;
 
 my $dsn     = "DBI:SQLite:$db_name";
 my $dbh     = DBI->connect($dsn, $user, $pass);
-#~ note($dbh);
 $diag       = "$unit test connected to      $db_name";
 ok( $dbh, $diag );
 $tc++;
 
+# New $trap.
+$sql        = q{INSERT INTO term_command (c_text) VALUES ('ls')};
+my $rv = trap{
+    my $rv = $dbh->do($sql);
+};
 
+$got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
+$want       = 'return'; 
+$diag       = "$unit test insert returned normally";
+is($got, $want, $diag);
+$tc++;
 
+$got        = $rv;
+$diag       = "$unit test insert returned true";
+ok( $got, $diag );
+$tc++;
 
 $got        = $dbh->disconnect();
 $diag       = "$unit test disconnected";
@@ -103,14 +117,17 @@ $tc++;
 #----------------------------------------------------------------------------#
 # TEARDOWN
 
-#~ $msg = $db->delete(
-#~     -db_name    => $db_name,
-#~     -warn_me    => undef,
-#~ );
-#~ 
-
+if ( $ENV{tr_preserve_test_db} ) {
+    diag "$db_name preserved."
+}
+else {
+    unlink $db_name;
+    note "$db_name unlinked."
+};
 
 done_testing($tc);                  # declare plan after testing
+
+#============================================================================#
 
 sub words {                         # sloppy match these strings
     my @words   = @_;
