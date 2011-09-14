@@ -73,14 +73,14 @@ $trap->return_like(
 $tc++;
 
 $got        = -f $db_name;      # is a plain file
-$diag       = "$unit found $db_name";
+$diag       = "$unit test found          $db_name";
 ok( $got, $diag );
 $tc++;
 
 my $dsn = "DBI:SQLite:$db_name";
 my $dbh = DBI->connect($dsn, $user, $pass);
 #~ note($dbh);
-$diag       = "$unit $db_name is a DB";
+$diag       = "$unit test connected to   $db_name";
 ok( $dbh, $diag );
 $tc++;
 

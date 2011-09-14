@@ -84,8 +84,13 @@ sub create {
         if ( scalar @_ % 2 );       # an even number modulo 2 is zero: false
     my %args        = @_;
     my $db_name     = $args{-db_name};
+    my $user        = $args{-db_user};      # not supported by SQLite
+    my $pass        = $args{-db_pass};      # not supported by SQLite
     
     my $msg         ;
+    
+    my $dsn = "DBI:SQLite:$db_name";
+    my $dbh = DBI->connect($dsn, $user, $pass);
     
     
     $msg            = 'Database Created.';      # fake only for debug only
