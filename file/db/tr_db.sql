@@ -1,6 +1,6 @@
-CREATE TABLE command (
-        command         INT     NOT NULL    PRIMARY KEY,
-        c_text          VARCHAR(255)
+CREATE TABLE term_command (
+        term_command        INTEGER     PRIMARY KEY,
+        c_text              VARCHAR(255)
         
 );
 
