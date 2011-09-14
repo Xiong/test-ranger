@@ -1,7 +1,0 @@
-Script started on Wed 07 Sep 2011 12:20:49 AM PDT
-]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ exitperl -E 'say "42";',;' ;'';'';'^[';'[';'C';'[1P';'[1P';'[2P';'[1P;'"';'"';'[C[1P;'T";'h";'i";'s";' ";'s";'e";'c";'t";'i";'o";'n";' ";'l";'e";'f";'t";' ";'i";'n";'t";'e";'n";'t";'i";'o";'n";'a";'l";'l";'y";' ";'b";'l";'a";'n";'k";'.";'
-42This section left intentionally blank.
-]0;xiong@oz: ~/projects/test-rangerxiong@oz:~/projects/test-ranger$ perl -E 'say "42", "This section left intentionally blank.";'[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cexit[K
-exit
-
-Script done on Wed 07 Sep 2011 12:22:12 AM PDT
