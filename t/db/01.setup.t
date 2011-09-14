@@ -8,7 +8,8 @@ use Test::Trap qw( :default );
 use Test::Ranger::DB;
 
 use DBI;                # Generic interface to a large number of databases
-use DBD::mysql;         # DBI driver for MySQL
+#~ use DBD::mysql;         # DBI driver for MySQL
+use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 
 #============================================================================#
 # 
@@ -23,7 +24,11 @@ my $unit        = 'create(): ';
 my $diag        = $unit;
 my $tc          = 0;
 
-my $db_name     = 'tr-test';
+my $db_name     = $ENV{tr_test_db_name}     //= 'file/db/tr_test_00';
+my $user        ;   # not supported by SQLite
+my $pass        ;   # not supported by SQLite
+
+unlink $db_name;    # cleanup previous test DB file if any
 
 #----------------------------------------------------------------------------#
 # EXECUTE
@@ -59,7 +64,7 @@ $trap->return_ok(
 $tc++;
 
 $expected   = words(qw( created ));
-$diag       = "$unit created something";
+$diag       = "$unit says it created something";
 $trap->return_like(
     0,
     $expected,
@@ -67,9 +72,19 @@ $trap->return_like(
 );
 $tc++;
 
+$got        = -f $db_name;      # is a plain file
+$diag       = "$unit found $db_name";
+ok( $got, $diag );
+$tc++;
 
-my $dsn = "DBI:mysql:$db_name";
+my $dsn = "DBI:SQLite:$db_name";
 my $dbh = DBI->connect($dsn, $user, $pass);
+#~ note($dbh);
+$diag       = "$unit $db_name is a DB";
+ok( $dbh, $diag );
+$tc++;
+
+
 
 
 #----------------------------------------------------------------------------#
@@ -82,9 +97,9 @@ my $dbh = DBI->connect($dsn, $user, $pass);
 #~ 
 
 
-done_testing($tc);                      # declare plan after testing
+done_testing($tc);                  # declare plan after testing
 
-sub words {             # construct a regex that matches these strings
+sub words {                         # sloppy match these strings
     my @words   = @_;
     my $regex   = q{};
     
