@@ -86,9 +86,11 @@ sub _crash {
 #   
 sub create {
     my $db          = shift;
-    _crash 'unpaired', 'create()', @_, $! 
-        if ( scalar @_ % 2 );       # an even number modulo 2 is zero: false
-    my %args        = @_;
+#~     _crash 'unpaired', 'create()', @_, $! 
+#~         if ( scalar @_ % 2 );       # an even number modulo 2 is zero: false
+#~     my %args        ;
+#~     %args           = eval { %args    = @_ };
+#~         _crash 'unpaired', 'create()', @_, $@ if $@;     
     my $db_name     = $args{-db_name};
 #~     my $user        = $args{-db_user};      # not supported by SQLite
 #~     my $pass        = $args{-db_pass};      # not supported by SQLite
