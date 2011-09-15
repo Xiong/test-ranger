@@ -76,103 +76,103 @@ sub init {
     return $self;
 }; ## init
 
-#=========# OBJECT METHOD
-#
-#   $single->expand();
-#
-# Purpose   : Expand/parse declaration into canonical form.
-# Parms     : $class
-#           : $self
-# Returns   : $self
-#
-sub expand {
-    my $self        = shift;
-    
-    # Default givens
-    if ( !$self->{-given}{-args} ) {
-        $self->{-given}{-args}     = [];
-    };
-    
-    # Default expectations
-    if ( !$self->{-return}{-want} ) {
-        $self->{-return}{-want}     = 1;
-    };
-    
-    
-    
-    $self->{-expanded}          = 1;
-    
-    return $self;
-}; ## expand
-
-#=========# OBJECT METHOD
-#
-#   $single->execute();
-#
-#       Execute a $single object.
-#
-sub execute {
-    my $self        = shift;
-    
-    $self->expand() if !$self->{-expanded};
-    
-    my $coderef     = $self->{-coderef};
-    my @args        = @{ $self->{-given}{-args} };
-    ### $coderef
-    
-    $self->{-return}{-got}    = &$coderef( @args );
-    
-    return $self;
-    
-}; ## execute
-
-#=========# OBJECT METHOD
-#
-#   $single->check();
-#
-#       Check results in a $single object.
-#
-sub check {
-    my $self        = shift;
-    
-    is( $self->{-return}{-got}, $self->{-return}{-want}, $self->{-fullname} );
-    $self->{-plan_counter}++;
-    
-    return $self;
-    
-}; ## check
-
-#=========# OBJECT METHOD
-#
-#   $single->test();
-#
-#       Execute and check a $single object.
-#
-sub test {
-    my $self        = shift;
-    
-    $self->execute();
-    $self->check();
-    
-    return $self;
-    
-}; ## test
-
-#=========# OBJECT METHOD
-#
-#   $single->done();
-#
-#       Conclude testing.
-#
-sub done {
-    my $self        = shift;
-    
-    done_testing( $self->{-done_counter} );
-    
-    return $self;
-    
-}; ## done
-
+#    #~ #=========# OBJECT METHOD
+#    #~ #
+#    #~ #   $single->expand();
+#    #~ #
+#    #~ # Purpose   : Expand/parse declaration into canonical form.
+#    #~ # Parms     : $class
+#    #~ #           : $self
+#    #~ # Returns   : $self
+#    #~ #
+#    #~ sub expand {
+#    #~     my $self        = shift;
+#    #~     
+#    #~     # Default givens
+#    #~     if ( !$self->{-given}{-args} ) {
+#    #~         $self->{-given}{-args}     = [];
+#    #~     };
+#    #~     
+#    #~     # Default expectations
+#    #~     if ( !$self->{-return}{-want} ) {
+#    #~         $self->{-return}{-want}     = 1;
+#    #~     };
+#    #~     
+#    #~     
+#    #~     
+#    #~     $self->{-expanded}          = 1;
+#    #~     
+#    #~     return $self;
+#    #~ }; ## expand
+#    #~ 
+#    #~ #=========# OBJECT METHOD
+#    #~ #
+#    #~ #   $single->execute();
+#    #~ #
+#    #~ #       Execute a $single object.
+#    #~ #
+#    #~ sub execute {
+#    #~     my $self        = shift;
+#    #~     
+#    #~     $self->expand() if !$self->{-expanded};
+#    #~     
+#    #~     my $coderef     = $self->{-coderef};
+#    #~     my @args        = @{ $self->{-given}{-args} };
+#    #~     ### $coderef
+#    #~     
+#    #~     $self->{-return}{-got}    = &$coderef( @args );
+#    #~     
+#    #~     return $self;
+#    #~     
+#    #~ }; ## execute
+#    #~ 
+#    #~ #=========# OBJECT METHOD
+#    #~ #
+#    #~ #   $single->check();
+#    #~ #
+#    #~ #       Check results in a $single object.
+#    #~ #
+#    #~ sub check {
+#    #~     my $self        = shift;
+#    #~     
+#    #~     is( $self->{-return}{-got}, $self->{-return}{-want}, $self->{-fullname} );
+#    #~     $self->{-plan_counter}++;
+#    #~     
+#    #~     return $self;
+#    #~     
+#    #~ }; ## check
+#    #~ 
+#    #~ #=========# OBJECT METHOD
+#    #~ #
+#    #~ #   $single->test();
+#    #~ #
+#    #~ #       Execute and check a $single object.
+#    #~ #
+#    #~ sub test {
+#    #~     my $self        = shift;
+#    #~     
+#    #~     $self->execute();
+#    #~     $self->check();
+#    #~     
+#    #~     return $self;
+#    #~     
+#    #~ }; ## test
+#    #~ 
+#    #~ #=========# OBJECT METHOD
+#    #~ #
+#    #~ #   $single->done();
+#    #~ #
+#    #~ #       Conclude testing.
+#    #~ #
+#    #~ sub done {
+#    #~     my $self        = shift;
+#    #~     
+#    #~     done_testing( $self->{-done_counter} );
+#    #~     
+#    #~     return $self;
+#    #~     
+#    #~ }; ## done
+#    #~ 
 
 ## END MODULE
 1;
@@ -185,7 +185,7 @@ Test::Ranger - Test with data tables, capturing, templates
 
 =head1 VERSION
 
-This document describes Test::Ranger version 0.0.1
+This document describes Test::Ranger version 0.0.4
 
 TODO: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
 
@@ -245,43 +245,11 @@ I<That's what it's paid to do, after all.>
 
 =back
 
-This is a comprehensive testing module compatible with Test::More and friends 
-within TAP::Harness. Helper scripts and templates are included to make 
-test-driven development quick, easy, and reliable. Test data structure is 
-open; choose from object-oriented methods or procedural/functional calls. 
 
-Tests themselves are formally untestable. All code conceals bugs. Do you want 
-to spend your time debugging tests or writing production code? 
-The Test::Ranger philosophy is to reduce the amount of code in a test script 
-and let test data (given inputs and wanted outputs) dominate. 
-
-Many hand-rolled test scripts examine expected output to see if it matches 
-expectations. Test::Ranger traps fatal exceptions cleanly and makes it easy 
-to subtest every execution for both expected and unexpected output. 
 
 =head2 Approach
 
-Our overall approach is to B<declare> all the conditions for a series of 
-tests in an Arrayref-of-Hashrefs. We B<execute> the tests, supplying inputs 
-to code under test and capturing outputs within the same AoH. 
-Then we B<compare> each execution's actual outputs with what we expected. 
 
-Each test is represented by a hashref in which each key is a literal string; 
-the values may be thought of as attributes of the test. The literal keys are 
-part of our published interface; accessor methods are not required. 
-Hashrefs and their keys may be nested DWIMmishly. 
-
-Much of the merit of our approach lies in B<sticky> declaration. Once you 
-declare, say, a coderef, you don't need to declare it again 
-for every set of givens. Or, you can declare a given list of arguments once 
-and pass them to several subroutines. See L</-sticky>, L</-clear>.
-
-Test::Ranger does not lock you in to a single specific approach. You can 
-declare your entire test series as an object and simply L</test()> it, 
-letting TR handle the details. You can read your data from somewhere 
-and just use TR to capture a single execution, then examine the results 
-on your own. You can mix TR methods and function calls; you can add 
-other Test::More-ish checks. The door is open.
 
 =head2 Templates
 
