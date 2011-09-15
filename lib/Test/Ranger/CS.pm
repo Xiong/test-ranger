@@ -10,6 +10,7 @@ use version 0.94; our $VERSION = qv('v0.0.4');
 use parent qw{ Test::Ranger };
 use Test::Ranger qw(:all);      # Testing tool base class and utilities
 
+use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
 use Scalar::Util qw(
     looks_like_number
 );
@@ -51,19 +52,12 @@ use Devel::Comments '###';      # debug only                             #~
 
 $::Debug = 0 unless (defined $::Debug);     # global; can be raised in caller
 
-    my $error       = {
-        init_0          => [ 
-            'Odd number of args in init()', 
-        ],
-        get_config_0    => [
-            'Error evaluating config file:',
-        ],
-        get_config_1    => [
-            'No config file found; searched:',
-        ],
-        get_pane_0      => [
-            'Tried to get a nonexistent pane:',
-        ],
+#============================================================================#
+
+# Pseudo-globals
+
+# Error messages
+dlock( my $err  = Test::Ranger->new(  # this only locks the reference
         put_mw_0        => [
             'Tried to store main Window from an undefined reference',
         ],
@@ -82,50 +76,9 @@ $::Debug = 0 unless (defined $::Debug);     # global; can be raised in caller
         get_color_of_2  => [
             'Color specification not arrayref of \'double\' integers',
         ],
-    };
+) ); ## $err
 
-#    #~ ######## CLASS METHOD ########
-#    #~ #
-#    #~ #   my $obj = Test::Ranger::CS->new();
-#    #~ #
-#    #~ #       Returns a hashref blessed into class of calling package
-#    #~ #
-#    #~ #       Args are optional but if supplied must be a list of 
-#    #~ #        key/value pairs, which will be used to initialize the object.
-#    #~ #
-#    #~ #       see also: init();
-#    #~ #
-#    #~ sub new {
-#    #~     my $class   = shift;
-#    #~     my $self    = {};
-#    #~     
-#    #~     bless ($self => $class);
-#    #~     $self->init(@_);            # init all remaining args
-#    #~     
-#    #~     return $self;
-#    #~ };
-#    #~ ######## /new ########
-#    #~ 
-#    #~ ######## OBJECT METHOD ########
-#    #~ #
-#    #~ #   $obj->init( '-key' => $value, '-foo' => $bar );
-#    #~ #
-#    #~ #       initializes $obj with a list of key/value pairs
-#    #~ #       empty list okay
-#    #~ #
-#    #~ sub init {
-#    #~     my $self    = shift;
-#    #~     my @args    = @_;
-#    #~     
-#    #~     # do some minimal checking
-#    #~     _crash('init_0') if ( scalar @args % 2 );
-#    #~     
-#    #~     # assign list to hash
-#    #~     %{ $self }  = @args;
-#    #~     
-#    #~     return $self;
-#    #~ };
-#    #~ ######## /init ########
+#----------------------------------------------------------------------------#
 
 #=========# OBJECT METHOD
 #
@@ -195,14 +148,14 @@ sub get_config {
         my $path        = $_;
 #### Loading config file: $path
         my $fh = IO::File->new("< $path")
-            or next;            # not a problem if no config file found
+            or next;            # not a problem if some config file not found
         my $prev_fh         = select $fh;
         local $/            = undef;            # slurp
         select $prev_fh;
         my $file_contents   = <$fh>;
 #### $file_contents
         my %temp            = eval $file_contents;
-        _crash( 'get_config_0', $path, q{}, $@ ) if $@;    
+        crash( 'Error evaluating config file:', $path, q{}, $@ ) if $@;    
 #### %temp
         
         %config             = ( %config, %temp );
@@ -213,7 +166,8 @@ sub get_config {
         close $fh;
     };
     # ... but it's bad if no configuration found at all.
-    _crash( 'get_config_1', @paths, q{} ) if ( not scalar keys %config );    
+    crash( 'No config file found; searched:', @paths, q{} ) 
+        if ( not scalar keys %config );    
     
 #### Configuration: %config    
     
@@ -246,7 +200,10 @@ sub get_pane {
     
     # Frames are numbered in order of creation.
     my $frame           = $frames[$frame_number]
-        or _crash( 'get_pane_0', "frame_number: $frame_number" );
+        or crash(
+            'Tried to get a nonexistent pane: ', 
+            "frame_number: $frame_number" 
+            );
     
     # Find the VBox, which is the requested pane.
     my $pane        = $frame->get_child();    
@@ -303,7 +260,7 @@ sub get_color_of {
     
 #### $color_spec
     if ( substr ($color_spec, 0, 1) eq '-' ) {    # requested from config hash
-        _crash( 'get_color_of_1', $color_spec, '') 
+        $err->crash( 'get_color_of_1', $color_spec ) 
             if not defined $cs->{-config}{$color_spec};
 #### $cs->{-config}{$color_spec};
         # recursive call
@@ -315,10 +272,10 @@ sub get_color_of {
         # check validity of each element
         for (@ary) {
             # can I do arithmetic on this element?
-            _crash( 'get_color_of_2', $color_spec, $_, '') 
+            $err->crash( 'get_color_of_2', $color_spec, $_ ) 
                 if not looks_like_number($_);
             # is element within range?
-            _crash( 'get_color_of_2', $color_spec, $_, '') 
+            $err->crash( 'get_color_of_2', $color_spec, $_ ) 
                 if not ( $_ >= 0 and $_ <= $max );          #   0..$max
         };
         
@@ -336,7 +293,7 @@ sub get_color_of {
         $color   = Gtk2::Gdk::Color->new( $r, $g, $b, 0 );        
     }
     else {
-        _crash( 'get_color_of_0', $color_spec );
+        $err->crash( 'get_color_of_0', $color_spec );
     };
     
     return $color;
@@ -392,71 +349,71 @@ sub method {
     
 }; ## method
 
-######## INTERNAL UTILITY ########
-#
-#   _crash( $errkey, @more );      # fatal out of internal error
-#       
-# Calls croak() with some message. 
-#   
-sub _crash {
-    my $errkey      = shift;            # remaining args are more lines
-    my $prepend     = __PACKAGE__;      # prepend to all errors
-       $prepend     = join q{}, q{# }, $prepend, q{: };
-    my $indent      = qq{\n} . q{ } x length $prepend;
-    
-    my @lines       ;
-    my $text        ;
-    
-    # define errors
-    my $error       = {
-        init_0          => [ 
-            'Odd number of args in init()', 
-        ],
-        get_config_0    => [
-            'Error evaluating config file:',
-        ],
-        get_config_1    => [
-            'No config file found; searched:',
-        ],
-        get_pane_0      => [
-            'Tried to get a nonexistent pane:',
-        ],
-        put_mw_0        => [
-            'Tried to store main Window from an undefined reference',
-        ],
-        put_mw_1        => [
-            'Not a main Window',
-        ],
-        put_mw_2        => [
-            'Not a Gtk object',
-        ],
-        get_color_of_0  => [
-            'Bad color specification',
-        ],
-        get_color_of_1  => [
-            'No color specification in configuration',
-        ],
-        get_color_of_2  => [
-            'Color specification not arrayref of \'double\' integers',
-        ],
-    };
-    
-    # find and expand error
-    if ($errkey) {
-        push @lines, $errkey;
-        push @lines, @{ $error->{$errkey} };
-    }
-    else {
-        push @lines, 'Unimplemented error';
-    };
-    push @lines, @_;
-    $text           = $prepend . join $indent, @lines;
-    
-    # now croak()
-    croak $text;
-    return 0;                   # should never get here, though
-};
-######## /_crash ########
+#~ ######## INTERNAL UTILITY ########
+#~ #
+#~ #   _crash( $errkey, @more );      # fatal out of internal error
+#~ #       
+#~ # Calls croak() with some message. 
+#~ #   
+#~ sub _crash {
+#~     my $errkey      = shift;            # remaining args are more lines
+#~     my $prepend     = __PACKAGE__;      # prepend to all errors
+#~        $prepend     = join q{}, q{# }, $prepend, q{: };
+#~     my $indent      = qq{\n} . q{ } x length $prepend;
+#~     
+#~     my @lines       ;
+#~     my $text        ;
+#~     
+#~     # define errors
+#~     my $error       = {
+#~         init_0          => [ 
+#~             'Odd number of args in init()', 
+#~         ],
+#~         get_config_0    => [
+#~             'Error evaluating config file:',
+#~         ],
+#~         get_config_1    => [
+#~             'No config file found; searched:',
+#~         ],
+#~         get_pane_0      => [
+#~             'Tried to get a nonexistent pane:',
+#~         ],
+#~         put_mw_0        => [
+#~             'Tried to store main Window from an undefined reference',
+#~         ],
+#~         put_mw_1        => [
+#~             'Not a main Window',
+#~         ],
+#~         put_mw_2        => [
+#~             'Not a Gtk object',
+#~         ],
+#~         get_color_of_0  => [
+#~             'Bad color specification',
+#~         ],
+#~         get_color_of_1  => [
+#~             'No color specification in configuration',
+#~         ],
+#~         get_color_of_2  => [
+#~             'Color specification not arrayref of \'double\' integers',
+#~         ],
+#~     };
+#~     
+#~     # find and expand error
+#~     if ($errkey) {
+#~         push @lines, $errkey;
+#~         push @lines, @{ $error->{$errkey} };
+#~     }
+#~     else {
+#~         push @lines, 'Unimplemented error';
+#~     };
+#~     push @lines, @_;
+#~     $text           = $prepend . join $indent, @lines;
+#~     
+#~     # now croak()
+#~     croak $text;
+#~     return 0;                   # should never get here, though
+#~ };
+#~ ######## /_crash ########
 
 #============================================================================#
 
@@ -511,12 +468,12 @@ sub put_mw {
     
 #### $mw    
     # $mw must be a defined reference
-    _crash( 'put_mw_0' ) if not defined $mw;
+    $err->crash( 'put_mw_0' ) if not defined $mw;
     
     # $mw must be a Gtk main Window
 #~     TODO: is this a valid Gtk main Window?
-#~     _crash('put_mw_1') if not ( $mw = eval{ $mw->MainWindow(); } );
-    _crash( 'put_mw_2', $@ ) if $@;    
+#~     $err->crash('put_mw_1') if not ( $mw = eval{ $mw->MainWindow(); } );
+    $err->crash( 'put_mw_2', $@ ) if $@;    
     
     $cs->{ -mw }    = $mw;
     
