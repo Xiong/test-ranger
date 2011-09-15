@@ -1,11 +1,11 @@
 package Test::Ranger::DB;       # database interactions
 
-use 5.010000;
+use 5.010001;
 use strict;
 use warnings;
 use Carp;
 
-use version 0.89; our $VERSION = qv('v0.0.4');
+use version 0.94; our $VERSION = qv('v0.0.4');
 
 use parent 'Test::Ranger::CS';  # just for new() and init() methods
 

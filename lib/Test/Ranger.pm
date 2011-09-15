@@ -1,11 +1,11 @@
 package Test::Ranger;
 
-use 5.010000;
+use 5.010001;
 use strict;
 use warnings;
 use Carp;
 
-use version 0.77; our $VERSION = qv('0.0.4');
+use version 0.94; our $VERSION = qv('0.0.4');
 
 use Test::More;                 # Standard framework for writing test scripts
 use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
