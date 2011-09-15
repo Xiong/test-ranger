@@ -8,7 +8,7 @@ use Carp;
 use version 0.94; our $VERSION = qv('v0.0.4');
 
 use parent qw{ Test::Ranger };
-use Test::Ranger qw(:ALL);      # Testing tool base class and utilities
+use Test::Ranger qw(:all);      # Testing tool base class and utilities
 
 use Scalar::Util qw(
     looks_like_number
@@ -51,48 +51,81 @@ use Devel::Comments '###';      # debug only                             #~
 
 $::Debug = 0 unless (defined $::Debug);     # global; can be raised in caller
 
-######## CLASS METHOD ########
-#
-#   my $obj = Test::Ranger::CS->new();
-#
-#       Returns a hashref blessed into class of calling package
-#
-#       Args are optional but if supplied must be a list of 
-#        key/value pairs, which will be used to initialize the object.
-#
-#       see also: init();
-#
-sub new {
-    my $class   = shift;
-    my $self    = {};
-    
-    bless ($self => $class);
-    $self->init(@_);            # init all remaining args
-    
-    return $self;
-};
-######## /new ########
+    my $error       = {
+        init_0          => [ 
+            'Odd number of args in init()', 
+        ],
+        get_config_0    => [
+            'Error evaluating config file:',
+        ],
+        get_config_1    => [
+            'No config file found; searched:',
+        ],
+        get_pane_0      => [
+            'Tried to get a nonexistent pane:',
+        ],
+        put_mw_0        => [
+            'Tried to store main Window from an undefined reference',
+        ],
+        put_mw_1        => [
+            'Not a main Window',
+        ],
+        put_mw_2        => [
+            'Not a Gtk object',
+        ],
+        get_color_of_0  => [
+            'Bad color specification',
+        ],
+        get_color_of_1  => [
+            'No color specification in configuration',
+        ],
+        get_color_of_2  => [
+            'Color specification not arrayref of \'double\' integers',
+        ],
+    };
 
-######## OBJECT METHOD ########
-#
-#   $obj->init( '-key' => $value, '-foo' => $bar );
-#
-#       initializes $obj with a list of key/value pairs
-#       empty list okay
-#
-sub init {
-    my $self    = shift;
-    my @args    = @_;
-    
-    # do some minimal checking
-    _crash('init_0') if ( scalar @args % 2 );
-    
-    # assign list to hash
-    %{ $self }  = @args;
-    
-    return $self;
-};
-######## /init ########
+#    #~ ######## CLASS METHOD ########
+#    #~ #
+#    #~ #   my $obj = Test::Ranger::CS->new();
+#    #~ #
+#    #~ #       Returns a hashref blessed into class of calling package
+#    #~ #
+#    #~ #       Args are optional but if supplied must be a list of 
+#    #~ #        key/value pairs, which will be used to initialize the object.
+#    #~ #
+#    #~ #       see also: init();
+#    #~ #
+#    #~ sub new {
+#    #~     my $class   = shift;
+#    #~     my $self    = {};
+#    #~     
+#    #~     bless ($self => $class);
+#    #~     $self->init(@_);            # init all remaining args
+#    #~     
+#    #~     return $self;
+#    #~ };
+#    #~ ######## /new ########
+#    #~ 
+#    #~ ######## OBJECT METHOD ########
+#    #~ #
+#    #~ #   $obj->init( '-key' => $value, '-foo' => $bar );
+#    #~ #
+#    #~ #       initializes $obj with a list of key/value pairs
+#    #~ #       empty list okay
+#    #~ #
+#    #~ sub init {
+#    #~     my $self    = shift;
+#    #~     my @args    = @_;
+#    #~     
+#    #~     # do some minimal checking
+#    #~     _crash('init_0') if ( scalar @args % 2 );
+#    #~     
+#    #~     # assign list to hash
+#    #~     %{ $self }  = @args;
+#    #~     
+#    #~     return $self;
+#    #~ };
+#    #~ ######## /init ########
 
 #=========# OBJECT METHOD
 #
