@@ -60,7 +60,7 @@ dlock( my $err     = Test::Ranger->new(  # this only locks the reference
 # 
 # The first arg is tested to see if it's a reference and if so, shifted off.
 # Then the next test is to see if the second (now first) arg is an errkey.
-# If not, then all args are considered @lines of text or references.
+# If not, then all args are considered @lines of text.
 #   
 sub crash {
     my $self        ;
