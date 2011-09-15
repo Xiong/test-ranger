@@ -8,6 +8,8 @@ use utf8;
 
 use version 0.94; our $VERSION = qv('v0.0.4');
 
+use parent qw{ Test::Ranger };
+use Test::Ranger qw(:ALL);      # Testing tool base class and utilities
 use Test::Ranger::CS;           # pseudo-global football of state
 
 use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes

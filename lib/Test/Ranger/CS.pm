@@ -7,7 +7,8 @@ use Carp;
 
 use version 0.94; our $VERSION = qv('v0.0.4');
 
-#use parent qw{  };             # inherits from UNIVERSAL only
+use parent qw{ Test::Ranger };
+use Test::Ranger qw(:ALL);      # Testing tool base class and utilities
 
 use Scalar::Util qw(
     looks_like_number
@@ -504,7 +505,7 @@ __END__
 
 =head1 NAME
 
-Test::Ranger::CS - class for 'context structure' football
+Test::Ranger::CS - Class for 'context structure' football
 
 =head1 VERSION
 

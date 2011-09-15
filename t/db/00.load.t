@@ -9,6 +9,7 @@ BEGIN {
 }   
 
 BEGIN {
+    use Test::Ranger;       # Testing tool base class and utilities
     use Test::Ranger::DB;   # Database interactions for Test-Ranger
     use DBI;                # Generic interface to a large number of databases
     #~ use DBD::mysql;         # DBI driver for MySQL
@@ -17,4 +18,4 @@ BEGIN {
 }
 
 pass( 'Load modules.' );
-diag( "Testing Test::Ranger::DB $Test::Ranger::DB::VERSION" );
+diag( "Testing Test::Ranger $Test::Ranger::VERSION" );

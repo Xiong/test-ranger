@@ -7,63 +7,35 @@ use Carp;
 
 use version 0.94; our $VERSION = qv('v0.0.4');
 
-use parent 'Test::Ranger::CS';  # just for new() and init() methods
+use parent qw{ Test::Ranger };
+use Test::Ranger qw(:all);      # Testing tool base class and utilities
 
 use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 use DBIx::RunSQL;       # run SQL to create a database schema
 
+use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
+
 # use for debug only
-use Devel::Comments '###';      # debug only                             #~
+#~ use Devel::Comments '###';      # debug only                             #~
 
 
 
 #============================================================================#
 
-#----------------------------------------------------------------------------#
+# Pseudo-globals
 
-######## INTERNAL UTILITY ########
-#
-#   _crash( $errkey, @more );      # fatal out of internal error
-#       
-# Calls croak() with some message. 
-#   
-sub _crash {
-    my $errkey      = shift;            # remaining args are more lines
-    my $prepend     = __PACKAGE__;      # prepend to all errors
-       $prepend     = join q{}, q{# }, $prepend, q{: };
-    my $indent      = qq{\n} . q{ } x length $prepend;
+# Error messages
+dlock( my $err  = Test::Ranger->new(  # this only locks the reference
+    _unpaired       => [ 'Unpaired arguments passed; named args required:'  ],
+    _no_sql_file    => [ 'No SQL file passed:'                              ],
+    _bad_sql_file   => [ 'Bad SQL file ($A[0]) passed:'                     ],
     
-    my @lines       ;
-    my $text        ;
     
-    # define errors
-    my $error       = {
-        unpaired            => [ 
-            'Unpaired argument in call to...', 
-        ],
-        create_1            => [
-            'No SQL file passed to create()',
-        ],
-    };
-    
-    # find and expand error
-    if ( $errkey && defined $error->{$errkey} ) {
-        push @lines, $errkey;
-        push @lines, @{ $error->{$errkey} };
-    }
-    else {
-        push @lines, 'Unimplemented error';
-    };
-    push @lines, @_;
-    $text           = $prepend . join $indent, @lines;
-    
-    # now croak()
-    croak $text;
-    return 0;                   # should never get here, though
-};
-######## /_crash ########
+) ); ## $err
+
+#----------------------------------------------------------------------------#
 
 #=========# OBJECT METHOD
 #
@@ -86,16 +58,14 @@ sub _crash {
 #   
 sub create {
     my $db          = shift;
-#~     _crash 'unpaired', 'create()', @_, $! 
-#~         if ( scalar @_ % 2 );       # an even number modulo 2 is zero: false
-#~     my %args        ;
-#~     %args           = eval { %args    = @_ };
-#~         _crash 'unpaired', 'create()', @_, $@ if $@;     
+    my %args        = paired(@_);
     my $db_name     = $args{-db_name};
 #~     my $user        = $args{-db_user};      # not supported by SQLite
 #~     my $pass        = $args{-db_pass};      # not supported by SQLite
     my $sql_file    = $args{-sql_file}
-        or _crash 'create_1', $!;
+        or $err->crash( '_no_sql_file' );
+    -f $sql_file
+        or $err->crash( "Not a file: ($sql_file)" );
     my $verbose     = $args{-verbose};
     
     my $msg         ;
@@ -107,8 +77,7 @@ sub create {
                 verbose => $verbose,
     );
     
-    $msg            = 'Database Created.';      # fake only for debug only
-    return $msg;
+    return $dbh;
 }; ## create
 
 

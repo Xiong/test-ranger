@@ -12,66 +12,163 @@ use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
 use Scalar::Util;               # General-utility scalar subroutines
 use Scalar::Util::Reftype;      # Alternate reftype() interface
 
+use Exporter::Easy (            # Procedural as well as OO interface; you pick
+    TAGS    => [
+        util        => [qw{
+            crash
+            crank
+            paired
+            
+        }],
+        
+        all         => [qw{ :util }]
+    ],
+);
+
 ## use
 
 # Alternate uses
-#~ use Devel::Comments;
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 
 # Pseudo-globals
 
-#~ # Literal hash keys
-#~ dlock( my $coderef     = '-coderef');    # cref to code under test
+# Error messages
+dlock( my $err     = Test::Ranger->new(  # this only locks the reference
+    _unpaired   => [ 'Unpaired arguments passed; named args required:' ],
+    
+    
+) ); ## $err
 
 #----------------------------------------------------------------------------#
 
+#=========# OBJECT METHOD OR EXTERNAL ROUTINE
+#
+#    crash( @lines );                # fatal out with @lines message
+#    $tr->crash( @lines );           # OO interface
+#    $tr->crash( $errkey );          # fatal out with value of $errkey
+#    $tr->crash( $errkey, @lines );  # fatal out with additional @lines
+#
+# Purpose   : Fatal out of internal errors
+# Parms     : $errkey   : string    : must begin with '_' (underbar)
+#             @lines    : strings   : free text
+# Reads     : $tr->{$errkey}, $tr->{-error}{$errkey}
+# Returns   : never
+# Throws    : always die()-s
+# See also  : paired(), crank()
+# 
+# The first arg is tested to see if it's a reference and if so, shifted off.
+# Then the next test is to see if the second (now first) arg is an errkey.
+# If not, then all args are considered @lines of text or references.
+#   
+sub crash {
+    my $self        ;
+    my @lines       ;
+    my $text        ;
+    if ( ref $_[0] ) {              # first arg is a reference
+        $self       = shift;        # hope it's blessed
+        if ( $_[0] =~ /^_/ ) {      # an $errkey was provided
+            my $errkey      = shift;
+##### $errkey    
+            # find and expand error
+            if ( defined $self->{$errkey} ) {
+                push @lines, $errkey;
+                push @lines, @{ $self->{$errkey} };
+            }
+            else {
+                push @lines, "Unimplemented error $errkey";
+            };
+        };
+    };
+    push @lines, @_;                # all remaining args are error text.
+        
+    # Stack backtrace.
+    my $call_pkg        = 0;
+    my $call_sub        = 3;
+    my $call_line       = 2;
+    for my $frame (1..3) {
+        my @caller_ary  = caller($frame);
+        push @lines,      $caller_ary[$call_pkg] . ( q{ } x 4 )
+                        . $caller_ary[$call_sub] . q{() line }
+                        . $caller_ary[$call_line]
+                        ;
+    };
+    
+    my $prepend     = __PACKAGE__;      # prepend to all errors
+       $prepend     = join q{}, q{# }, $prepend, q{: };
+    my $indent      = qq{\n} . q{ } x length $prepend;
+    
+    # Expand error.
+    $text           = $prepend . join $indent, @lines;
+    $text           = $text . $indent;      # before croak()'s trace
+    
+    # now croak()
+    croak $text;
+    return 0;                   # should never get here, though
+}; ## crash
+
+#=========# EXTERNAL FUNCTION
+#
+#   my %args    = paired(@_);     # check for unpaired arguments
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub paired {
+    if ( scalar @_ % 2 ) {  # an odd number modulo 2 is one: true
+        $err->crash('_unpaired');
+    };
+    return @_;
+}; ## paired
+
 #=========# CLASS METHOD
 #
-#   my $obj     = $class->new($self);
 #   my $obj     = $class->new();
 #   my $obj     = $class->new({ -a  => 'x' });
-#   my $obj     = $class->new([ 1, 2, 3, 4 ]);
 #       
 # Purpose   : Object constructor
 # Parms     : $class    : Any subclass of this class
-#           : $self     : Hashref or arrayref
+#             anything else will be passed to init()
 # Returns   : $self
-# Invokes   : init(), Test::Ranger::List::new()
+# Invokes   : init()
 # 
 # If invoked with $class only, blesses and returns an empty hashref. 
 # If invoked with $class and a hashref, blesses and returns it. 
-# If invoked with $class and an arrayref, invokes ::List::new(). 
+# Note that you can't skip passing the hashref if you mean to init() it. 
 # 
 sub new {
     my $class   = shift;
-    my $self    = shift || {};      # default: hashref
+    my $self    = {};           # always hashref
     
-    if ( (reftype $self)->array ) {
-        $self       = Test::Ranger::List->new($self);
-    } 
-    else {
-        bless ($self => $class);
-        $self->init();
-    };
+    bless ($self => $class);
+    $self->init(@_);            # init remaining args
     
     return $self;
 }; ## new
 
 #=========# OBJECT METHOD
+#   $obj->init( '-key' => $value, '-foo' => $bar );
 #
-#   $obj->init();
-#
-# Purpose   : Initialize housekeeping info.
-# Parms     : $class    : Any subclass of this class
-#           : $self     : Hashref
-# Returns   : $self
+#       initializes $obj with a list of key/value pairs
+#       empty list okay
 #
 sub init {
-    my $self        = shift;
+    my $self    = shift;
+    my @args    = @_;
     
-    $self->{-plan_counter}      = 0;
-    $self->{-expanded}          = 0;
+    # do some minimal checking
+    _crash('init_0') if ( scalar @args % 2 );
+    
+    # assign list to hash
+    %{ $self }  = @args;
     
     return $self;
 }; ## init
@@ -181,7 +278,7 @@ __END__
 
 =head1 NAME
 
-Test::Ranger - Test with data tables, capturing, templates
+Test::Ranger - Testing tool base class and utilities
 
 =head1 VERSION
 

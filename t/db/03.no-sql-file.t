@@ -21,6 +21,7 @@ my $diag        = $unit;
 my $tc          = 0;
 
 my $db_name     = $ENV{tr_test_db_name}     //= 'file/db/tr_test_01';
+my $sql_file    = q{};      # don't pass
 
 #----------------------------------------------------------------------------#
 # EXECUTE
@@ -30,7 +31,7 @@ trap{
     my $db          = Test::Ranger::DB->new();
     my $msg = $db->create(
         -db_name    => $db_name,
-        'foo',      # unpaired argument
+        -sql_file   => $sql_file,
     );
 
 };
@@ -40,11 +41,11 @@ trap{
 
 #~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
 
-$trap->did_die("$unit dies correctly when fed unpaired argument");
+$trap->did_die("$unit dies correctly when given no .sql file");
 $tc++;
 
 $trap->die_like(
-    words(qw( unpaired arg create )),
+    words(qw( no sql file )),
     "$unit emits expected error message",
 );
 $tc++;
