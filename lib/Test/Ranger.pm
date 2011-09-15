@@ -162,10 +162,7 @@ sub new {
 #
 sub init {
     my $self    = shift;
-    my @args    = @_;
-    
-    # do some minimal checking
-    _crash('init_0') if ( scalar @args % 2 );
+    my @args    = paired(@_);
     
     # assign list to hash
     %{ $self }  = @args;
