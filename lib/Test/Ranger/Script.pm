@@ -8,6 +8,8 @@ use utf8;
 
 use version 0.94; our $VERSION = qv('v0.0.4');
 
+use parent qw{ Test::Ranger };
+use Test::Ranger qw(:all);      # Testing tool base class and utilities
 use Test::Ranger::CS;           # pseudo-global football of state
 
 use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
@@ -36,8 +38,12 @@ use Devel::Comments '###';
 #============================================================================#
 # Constants
 
-# Command line options
-#~ dlock( my $option_oneshot     = '-1');    # execute from a script
+# Error messages
+dlock( my $err     = Test::Ranger->new(  # this only locks the reference
+    _failed_fork     => [ 'Failed to fork:'                                 ],
+    
+    
+) ); ## $err
 
 #----------------------------------------------------------------------------#
 # Globals
@@ -684,7 +690,7 @@ sub make_logger {
             last;
         };
     };
-    die "Unregistered terminal $terminal ", $!
+    crash( "Unregistered terminal $terminal " )
         if ( $term_id == $bogus );
     
     
@@ -700,12 +706,12 @@ sub make_logger {
     # Create fifo.
     my $fifo        = "tr_fifo_$term_id";        # arbitrary but unique
     mkfifo( $fifo, 0700 ) 
-        or die "mkfifo $fifo failed: $!";
+        or crash( "mkfifo $fifo failed:" );
     push @{ $cs->{-fifos} }, $fifo;
     
     # Fork, to avoid hang up waiting for the other half of the fifo.
     my $pid     = fork;
-    if (not defined $pid) { die 'Failed to fork.' };
+    if (not defined $pid) { $err->crash( '_failed_fork' ) };
     # Am I parent or child?
     if   ( $pid ) {         # parent
         push @{ $cs->{-child_pid} }, $pid;
@@ -713,7 +719,7 @@ sub make_logger {
     else {                  # child
         # Open fifo. 
         open my $fh, '<', $fifo
-            or die "Failed to open $fifo for reading ", $!;
+            or crash( "Failed to open $fifo for reading " );
     
         while (<$fh>) {
             _parse_script( 
@@ -723,7 +729,7 @@ sub make_logger {
             );
         };
         close $fh
-            or die "Failed to close $fifo for reading ", $!;
+            or crash( "Failed to open $fifo for reading " );
         exit(0);
     };
     
@@ -760,9 +766,7 @@ sub make_logger {
 # http://www.ncssm.edu/~cs/index.php?loc=logging.html&callPrintLinuxSupport=1
 # 
 sub _parse_script {
-    die "_parse_script: Odd number of arguments: ", @_, $! 
-        if ( scalar @_ % 2 );       # an even number modulo 2 is zero: false
-    my %args        = @_;
+    my %args        = paired(@_);
     my $cs          = $args{-cs};           # football
     my $text        = $args{-text};         # grabbed typescript
     my $term_id     = $args{-term_id};      # terminal id not signal id

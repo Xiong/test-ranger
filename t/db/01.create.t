@@ -1,4 +1,4 @@
-use 5.010000;
+use 5.010001;
 use strict;
 use warnings;
 
@@ -21,8 +21,8 @@ use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 # SETUP
 
 my $got         ;
-my $want    ;
-my $unit        = 'create(): ';
+my $want        ;
+my $unit        = '::DB::create(): ';
 my $diag        = $unit;
 my $tc          = 0;
 
@@ -72,11 +72,9 @@ $trap->return_ok(
 );
 $tc++;
 
-$want       = words(qw( created ));
-$diag       = "$unit says it created something";
-$trap->return_like(
+$diag       = "$unit returned something";
+$trap->return_ok(
     0,
-    $want,
     $diag,
 );
 $tc++;
