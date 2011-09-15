@@ -54,6 +54,23 @@ $::Debug = 0 unless (defined $::Debug);     # global; can be raised in caller
 
 #============================================================================#
 
+# CS is a 'sloppy' hashref class in which callers are expected to stuff 
+# things in and take them out directly. It's expected that only one such 
+# object will exist per script invocation. I call it a "football" because 
+# it's passed from hand to hand; nothing can be done by anything that has 
+# not got it. I call it "pseudo-global" because it contains values that are, 
+# essentially, global to all execution. 
+#
+# LIST KEYS HERE:
+# 
+# -mw                           # Gtk main Window object
+# -config                       # basic configurations loaded from file
+#   -mw_initial_V               # main Window starting size Vertical   (px)
+#   -mw_initial_H               # main Window starting size Horizontal (px)
+#   -mw_anchor                  # where main Window is anchored on screen
+
+#============================================================================#
+
 # Pseudo-globals
 
 # Error messages
@@ -330,110 +347,6 @@ sub db_history_add {
 
 #=========# OBJECT METHOD
 #
-#   $obj->method( '-parm' => $value, );     # short
-#       
-# Purpose   : ____
-# Parms     : ____
-# Reads     : ____
-# Returns   : ____
-# Invokes   : ____
-# Writes    : ____
-# Throws    : ____
-# See also  : ____
-# 
-# ____
-#   
-sub method {
-    
-    
-    
-}; ## method
-
-#~ ######## INTERNAL UTILITY ########
-#~ #
-#~ #   _crash( $errkey, @more );      # fatal out of internal error
-#~ #       
-#~ # Calls croak() with some message. 
-#~ #   
-#~ sub _crash {
-#~     my $errkey      = shift;            # remaining args are more lines
-#~     my $prepend     = __PACKAGE__;      # prepend to all errors
-#~        $prepend     = join q{}, q{# }, $prepend, q{: };
-#~     my $indent      = qq{\n} . q{ } x length $prepend;
-#~     
-#~     my @lines       ;
-#~     my $text        ;
-#~     
-#~     # define errors
-#~     my $error       = {
-#~         init_0          => [ 
-#~             'Odd number of args in init()', 
-#~         ],
-#~         get_config_0    => [
-#~             'Error evaluating config file:',
-#~         ],
-#~         get_config_1    => [
-#~             'No config file found; searched:',
-#~         ],
-#~         get_pane_0      => [
-#~             'Tried to get a nonexistent pane:',
-#~         ],
-#~         put_mw_0        => [
-#~             'Tried to store main Window from an undefined reference',
-#~         ],
-#~         put_mw_1        => [
-#~             'Not a main Window',
-#~         ],
-#~         put_mw_2        => [
-#~             'Not a Gtk object',
-#~         ],
-#~         get_color_of_0  => [
-#~             'Bad color specification',
-#~         ],
-#~         get_color_of_1  => [
-#~             'No color specification in configuration',
-#~         ],
-#~         get_color_of_2  => [
-#~             'Color specification not arrayref of \'double\' integers',
-#~         ],
-#~     };
-#~     
-#~     # find and expand error
-#~     if ($errkey) {
-#~         push @lines, $errkey;
-#~         push @lines, @{ $error->{$errkey} };
-#~     }
-#~     else {
-#~         push @lines, 'Unimplemented error';
-#~     };
-#~     push @lines, @_;
-#~     $text           = $prepend . join $indent, @lines;
-#~     
-#~     # now croak()
-#~     croak $text;
-#~     return 0;                   # should never get here, though
-#~ };
-#~ ######## /_crash ########
-
-#============================================================================#
-
-# CS is a 'sloppy' hashref class in which callers are expected to stuff 
-# things in and take them out directly. It's expected that only one such 
-# object will exist per script invocation. I call it a "football" because 
-# it's passed from hand to hand; nothing can be done by anything that has 
-# not got it. I call it "pseudo-global" because it contains values that are, 
-# essentially, global to all execution. 
-#
-# LIST KEYS HERE:
-# 
-# -mw                           # Gtk main Window object
-# -config                       # basic configurations loaded from file
-#   -mw_initial_V               # main Window starting size Vertical   (px)
-#   -mw_initial_H               # main Window starting size Horizontal (px)
-#   -mw_anchor                  # where main Window is anchored on screen
-
-#=========# OBJECT METHOD
-#
 #   $mw = $cs->get_mw();        # retrieve the Gtk main Window object
 #       
 # Purpose   : Copy main Window object from football into supplied ref.
@@ -480,12 +393,26 @@ sub put_mw {
     return $cs;
 }; ## put_mw
 
-
-
-
-
-
-
+#=========# OBJECT METHOD
+#
+#   $obj->method( '-parm' => $value, );     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub method {
+    
+    
+    
+}; ## method
 
 
 #############################
