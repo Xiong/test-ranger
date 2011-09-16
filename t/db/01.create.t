@@ -74,13 +74,6 @@ $trap->return_ok(
 );
 $tc++;
 
-$diag       = "$unit returned something";
-$trap->return_ok(
-    0,
-    $diag,
-);
-$tc++;
-
 $got        = -f $db_name;      # is a plain file
 $diag       = "$unit test found             $db_name";
 ok( $got, $diag );
