@@ -49,13 +49,16 @@ $db->create(
 #~     -verbose    => $verbose,
 );
 
+my $text        = 'ls -l';
 
 #----------------------------------------------------------------------------#
 # EXECUTE
 
 my $rv = trap{
     
-    $db->insert_term_command('ls -l');
+    $db     = $db->insert_term_command(    # add to command history
+                '-text' => $text, 
+            );
     
 };
 
@@ -72,7 +75,7 @@ $tc++;
 #~ 
 $diag       = "$unit returned something";
 $trap->return_ok(
-#~     0,               # array index if @rv
+    0,               # even if :scalar, return => []
     $diag,
 );
 $tc++;

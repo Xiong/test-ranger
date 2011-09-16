@@ -40,20 +40,23 @@ dlock( my $err  = Test::Ranger->new(  # this only locks the reference
 
 #=========# OBJECT METHOD
 #
-#   $msg    = $db->create( 
+#   $db     = $db->create( 
 #               -db_name    => 'tr',        # (file)name of sqlite database
 #               -sql_file   => 'setup.sql', # setup file contains SQL syntax
 #               -verbose    => 1,           # print each SQL statement as run
 #           );
 #       
 # Purpose   : Create a 'tr' database if it does not exist.
-# Parms     : ____
-# Reads     : ____
-# Returns   : ____
-# Invokes   : ____
-# Writes    : ____
-# Throws    : ____
-# See also  : ____
+# Parms     : $db           : TR::DB object
+#             -db_name      : string    : fully qualified
+#             -sql_file     : string    : fully qualified
+#             -verbose      : bool      : NOT USEFUL HERE?
+# Reads     : -sql_file
+# Returns   : $db           : itself
+# Invokes   : DBIx::RunSQL->create()
+# Writes    : -db_name
+# Throws    : fatal if no or bad file passed
+# See also  : TR::paired()
 # 
 # ____
 #   
@@ -79,11 +82,41 @@ sub create {
     );
     
     # It is better to die() than to return() in failure.
+    # TODO: This test does not work properly; see RT#70998
     crash("Couldn't create DB from $sql_file") unless $dbh;
 ##### $dbh
     
-    return $dbh;
+    $db->{-dbh}     = $dbh;
+    return $db;
 }; ## create
+
+#=========# OBJECT METHOD
+#
+#    $db     = $db->insert_term_command(    # add to command history
+#                '-text' => $text, 
+#            );
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub insert_term_command {
+    my $db      = shift;
+    my $dbh     = $db->{-dbh};
+    my %args    = paired(@_);
+    
+    
+    
+    
+    return $db;
+}; ## insert_term_command
 
 
 
