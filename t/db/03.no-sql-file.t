@@ -9,8 +9,8 @@ use Test::Ranger::DB;
 
 #============================================================================#
 # 
-# This script tests the _crash() error handler for 'unpaired' to create().
-# Was 'odd_args'.
+# This script tests for no file at all passed to create().
+# The empty string is passed.
 
 #----------------------------------------------------------------------------#
 # SETUP

@@ -9,7 +9,7 @@ use Test::Ranger::DB;
 
 #============================================================================#
 # 
-# This script tests the _crash() error handler for 'unpaired' to create().
+# This script tests for unpaired arguments passed to create().
 # Was 'odd_args'.
 
 #----------------------------------------------------------------------------#

@@ -11,8 +11,8 @@ use Test::Ranger::DB;
 
 #============================================================================#
 # 
-# This script tests the _crash() error handler for 'unpaired' to create().
-# Was 'odd_args'.
+# This script tests for no plain file passed to create().
+# The current directory is passed.
 
 #----------------------------------------------------------------------------#
 # SETUP
@@ -51,7 +51,7 @@ $trap->die_like(
     "$unit emits expected error message",
 );
 $tc++;
-note( qq{\n} .$trap->die );
+note( qq{\n} . $trap->die );
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
