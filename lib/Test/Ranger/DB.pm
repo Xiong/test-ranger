@@ -19,6 +19,7 @@ use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
 
 # use for debug only
 #~ use Devel::Comments '###';      # debug only                             #~
+use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 
 
@@ -76,6 +77,10 @@ sub create {
                 sql     => $sql_file,
                 verbose => $verbose,
     );
+    
+    # It is better to die() than to return() in failure.
+    crash("Couldn't create DB from $sql_file") unless $dbh;
+##### $dbh
     
     return $dbh;
 }; ## create
