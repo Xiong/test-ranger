@@ -64,24 +64,20 @@ my $rv = trap{
 
 #~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
 
+$got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
+$want       = 'return'; 
+$diag       = "$unit returned normally";
+is($got, $want, $diag);
+$tc++;
+#~ 
+$diag       = "$unit returned something";
+$trap->return_ok(
+#~     0,               # array index if @rv
+    $diag,
+);
+$tc++;
 
 
-
-
-
-
-#~ $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
-#~ $want       = 'return'; 
-#~ $diag       = "$unit returned normally";
-#~ is($got, $want, $diag);
-#~ $tc++;
-
-#~ $diag       = "$unit returned something";
-#~ $trap->return_ok(
-#~     0,
-#~     $diag,
-#~ );
-#~ $tc++;
 
 #~ $got        = -f $db_name;      # is a plain file
 #~ $diag       = "$unit test found             $db_name";
