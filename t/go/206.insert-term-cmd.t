@@ -1,0 +1,1 @@
+/home/xiong/projects/test-ranger/t/db/206.insert-term-cmd.t

@@ -1,0 +1,1 @@
+/home/xiong/projects/test-ranger/t/db/203.no-sql-file.t
