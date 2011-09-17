@@ -67,7 +67,7 @@ my $rv = trap{
     
     my $cmds = $db->select_term_command();   # no args: select *    
     
-    return $cmds;     # returns an AoA ref: $cmds->{$row}{$col}
+    return $cmds;     # returns an AoA ref: $cmds->[$row][$col]
 };
 
 #----------------------------------------------------------------------------#
