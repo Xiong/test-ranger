@@ -12,7 +12,7 @@ use DBI;                # Generic interface to a large number of databases
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 
 #~ use Devel::Comments '###';                                  # debug only #~
-use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
 #============================================================================#
 # 
@@ -98,10 +98,13 @@ $rv = trap{
     my $sth = $dbh->prepare($sql);
     $rv = $sth->execute
         or die $sth->errstr;
-    $rv = [];                           # clear good return from execute
-    my @row     ;
-    while ( @row = $sth->fetchrow_array ) {
-        push @$rv, \@row;
+#~     $rv = [];                           # clear good return from execute
+    $rv = ['ok'];                       # clear good return from execute
+    my $row     ;
+    while ( $row = $sth->fetchrow_arrayref ) {
+        ##### $row
+        push @$rv, $row;
+        ##### $rv
     };
     return $rv;
 };
@@ -118,7 +121,7 @@ ok( $got, $diag );
 $tc++;
 
 $got        = $rv;
-$want       = [ [ $text ] ],
+$want       = [ 'ok', [ 1, $text ] ],
 ##### $got
 ##### $want
 $diag       = "$unit test select returned inserted command deeply";
