@@ -100,11 +100,11 @@ $rv = trap{
         or die $sth->errstr;
     $rv = [];                           # clear good return from execute
 #~     $rv = ['ok'];                       # clear good return from execute
-    my @row     ;
-    while ( @row = $sth->fetchrow_array ) {
-        ##### @row
+#~     my @row     ;
+    while ( my @row = $sth->fetchrow_array ) {
+#~         ##### @row
         push @$rv, [ @row ];
-        ##### $rv
+#~         ##### $rv
     };
     return $rv;
 };

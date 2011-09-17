@@ -16,14 +16,15 @@ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
 #============================================================================#
 # 
-# This script selects from the terminal command history DB.
+# This script tests a good insert_term_command() with three values.
+# This method stores terminal command history.
 
 #----------------------------------------------------------------------------#
 # SETUP
 
 my $got         ;
 my $want        ;
-my $unit        = '::DB::select_term_command(): ';
+my $unit        = '::DB::insert_term_command(): ';
 my $diag        = $unit;
 my $tc          = 0;
 
@@ -54,11 +55,6 @@ my @text        = (
                     'cat food',
                     'echo ${USER}',
                 );
-for my $text (@text) {
-    $db->insert_term_command(    # add to command history
-            '-text' => $text, 
-        );
-};
 
 
 #----------------------------------------------------------------------------#
@@ -66,7 +62,12 @@ for my $text (@text) {
 
 my $rv = trap{
     
-    
+    for my $text (@text) {
+        $db->insert_term_command(    # add to command history
+                '-text' => $text, 
+            );
+    };
+    return 1;
 };
 
 #----------------------------------------------------------------------------#
@@ -101,11 +102,11 @@ $rv = trap{
         or die $sth->errstr;
     $rv = [];                           # clear good return from execute
 #~     $rv = ['ok'];                       # clear good return from execute
-    my @row     ;
-    while ( @row = $sth->fetchrow_array ) {
-        ##### @row
+#~     my @row     ;
+    while ( my @row = $sth->fetchrow_array ) {
+#~         ##### @row
         push @$rv, [ @row ];
-        ##### $rv
+#~         ##### $rv
     };
     return $rv;
 };
@@ -121,8 +122,8 @@ $diag       = "$unit test select returned true";
 ok( $got, $diag );
 $tc++;
 
-$got        = $rv;
-$want       = [ \@text ],
+@$got       = map { $_->[1] } @$rv;
+$want       = \@text,
 ##### $got
 ##### $want
 $diag       = "$unit test select returned inserted command deeply";
