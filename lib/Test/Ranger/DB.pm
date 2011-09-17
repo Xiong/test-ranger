@@ -15,10 +15,11 @@ use DBI;                # Generic interface to a large number of databases
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 use DBIx::RunSQL;       # run SQL to create a database schema
 
-use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
+use Data::Lock qw( dlock );     # Declare locked scalars
 
 # use for debug only
 #~ use Devel::Comments '###';      # debug only                             #~
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
 
 
@@ -39,20 +40,23 @@ dlock( my $err  = Test::Ranger->new(  # this only locks the reference
 
 #=========# OBJECT METHOD
 #
-#   $msg    = $db->create( 
+#   $db     = $db->create( 
 #               -db_name    => 'tr',        # (file)name of sqlite database
 #               -sql_file   => 'setup.sql', # setup file contains SQL syntax
 #               -verbose    => 1,           # print each SQL statement as run
 #           );
 #       
 # Purpose   : Create a 'tr' database if it does not exist.
-# Parms     : ____
-# Reads     : ____
-# Returns   : ____
-# Invokes   : ____
-# Writes    : ____
-# Throws    : ____
-# See also  : ____
+# Parms     : $db           : TR::DB object
+#             -db_name      : string    : fully qualified
+#             -sql_file     : string    : fully qualified
+#             -verbose      : bool      : NOT USEFUL HERE?
+# Reads     : -sql_file
+# Returns   : $db           : itself
+# Invokes   : DBIx::RunSQL->create()
+# Writes    : -db_name
+# Throws    : fatal if no or bad file passed
+# See also  : TR::paired()
 # 
 # ____
 #   
@@ -77,8 +81,94 @@ sub create {
                 verbose => $verbose,
     );
     
-    return $dbh;
+    # It is better to die() than to return() in failure.
+    # TODO: This test does not work properly; see RT#70998
+    crash("Couldn't create DB from $sql_file") unless $dbh;
+##### $dbh
+    
+    $db->{-dbh}     = $dbh;
+    return $db;
 }; ## create
+
+#=========# OBJECT METHOD
+#
+#    $db     = $db->insert_term_command(    # add to command history
+#                '-text' => $text, 
+#            );
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub insert_term_command {
+    my $db      = shift;
+    my $dbh     = $db->{-dbh};
+    my %args    = paired(@_);
+    my $text    = $args{-text};
+    
+    my $table   = 'term_command';
+    my $F_text  = 'c_text';         # column name of this field
+    my $sql     = qq{INSERT INTO $table ($F_text) VALUES ('$text')};
+    
+    my $rv = $dbh->do($sql)
+        or crash( "Insert failed:", $sql );
+    
+    return $db;
+}; ## insert_term_command
+
+#=========# OBJECT METHOD
+#
+#   $db->select_term_command( '-parm' => $value, );     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub select_term_command {
+    my $db          = shift;
+    my $dbh         = $db->{-dbh};
+    my %args        = paired(@_);
+    
+    my $table       = 'term_command';
+    my $sql         ;
+    
+    my $cmds        ;   # $cmds->[$row][$col]
+    
+    # What to do?
+    if    ( 0 ) {
+        
+    } 
+    elsif ( 0 ) {
+        
+    } 
+    else {              # no %args left: select all
+        $sql        = qq{SELECT * FROM $table};
+    };
+    
+    # Access the DB and wrap up the results.
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute
+        or die $sth->errstr;
+    while ( my @row = $sth->fetchrow_array ) {
+        push @$cmds, [ @row ];
+    };
+    
+    return $cmds;
+}; ## select_term_command
 
 
 

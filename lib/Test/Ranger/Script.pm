@@ -12,7 +12,7 @@ use parent qw{ Test::Ranger };
 use Test::Ranger qw(:all);      # Testing tool base class and utilities
 use Test::Ranger::CS;           # pseudo-global football of state
 
-use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
+use Data::Lock qw( dlock );     # Declare locked scalars
 use List::MoreUtils qw(
     any all none notall true false firstidx first_index 
     lastidx last_index insert_after insert_after_string 

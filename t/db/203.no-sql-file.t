@@ -9,14 +9,15 @@ use Test::Ranger::DB;
 
 #============================================================================#
 # 
-# This script tests the _crash() error handler for 'unpaired' to create().
-# Was 'odd_args'.
+# This script tests for no file at all passed to create().
+# The empty string is passed.
 
 #----------------------------------------------------------------------------#
 # SETUP
-my $got         ;
-my $expected    ;
+
 my $unit        = '::DB::create(): ';
+my $got         ;
+my $want        ;
 my $diag        = $unit;
 my $tc          = 0;
 
@@ -41,24 +42,35 @@ trap{
 
 #~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
 
-$trap->did_die("$unit dies correctly when given no .sql file");
 $tc++;
+$trap->did_die("$unit dies correctly when given no .sql file")
+    or exit 1;
 
+$tc++;
 $trap->die_like(
     words(qw( no sql file )),
     "$unit emits expected error message",
-);
-$tc++;
-note( qq{\n} .$trap->die );
+)  or exit 1;
+note( qq{\n} . $trap->die );
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
 
+END {
+    if ( $ENV{tr_preserve_test_db} ) {
+        diag "$db_name preserved."
+    }
+    else {
+        unlink $db_name;
+        note "$db_name unlinked."
+    };
 
+    done_testing($tc);                  # declare plan after testing
+}
 
-done_testing($tc);                      # declare plan after testing
+#============================================================================#
 
-sub words {             # construct a regex that matches these strings
+sub words {                         # sloppy match these strings
     my @words   = @_;
     my $regex   = q{};
     
@@ -68,5 +80,4 @@ sub words {             # construct a regex that matches these strings
     
     return qr/$regex/is;
 };
-
 

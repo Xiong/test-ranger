@@ -20,14 +20,15 @@ use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 #----------------------------------------------------------------------------#
 # SETUP
 
+my $unit        = '::DB::create(): ';
 my $got         ;
 my $want        ;
-my $unit        = '::DB::create(): ';
 my $diag        = $unit;
 my $tc          = 0;
 
 my $db_name     = $ENV{tr_test_db_name}     //= 'file/db/tr_test_01';
 my $sql_file    = $ENV{tr_sql_file}         //= 'file/db/tr_db.sql';
+#~ my $verbose     = $ENV{tr_test_verbose};
 my $user        ;   # not supported by SQLite
 my $pass        ;   # not supported by SQLite
 my $sql         ;
@@ -36,8 +37,8 @@ unlink $db_name;            # cleanup previous test DB file if any
 $got            = -f $db_name;      # is a plain file
 $want           = undef;            # want it to *not* exist
 $diag           = "$unit test unlinks existing  $db_name";
-is( $got, $want, $diag );
 $tc++;
+is( $got, $want, $diag ) or exit 1;
 
 #----------------------------------------------------------------------------#
 # EXECUTE
@@ -50,6 +51,7 @@ my @rv = trap{
     $msg = $db->create(
         -db_name    => $db_name,
         -sql_file   => $sql_file,
+#~         -verbose    => $verbose,
     );
     return $msg;
 };
@@ -62,33 +64,26 @@ my @rv = trap{
 $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
 $want       = 'return'; 
 $diag       = "$unit returned normally";
-is($got, $want, $diag);
 $tc++;
+is($got, $want, $diag) or exit 1;
 
 $diag       = "$unit returned something";
+$tc++;
 $trap->return_ok(
     0,
     $diag,
-);
-$tc++;
-
-$diag       = "$unit returned something";
-$trap->return_ok(
-    0,
-    $diag,
-);
-$tc++;
+) or exit 1;
 
 $got        = -f $db_name;      # is a plain file
 $diag       = "$unit test found             $db_name";
-ok( $got, $diag );
 $tc++;
+ok( $got, $diag ) or exit 1;
 
 my $dsn     = "DBI:SQLite:$db_name";
 my $dbh     = DBI->connect($dsn, $user, $pass);
 $diag       = "$unit test connected to      $db_name";
-ok( $dbh, $diag );
 $tc++;
+ok( $dbh, $diag ) or exit 1;
 
 # New $trap.
 $sql        = q{INSERT INTO term_command (c_text) VALUES ('ls')};
@@ -99,31 +94,33 @@ my $rv = trap{
 $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
 $want       = 'return'; 
 $diag       = "$unit test insert returned normally";
-is($got, $want, $diag);
 $tc++;
+is($got, $want, $diag) or exit 1;
 
 $got        = $rv;
 $diag       = "$unit test insert returned true";
-ok( $got, $diag );
 $tc++;
+ok( $got, $diag ) or exit 1;
 
 $got        = $dbh->disconnect();
 $diag       = "$unit test disconnected";
-ok( $got, $diag );
 $tc++;
+ok( $got, $diag ) or exit 1;
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
 
-if ( $ENV{tr_preserve_test_db} ) {
-    diag "$db_name preserved."
-}
-else {
-    unlink $db_name;
-    note "$db_name unlinked."
-};
+END {
+    if ( $ENV{tr_preserve_test_db} ) {
+        diag "$db_name preserved."
+    }
+    else {
+        unlink $db_name;
+        note "$db_name unlinked."
+    };
 
-done_testing($tc);                  # declare plan after testing
+    done_testing($tc);                  # declare plan after testing
+}
 
 #============================================================================#
 
