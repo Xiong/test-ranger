@@ -12,6 +12,7 @@ use DBI;                # Generic interface to a large number of databases
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 
 #~ use Devel::Comments '###';                                  # debug only #~
+use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
 #============================================================================#
 # 
@@ -80,40 +81,54 @@ $trap->return_ok(
 );
 $tc++;
 
-
-
 #~ $got        = -f $db_name;      # is a plain file
 #~ $diag       = "$unit test found             $db_name";
 #~ ok( $got, $diag );
 #~ $tc++;
 
-#~ my $dsn     = "DBI:SQLite:$db_name";
-#~ my $dbh     = DBI->connect($dsn, $user, $pass);
-#~ $diag       = "$unit test connected to      $db_name";
-#~ ok( $dbh, $diag );
-#~ $tc++;
+my $dsn     = "DBI:SQLite:$db_name";
+my $dbh     = DBI->connect($dsn, $user, $pass);
+$diag       = "$unit test connected to      $db_name";
+ok( $dbh, $diag );
+$tc++;
 
-#~ # New $trap.
-#~ $sql        = q{INSERT INTO term_command (c_text) VALUES ('ls')};
-#~ my $rv = trap{
-#~     my $rv = $dbh->do($sql);
-#~ };
+# New $trap.
+$sql        = q{SELECT * FROM term_command};
+my $rv = trap{
+    my $sth = $dbh->prepare($sql);
+    $rv = $sth->execute
+        or die $sth->errstr;
+    $rv = [];                           # clear good return from execute
+    my @row     ;
+    while ( @row = $sth->fetchrow_array ) {
+        push @$rv, \@row;
+    };
+    return $rv;
+};
 
-#~ $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
-#~ $want       = 'return'; 
-#~ $diag       = "$unit test insert returned normally";
-#~ is($got, $want, $diag);
-#~ $tc++;
+$got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
+$want       = 'return'; 
+$diag       = "$unit test select returned normally";
+is($got, $want, $diag);
+$tc++;
 
-#~ $got        = $rv;
-#~ $diag       = "$unit test insert returned true";
-#~ ok( $got, $diag );
-#~ $tc++;
+$got        = $rv;
+$diag       = "$unit test select returned true";
+ok( $got, $diag );
+$tc++;
 
-#~ $got        = $dbh->disconnect();
-#~ $diag       = "$unit test disconnected";
-#~ ok( $got, $diag );
-#~ $tc++;
+$got        = $rv;
+$want       = [ [ $text ] ],
+##### $got
+##### $want
+$diag       = "$unit test select returned inserted command deeply";
+is_deeply( $got, $want, $diag );
+$tc++;
+
+$got        = $dbh->disconnect();
+$diag       = "$unit test disconnected";
+ok( $got, $diag );
+$tc++;
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
