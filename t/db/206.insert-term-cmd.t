@@ -98,12 +98,12 @@ $rv = trap{
     my $sth = $dbh->prepare($sql);
     $rv = $sth->execute
         or die $sth->errstr;
-#~     $rv = [];                           # clear good return from execute
-    $rv = ['ok'];                       # clear good return from execute
-    my $row     ;
-    while ( $row = $sth->fetchrow_arrayref ) {
-        ##### $row
-        push @$rv, $row;
+    $rv = [];                           # clear good return from execute
+#~     $rv = ['ok'];                       # clear good return from execute
+    my @row     ;
+    while ( @row = $sth->fetchrow_array ) {
+        ##### @row
+        push @$rv, [ @row ];
         ##### $rv
     };
     return $rv;
@@ -121,7 +121,7 @@ ok( $got, $diag );
 $tc++;
 
 $got        = $rv;
-$want       = [ 'ok', [ 1, $text ] ],
+$want       = [ [ 1, $text ] ],
 ##### $got
 ##### $want
 $diag       = "$unit test select returned inserted command deeply";
