@@ -111,9 +111,14 @@ sub insert_term_command {
     my $db      = shift;
     my $dbh     = $db->{-dbh};
     my %args    = paired(@_);
+    my $text    = $args{-text};
     
+    my $table   = 'term_command';
+    my $F_text  = 'c_text';
+    my $sql     = qq{INSERT INTO $table ($F_text) VALUES ('$text')};
     
-    
+    my $rv = $dbh->do($sql)
+        or crash( "Insert failed:", $sql );
     
     return $db;
 }; ## insert_term_command

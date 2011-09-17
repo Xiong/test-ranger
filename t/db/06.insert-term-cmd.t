@@ -94,7 +94,7 @@ $tc++;
 
 # New $trap.
 $sql        = q{SELECT * FROM term_command};
-my $rv = trap{
+$rv = trap{
     my $sth = $dbh->prepare($sql);
     $rv = $sth->execute
         or die $sth->errstr;
