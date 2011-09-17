@@ -16,9 +16,10 @@ use Test::Ranger::DB;
 
 #----------------------------------------------------------------------------#
 # SETUP
-my $got         ;
-my $expected    ;
+
 my $unit        = '::DB::create(): ';
+my $got         ;
+my $want        ;
 my $diag        = $unit;
 my $tc          = 0;
 

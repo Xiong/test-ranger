@@ -114,7 +114,7 @@ sub insert_term_command {
     my $text    = $args{-text};
     
     my $table   = 'term_command';
-    my $F_text  = 'c_text';
+    my $F_text  = 'c_text';         # column name of this field
     my $sql     = qq{INSERT INTO $table ($F_text) VALUES ('$text')};
     
     my $rv = $dbh->do($sql)

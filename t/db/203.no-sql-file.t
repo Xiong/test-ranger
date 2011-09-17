@@ -14,9 +14,10 @@ use Test::Ranger::DB;
 
 #----------------------------------------------------------------------------#
 # SETUP
-my $got         ;
-my $expected    ;
+
 my $unit        = '::DB::create(): ';
+my $got         ;
+my $want        ;
 my $diag        = $unit;
 my $tc          = 0;
 
@@ -53,8 +54,6 @@ note( qq{\n} .$trap->die );
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
-
-
 
 done_testing($tc);                      # declare plan after testing
 

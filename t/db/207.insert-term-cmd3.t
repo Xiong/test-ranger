@@ -12,7 +12,7 @@ use DBI;                # Generic interface to a large number of databases
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 
 #~ use Devel::Comments '###';                                  # debug only #~
-use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
 #============================================================================#
 # 
@@ -22,9 +22,9 @@ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 #----------------------------------------------------------------------------#
 # SETUP
 
+my $unit        = '::DB::insert_term_command(): ';
 my $got         ;
 my $want        ;
-my $unit        = '::DB::insert_term_command(): ';
 my $diag        = $unit;
 my $tc          = 0;
 
@@ -80,7 +80,7 @@ $want       = 'return';
 $diag       = "$unit returned normally";
 is($got, $want, $diag);
 $tc++;
-#~ 
+
 $diag       = "$unit returned something";
 $trap->return_ok(
     0,               # even if :scalar, return => []
@@ -126,7 +126,7 @@ $tc++;
 $want       = \@text,
 ##### $got
 ##### $want
-$diag       = "$unit test select returned inserted command deeply";
+$diag       = "$unit test select returned three inserted commands deeply";
 is_deeply( $got, $want, $diag );
 $tc++;
 

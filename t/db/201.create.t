@@ -20,9 +20,9 @@ use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 #----------------------------------------------------------------------------#
 # SETUP
 
+my $unit        = '::DB::create(): ';
 my $got         ;
 my $want        ;
-my $unit        = '::DB::create(): ';
 my $diag        = $unit;
 my $tc          = 0;
 
