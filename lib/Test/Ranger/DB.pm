@@ -123,6 +123,53 @@ sub insert_term_command {
     return $db;
 }; ## insert_term_command
 
+#=========# OBJECT METHOD
+#
+#   $db->select_term_command( '-parm' => $value, );     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub select_term_command {
+    my $db          = shift;
+    my $dbh         = $db->{-dbh};
+    my %args        = paired(@_);
+    
+    my $table       = 'term_command';
+    my $sql         ;
+    
+    my $cmds        ;   # $cmds->[$row][$col]
+    
+    # What to do?
+    if    ( 0 ) {
+        
+    } 
+    elsif ( 0 ) {
+        
+    } 
+    else {              # no %args left: select all
+        $sql        = qq{SELECT * FROM $table};
+    };
+    
+    # Access the DB and wrap up the results.
+    my $sth = $dbh->prepare($sql);
+    my $rv = $sth->execute
+        or die $sth->errstr;
+    while ( my @row = $sth->fetchrow_array ) {
+        push @$cmds, [ @row ];
+    };
+    
+    return $cmds;
+}; ## select_term_command
+
 
 
 ## END MODULE

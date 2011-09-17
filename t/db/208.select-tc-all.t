@@ -12,7 +12,7 @@ use DBI;                # Generic interface to a large number of databases
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 
 #~ use Devel::Comments '###';                                  # debug only #~
-use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
 #============================================================================#
 # 
@@ -73,7 +73,7 @@ my $rv = trap{
 #----------------------------------------------------------------------------#
 # CHECK
 
-#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
+#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
 
 $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
 $want       = 'return'; 
@@ -88,7 +88,9 @@ $trap->return_ok(
     $diag,
 ) or exit 1;
 
-@$got       = map { $_->[1] } @$rv;
+
+$got        = [];       # clear out previous contents
+@$got       = map { $_->[1] } @{ $rv };
 $want       = \@text,
 $diag       = "$unit returned three inserted commands deeply";
 $tc++;
