@@ -15,7 +15,7 @@ use DBI;                # Generic interface to a large number of databases
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 use DBIx::RunSQL;       # run SQL to create a database schema
 
-use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
+use Data::Lock qw( dlock );     # Declare locked scalars
 
 # use for debug only
 #~ use Devel::Comments '###';      # debug only                             #~

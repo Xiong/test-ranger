@@ -8,7 +8,7 @@ use Carp;
 use version 0.94; our $VERSION = qv('0.0.4');
 
 use Test::More;                 # Standard framework for writing test scripts
-use Data::Lock qw( dlock );     # Declare locked scalars, arrays, and hashes
+use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util;               # General-utility scalar subroutines
 use Scalar::Util::Reftype;      # Alternate reftype() interface
 
