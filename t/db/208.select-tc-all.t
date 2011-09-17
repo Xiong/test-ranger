@@ -39,8 +39,8 @@ unlink $db_name;            # cleanup previous test DB file if any
 $got            = -f $db_name;      # is a plain file
 $want           = undef;            # want it to *not* exist
 $diag           = "$unit test unlinks existing  $db_name";
-is( $got, $want, $diag );
 $tc++;
+is( $got, $want, $diag ) or exit 1;
 
 my $db          = Test::Ranger::DB->new();
 $db->create(
@@ -60,7 +60,6 @@ for my $text (@text) {
         );
 };
 
-
 #----------------------------------------------------------------------------#
 # EXECUTE
 
@@ -79,27 +78,27 @@ my $rv = trap{
 $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
 $want       = 'return'; 
 $diag       = "$unit returned normally";
-is($got, $want, $diag);
 $tc++;
+is($got, $want, $diag) or exit 1;
 
 $diag       = "$unit returned something";
+$tc++;
 $trap->return_ok(
     0,               # even if :scalar, return => []
     $diag,
-);
-$tc++;
+) or exit 1;
 
 @$got       = map { $_->[1] } @$rv;
 $want       = \@text,
 $diag       = "$unit returned three inserted commands deeply";
-is_deeply( $got, $want, $diag );
 $tc++;
+is_deeply( $got, $want, $diag ) or exit 1;
 
 #~ my $dsn     = "DBI:SQLite:$db_name";
 #~ my $dbh     = DBI->connect($dsn, $user, $pass);
 #~ $diag       = "$unit test connected to      $db_name";
-#~ ok( $dbh, $diag );
 #~ $tc++;
+#~ ok( $dbh, $diag ) or exit 1;
 
 #~ # New $trap.
 #~ $sql        = q{SELECT * FROM term_command};
@@ -117,31 +116,33 @@ $tc++;
 #~ $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
 #~ $want       = 'return'; 
 #~ $diag       = "$unit test select returned normally";
-#~ is($got, $want, $diag);
 #~ $tc++;
+#~ is($got, $want, $diag) or exit 1;
 
 #~ $got        = $rv;
 #~ $diag       = "$unit test select returned true";
-#~ ok( $got, $diag );
 #~ $tc++;
+#~ ok( $got, $diag ) or exit 1;
 
 #~ $got        = $dbh->disconnect();
 #~ $diag       = "$unit test disconnected";
-#~ ok( $got, $diag );
 #~ $tc++;
+#~ ok( $got, $diag ) or exit 1;
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
 
-if ( $ENV{tr_preserve_test_db} ) {
-    diag "$db_name preserved."
-}
-else {
-    unlink $db_name;
-    note "$db_name unlinked."
-};
+END {
+    if ( $ENV{tr_preserve_test_db} ) {
+        diag "$db_name preserved."
+    }
+    else {
+        unlink $db_name;
+        note "$db_name unlinked."
+    };
 
-done_testing($tc);                  # declare plan after testing
+    done_testing($tc);                  # declare plan after testing
+}
 
 #============================================================================#
 

@@ -46,25 +46,36 @@ trap{
 
 #~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
 
-$trap->did_die("$unit dies correctly when given crap .sql file (\$0)");
 $tc++;
+$trap->did_die("$unit dies correctly when given crap .sql file (\$0)")
+    or exit 1;
 
+$tc++;
 $trap->die_like(
     words(qw( create DB ) ),
     "$unit emits expected error message",
-);
-$tc++;
+) or exit 1;
 #~ note( qq{\n Died with: } . $trap->die );
 note( qq{\n sql_file: } . $sql_file );
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
 
+END {
+    if ( $ENV{tr_preserve_test_db} ) {
+        diag "$db_name preserved."
+    }
+    else {
+        unlink $db_name;
+        note "$db_name unlinked."
+    };
 
+    done_testing($tc);                  # declare plan after testing
+}
 
-done_testing($tc);                      # declare plan after testing
+#============================================================================#
 
-sub words {             # construct a regex that matches these strings
+sub words {                         # sloppy match these strings
     my @words   = @_;
     my $regex   = q{};
     
@@ -74,5 +85,4 @@ sub words {             # construct a regex that matches these strings
     
     return qr/$regex/is;
 };
-
 
