@@ -814,6 +814,7 @@ my $t3 = $text;                                                     # debug
 ##### $: $prompt
     
     #---# End cleanup #---#
+    # still in _parse_script
     
     # Now decide what to do with the extracted poop -- if anything
     return if not $text;                # nothing left after cleanup
