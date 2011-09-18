@@ -35,10 +35,13 @@ use Glib                        # Gtk constants
 -terminal_frame         => 'D',         # pane to create terminal windows
 #~ -terminal_frame         => '1',         # pane to create terminal windows
 
-
-
 # terminal widget settings
 -terminal_color_background      => 'straw',
 -terminal_color_foreground      => 'black',
+
+-db_file                => '.test-ranger/tr_db',    # SQLite database file
+-sql_file               => 'file/db/tr_db.sql',     # setup file contains SQL
+
+
 
 

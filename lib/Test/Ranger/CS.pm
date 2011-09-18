@@ -9,6 +9,7 @@ use version 0.94; our $VERSION = qv('v0.0.4');
 
 use parent qw{ Test::Ranger };
 use Test::Ranger qw(:all);      # Testing tool base class and utilities
+use Test::Ranger::DB;           # Database interactions for Test-Ranger
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util qw(
