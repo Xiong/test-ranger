@@ -12,9 +12,10 @@ use Test::Ranger qw(:all);      # Testing tool base class and utilities
 
 use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
-use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
+#~ use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 use DBIx::RunSQL;       # Run SQL to create a database schema
 use DBIx::Connector;    # Fast, safe DBI connection and transaction management
+use DBIx::Connector::Driver::SQLite;    # SQLite-specific connection interface
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 
@@ -42,7 +43,8 @@ dlock( my $err  = Test::Ranger->new(  # this only locks the reference
 dlock( my $DB_flags = {
     RaiseError          => 1,
     AutoCommit          => 1,
-    AutoInactiveDestroy => 1,
+#~     AutoInactiveDestroy => 1,    # defaults to true in DBIx::Connector
+#~     AutoInactiveDestroy => '1',  # raises warning if set explicitly
     
 } );
 

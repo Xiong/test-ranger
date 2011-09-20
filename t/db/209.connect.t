@@ -9,7 +9,7 @@ use Test::Ranger::DB;
 
 use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
-use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
+#~ use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 use DBIx::Connector;    # Fast, safe DBI connection and transaction management
 
 #~ use Devel::Comments '###';                                  # debug only #~
@@ -75,7 +75,7 @@ my $rv = trap{
 #----------------------------------------------------------------------------#
 # CHECK
 
-$trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
+#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
 
 $diag       = "$unit returned normally";
 $tc++;
