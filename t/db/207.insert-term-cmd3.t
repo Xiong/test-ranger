@@ -106,11 +106,9 @@ $rv = trap{
     return $rv;
 };
 
-$got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
-$want       = 'return'; 
-$diag       = "$unit test select returned normally";
+$diag       = "$unit returned normally";
 $tc++;
-is($got, $want, $diag) or exit 1;
+$got        = $trap->did_return($diag) or exit 1;
 
 $got        = $rv;
 $diag       = "$unit test select returned true";

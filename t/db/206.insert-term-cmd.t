@@ -68,11 +68,9 @@ my $rv = trap{
 
 #~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
 
-$got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
-$want       = 'return'; 
 $diag       = "$unit returned normally";
 $tc++;
-is($got, $want, $diag) or exit 1;
+$got        = $trap->did_return($diag) or exit 1;
 
 $diag       = "$unit returned something";
 $tc++;
