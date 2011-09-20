@@ -13,7 +13,8 @@ use Test::Ranger qw(:all);      # Testing tool base class and utilities
 use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
-use DBIx::RunSQL;       # run SQL to create a database schema
+use DBIx::RunSQL;       # Run SQL to create a database schema
+use DBIx::Connector;    # Fast, safe DBI connection and transaction management
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 
@@ -32,6 +33,7 @@ dlock( my $err  = Test::Ranger->new(  # this only locks the reference
     _unpaired       => [ 'Unpaired arguments passed; named args required:'  ],
     _no_sql_file    => [ 'No SQL file passed:'                              ],
     _bad_sql_file   => [ 'Bad SQL file ($A[0]) passed:'                     ],
+    _no_db_name     => [ 'No DB passed; must pass a file if not remembered.'],
     
     
 ) ); ## $err
@@ -63,19 +65,19 @@ dlock( my $err  = Test::Ranger->new(  # this only locks the reference
 sub create {
     my $db          = shift;
     my %args        = paired(@_);
-    my $db_name     = $args{-db_name};
-#~     my $user        = $args{-db_user};      # not supported by SQLite
-#~     my $pass        = $args{-db_pass};      # not supported by SQLite
+    my $db_name     = $args{-db_name}
+        or $err->crash ('_no_db_name');
+    my $user        = $args{-db_user};      # not supported by SQLite
+    my $pass        = $args{-db_pass};      # not supported by SQLite
     my $sql_file    = $args{-sql_file}
-        or $err->crash( '_no_sql_file' );
+        or $err->crash('_no_sql_file');
     -f $sql_file
         or $err->crash( "Not a file: ($sql_file)" );
     my $verbose     = $args{-verbose};
     
-    my $msg         ;
-    
+    # Actually create the DB. This should not be done often. 
     my $dsn         = "DBI:SQLite:$db_name";
-    my $dbh         = DBIx::RunSQL->create(
+    my $dbh         = DBIx::RunSQL->create(     # returns a new DBI object
                 dsn     => $dsn,
                 sql     => $sql_file,
                 verbose => $verbose,
@@ -84,9 +86,19 @@ sub create {
     # It is better to die() than to return() in failure.
     # TODO: This test does not work properly; see RT#70998
     crash("Couldn't create DB from $sql_file") unless $dbh;
-##### $dbh
     
-    $db->{-dbh}     = $dbh;
+    # Close the returned handle and make a "connector" to the DB.
+    $dbh            = undef; 
+    my $conn        = DBIx::Connector->new($dsn, $user, $pass, 
+        {
+            RaiseError          => 1,
+            AutoCommit          => 1,
+            AutoInactiveDestroy => 1,
+        }
+    );
+    
+    $db->{-db_name} = $db_name;
+    $db->{-conn}    = $conn;
     return $db;
 }; ## create
 
@@ -94,10 +106,10 @@ sub create {
 #
 #   $obj->connect( '-parm' => $value, );     # short
 #       
-# Purpose   : ____
+# Purpose   : Connect to an existing DB; remembered or by file name. 
 # Parms     : ____
 # Reads     : ____
-# Returns   : ____
+# Returns   : $dbh      : DBI object        # database handle
 # Invokes   : ____
 # Writes    : ____
 # Throws    : ____
@@ -106,16 +118,39 @@ sub create {
 # ____
 #   
 sub connect {
-    my $db      = shift;
-    my $dbh     = $db->{-dbh};
-    my $dbh_new ;
-    my %args    = paired(@_);
-    my $text    = $args{-db_name};
+    my $db          = shift;
+    my %args        = paired(@_);
+    my $conn        = $db->{-conn};         # remembered connection
+    my $db_name     = $args{-db_name}       # or by file name passed
+                   || $db->{-db_name};      # ... or stored
+    my $user        = $args{-db_user};      # not supported by SQLite
+    my $pass        = $args{-db_pass};      # not supported by SQLite
     
+    ( $conn or $db_name )                   # assert at least one is true
+        or crash ('_no_db_passed');
     
+    my $dsn         = "DBI:SQLite:$db_name";
+    my $dbh         ;
     
-    $db->{-dbh}     = $dbh_new;
-    return $db;
+    if ($conn) {
+        $dbh        = $conn->dbh();
+    }
+    else
+    {
+        $conn            = DBIx::Connector->new($dsn, $user, $pass, 
+            {
+                RaiseError          => 1,
+                AutoCommit          => 1,
+                AutoInactiveDestroy => 1,
+            }
+        );
+        $conn->mode('fixup');               # reuse handle optimistically
+        $db->{-db_name} = $db_name;
+        $db->{-conn}    = $conn;
+        $dbh            = $conn->dbh();
+    };
+    
+    return $dbh;                            # returns DB handle
 }; ## connect
 
 #=========# OBJECT METHOD
@@ -136,17 +171,21 @@ sub connect {
 # ____
 #   
 sub insert_term_command {
-    my $db      = shift;
-    my $dbh     = $db->{-dbh};
-    my %args    = paired(@_);
-    my $text    = $args{-text};
+    my $db          = shift;
+    my $conn        = $db->connect();       # remembered connection
+    my %args        = paired(@_);
+    my $text        = $args{-text};
     
-    my $table   = 'term_command';
-    my $F_text  = 'c_text';         # column name of this field
-    my $sql     = qq{INSERT INTO $table ($F_text) VALUES ('$text')};
+    my $table       = 'term_command';
+    my $F_text      = 'c_text';             # column name of this field
+    my $sql         = "INSERT INTO $table ($F_text) VALUES (?)";
+    my $sth         ;
     
-    my $rv = $dbh->do($sql)
-        or crash( "Insert failed:", $sql );
+    $conn->run( sub{                        # $_ aliased to the dbh
+                $sth = $_->prepare($sql);
+                     $sth->execute($text);
+            } )
+            or crash( "Insert failed:", $sth->errstr, $sql );
     
     return $db;
 }; ## insert_term_command
@@ -168,17 +207,20 @@ sub insert_term_command {
 #   
 sub select_term_command {
     my $db          = shift;
-    my $dbh         = $db->{-dbh};
+    my $conn        = $db->connect();       # remembered connection
     my %args        = paired(@_);
     
     my $table       = 'term_command';
     my $sql         ;
+#~     my $row ???          # TODO
+    my $text        ;
     
+    my $sth         ;
     my $cmds        ;   # $cmds->[$row][$col]
     
     # What to do?
     if    ( 0 ) {
-        
+                            # TODO
     } 
     elsif ( 0 ) {
         
@@ -187,10 +229,14 @@ sub select_term_command {
         $sql        = qq{SELECT * FROM $table};
     };
     
-    # Access the DB and wrap up the results.
-    my $sth = $dbh->prepare($sql);
-    my $rv = $sth->execute
-        or die $sth->errstr;
+    # Access the DB...
+    $conn->run( sub{                        # $_ aliased to the dbh
+                $sth = $_->prepare($sql);
+                     $sth->execute($text);
+            } )
+            or crash( "Select failed:", $sth->errstr, $sql );
+    
+    # ... and wrap up the results.
     while ( my @row = $sth->fetchrow_array ) {
         push @$cmds, [ @row ];
     };
