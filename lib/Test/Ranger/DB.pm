@@ -38,6 +38,14 @@ dlock( my $err  = Test::Ranger->new(  # this only locks the reference
     
 ) ); ## $err
 
+# Database connection flags
+dlock( my $DB_flags = {
+    RaiseError          => 1,
+    AutoCommit          => 1,
+    AutoInactiveDestroy => 1,
+    
+} );
+
 #----------------------------------------------------------------------------#
 
 #=========# OBJECT METHOD
@@ -88,14 +96,9 @@ sub create {
     crash("Couldn't create DB from $sql_file") unless $dbh;
     
     # Close the returned handle and make a "connector" to the DB.
-    $dbh            = undef; 
-    my $conn        = DBIx::Connector->new($dsn, $user, $pass, 
-        {
-            RaiseError          => 1,
-            AutoCommit          => 1,
-            AutoInactiveDestroy => 1,
-        }
-    );
+    $dbh            = undef;
+    my $flags       = {%$DB_flags};         # make an editable copy
+    my $conn        = DBIx::Connector->new($dsn, $user, $pass, $flags);
     
     $db->{-db_name} = $db_name;
     $db->{-conn}    = $conn;
@@ -137,13 +140,8 @@ sub connect {
     }
     else
     {
-        $conn            = DBIx::Connector->new($dsn, $user, $pass, 
-            {
-                RaiseError          => 1,
-                AutoCommit          => 1,
-                AutoInactiveDestroy => 1,
-            }
-        );
+        my $flags       = {%$DB_flags};     # make an editable copy
+        $conn            = DBIx::Connector->new($dsn, $user, $pass, $flags);
         $conn->mode('fixup');               # reuse handle optimistically
         $db->{-db_name} = $db_name;
         $db->{-conn}    = $conn;
