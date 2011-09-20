@@ -10,6 +10,7 @@ use Test::Ranger::DB;
 use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
 use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
+use DBIx::Connector;    # Fast, safe DBI connection and transaction management
 
 #~ use Devel::Comments '###';                                  # debug only #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
@@ -66,9 +67,9 @@ for my $text (@text) {
 
 my $rv = trap{
     
-    my $new_dbh = $db->connect( -db_name => $db_name );   
+    my $conn = $db->connect( -db_name => $db_name );   
     
-    return $new_dbh;
+    return $conn;
 };
 
 #----------------------------------------------------------------------------#
@@ -76,12 +77,6 @@ my $rv = trap{
 
 #~ $trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
 
-#~ $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
-#~ $want       = 'return'; 
-#~ $diag       = "$unit returned normally";
-#~ $tc++;
-#~ is($got, $want, $diag) or exit 1;
-#~ 
 $diag       = "$unit returned normally";
 $tc++;
 $got        = $trap->did_return($diag) or exit 1;
@@ -93,7 +88,7 @@ $trap->return_ok(
     $diag,
 ) or exit 1;
 
-my $dbh     = $rv;
+my $conn     = $rv;
 
 #~ $got        = [];       # clear out previous contents
 #~ @$got       = map { $_->[1] } @{ $rv };
