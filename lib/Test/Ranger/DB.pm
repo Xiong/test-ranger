@@ -133,7 +133,7 @@ sub connect {
     my $dbh         ;
     
     if ($conn) {
-        $dbh        = $conn->dbh();
+        $dbh        = $conn->dbh();         # ? delete ?
     }
     else
     {
@@ -147,10 +147,10 @@ sub connect {
         $conn->mode('fixup');               # reuse handle optimistically
         $db->{-db_name} = $db_name;
         $db->{-conn}    = $conn;
-        $dbh            = $conn->dbh();
+        $dbh        = $conn->dbh();         # ? delete ?
     };
     
-    return $dbh;                            # returns DB handle
+    return $conn;                           # returns "connector"
 }; ## connect
 
 #=========# OBJECT METHOD
