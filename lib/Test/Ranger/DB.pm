@@ -92,6 +92,34 @@ sub create {
 
 #=========# OBJECT METHOD
 #
+#   $obj->connect( '-parm' => $value, );     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub connect {
+    my $db      = shift;
+    my $dbh     = $db->{-dbh};
+    my $dbh_new ;
+    my %args    = paired(@_);
+    my $text    = $args{-db_name};
+    
+    
+    
+    $db->{-dbh}     = $dbh_new;
+    return $db;
+}; ## connect
+
+#=========# OBJECT METHOD
+#
 #    $db     = $db->insert_term_command(    # add to command history
 #                '-text' => $text, 
 #            );

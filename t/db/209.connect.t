@@ -66,7 +66,7 @@ for my $text (@text) {
 
 my $rv = trap{
     
-    my $new_dbh = $db->connect($dsn);   
+    my $new_dbh = $db->connect( -db_name => $db_name );   
     
     return $new_dbh;
 };
