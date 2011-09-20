@@ -75,7 +75,7 @@ my $rv = trap{
 #----------------------------------------------------------------------------#
 # CHECK
 
-#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
+$trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
 
 $diag       = "$unit returned normally";
 $tc++;

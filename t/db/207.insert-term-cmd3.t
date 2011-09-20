@@ -72,7 +72,7 @@ my $rv = trap{
 #----------------------------------------------------------------------------#
 # CHECK
 
-#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
+$trap->diag_all;                    # Dumps the $trap object, TAP safe
 
 $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
 $want       = 'return'; 
