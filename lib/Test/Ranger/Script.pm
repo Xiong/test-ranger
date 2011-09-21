@@ -10,7 +10,8 @@ use version 0.94; our $VERSION = qv('v0.0.4');
 
 use parent qw{ Test::Ranger };
 use Test::Ranger qw(:all);      # Testing tool base class and utilities
-use Test::Ranger::CS;           # pseudo-global football of state
+use Test::Ranger::CS;           # Class for 'context structure' football
+use Test::Ranger::DB;           # Database interactions for Test-Ranger
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 use List::MoreUtils qw(
@@ -145,6 +146,9 @@ sub _setup {
     
     # Panes
     _setup_panes($cs);      # initial window panes
+    
+    # Database
+    _setup_db($cs);         # find or create database file
     
     # Terminal
     _setup_terminal($cs);   # virtual terminal emulator
@@ -810,6 +814,7 @@ my $t3 = $text;                                                     # debug
 ##### $: $prompt
     
     #---# End cleanup #---#
+    # still in _parse_script
     
     # Now decide what to do with the extracted poop -- if anything
     return if not $text;                # nothing left after cleanup
@@ -835,6 +840,51 @@ my $t3 = $text;                                                     # debug
     
     return 1;
 }; ## _parse_script
+
+#=========# GTK SETUP ROUTINE
+#
+#   _setup_db($cs);     # find or create database file
+#       
+# Purpose   : Unless exists, create and initialize DB file.
+# Parms     : ____
+# Reads     : $cs->{-config}
+# Returns   : ____
+# Writes    : $cs->{-db}
+# Throws    : ____
+# See also  : TR::DB::create()
+# 
+# ____
+# 
+sub _setup_db {
+    my $cs          = shift;
+#~     my $mw          = $cs->get_mw();       # not needed?
+    my $db_file     = $cs->{-config}{-db_file};
+    my $sql_file    = $cs->{-config}{-sql_file};
+    
+    my $db          = Test::Ranger::DB->new();  # our DB object
+    my $dbh         ;                           # DBI object
+    
+    # Determine if the DB file exists, is initialized, and is writable.
+    if ( 
+            stat $db_file                   # stat succeeds
+        and -f _                            # exists a file (not dir)
+        and -s _                            # has non-zero size
+        and -B _                            # is a binary file
+        and -w _                            # is writable 
+    ) {     #... then we conclude it's our DB
+        $db->connect(   -db_name    => $db_file );
+    } 
+    else {  #   create and initialize
+        $db->create(
+                        -db_name    => $db_file,
+                        -sql_file   => $sql_file,
+#~                         -verbose    => $verbose,
+        );
+    };
+    
+    $cs->{-db}      = $db;
+    return $cs;
+}; ## _setup_db
 
 
 

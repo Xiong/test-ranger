@@ -9,6 +9,7 @@ use version 0.94; our $VERSION = qv('v0.0.4');
 
 use parent qw{ Test::Ranger };
 use Test::Ranger qw(:all);      # Testing tool base class and utilities
+use Test::Ranger::DB;           # Database interactions for Test-Ranger
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util qw(
@@ -337,12 +338,16 @@ sub get_color_of {
 #   
 sub db_history_add {
     my $cs  = shift;
+    my $db  = $cs->{-db};
+    my %args    = paired(@_);
+    my $text    = $args{-command};
+    my $id      = $args{-term_id};
     
+    $db     = $db->insert_term_command(    # add to command history
+                '-text' => $text, 
+            );
     
-    
-    
-    
-    return 1;
+    return $cs;
 }; ## db_history_add
 
 #=========# OBJECT METHOD

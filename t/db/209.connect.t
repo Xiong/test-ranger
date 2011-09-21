@@ -9,22 +9,22 @@ use Test::Ranger::DB;
 
 use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
-use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
+#~ use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
+use DBIx::Connector;    # Fast, safe DBI connection and transaction management
 
 #~ use Devel::Comments '###';                                  # debug only #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
 #============================================================================#
 # 
-# This script tests a good insert_term_command().
-# This method stores terminal command history.
+# This script tests the ability to connect() to an existing DB.
 
 #----------------------------------------------------------------------------#
 # SETUP
 
+my $unit        = '::DB::connect(): ';
 my $got         ;
 my $want        ;
-my $unit        = '::DB::insert_term_command(): ';
 my $diag        = $unit;
 my $tc          = 0;
 
@@ -35,6 +35,7 @@ my $sql_file    = $ENV{tr_sql_file}         //= 'file/db/tr_db.sql';
 my $user        ;   # not supported by SQLite
 my $pass        ;   # not supported by SQLite
 my $sql         ;
+my $dsn         = "DBI:SQLite:$db_name";
 
 unlink $db_name;            # cleanup previous test DB file if any
 $got            = -f $db_name;      # is a plain file
@@ -50,23 +51,31 @@ $db->create(
 #~     -verbose    => $verbose,
 );
 
-my $text        = 'ls -l';
+my @text        = (
+                    'ls -l',
+                    'cat food',
+                    'echo ${USER}',
+                );
+for my $text (@text) {
+    $db->insert_term_command(    # add to command history
+            '-text' => $text, 
+        );
+};
 
 #----------------------------------------------------------------------------#
 # EXECUTE
 
 my $rv = trap{
     
-    $db     = $db->insert_term_command(    # add to command history
-                '-text' => $text, 
-            );
+    my $conn = $db->connect( -db_name => $db_name );   
     
+    return $conn;
 };
 
 #----------------------------------------------------------------------------#
 # CHECK
 
-#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe
+#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
 
 $diag       = "$unit returned normally";
 $tc++;
@@ -79,46 +88,52 @@ $trap->return_ok(
     $diag,
 ) or exit 1;
 
-my $dsn     = "DBI:SQLite:$db_name";
-my $dbh     = DBI->connect($dsn, $user, $pass);
-$diag       = "$unit test connected to      $db_name";
-$tc++;
-ok( $dbh, $diag ) or exit 1;
+my $conn     = $rv;
+
+#~ $got        = [];       # clear out previous contents
+#~ @$got       = map { $_->[1] } @{ $rv };
+#~ $want       = \@text,
+#~ $diag       = "$unit returned three inserted commands deeply";
+#~ $tc++;
+#~ is_deeply( $got, $want, $diag ) or exit 1;
+
+#~ my $dsn     = "DBI:SQLite:$db_name";
+#~ my $dbh     = DBI->connect($dsn, $user, $pass);
+#~ $diag       = "$unit test connected to      $db_name";
+#~ $tc++;
+#~ ok( $dbh, $diag ) or exit 1;
 
 # New $trap.
-$sql        = q{SELECT * FROM term_command};
 $rv = trap{
-    my $sth = $dbh->prepare($sql);
-    $rv = $sth->execute
-        or die $sth->errstr;
-    $rv = [];                           # clear good return from execute
-    while ( my @row = $sth->fetchrow_array ) {
-        push @$rv, [ @row ];
-    };
-    return $rv;
+    my $cmds = $db->select_term_command();   # no args: select *    
+    
+    return $cmds;     # returns an AoA ref: $cmds->[$row][$col]
 };
 
-$got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
-$want       = 'return'; 
-$diag       = "$unit test select returned normally";
-$tc++;
-is($got, $want, $diag) or exit 1;
+#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
 
-$got        = $rv;
-$diag       = "$unit test select returned true";
-ok( $got, $diag );
-$tc++;
-
-$got        = $rv;
-$want       = [ [ 1, $text ] ],
-$diag       = "$unit test select returned inserted command deeply";
+$got        = [];       # clear out previous contents
+@$got       = map { $_->[1] } @{ $rv };
+$want       = \@text,
+$diag       = "$unit returned three inserted commands deeply";
 $tc++;
 is_deeply( $got, $want, $diag ) or exit 1;
 
-$got        = $dbh->disconnect();
-$diag       = "$unit test disconnected";
-$tc++;
-ok( $got, $diag ) or exit 1;
+#~ $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
+#~ $want       = 'return'; 
+#~ $diag       = "$unit test select returned normally";
+#~ $tc++;
+#~ is($got, $want, $diag) or exit 1;
+
+#~ $got        = $rv;
+#~ $diag       = "$unit test select returned true";
+#~ $tc++;
+#~ ok( $got, $diag ) or exit 1;
+
+#~ $got        = $dbh->disconnect();
+#~ $diag       = "$unit test disconnected";
+#~ $tc++;
+#~ ok( $got, $diag ) or exit 1;
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
