@@ -21,7 +21,12 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
             
         }],
         
-        all         => [qw{ :util }]
+        test        => [qw{
+            akin
+            
+        }],
+        
+        all         => [qw{ :util :test }]
     ],
 );
 
@@ -37,7 +42,8 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
 # Error messages
 dlock( my $err     = Test::Ranger->new(  # this only locks the reference
     _unpaired   => [ 'Unpaired arguments passed; named args required:' ],
-    
+    _unsupported_akin   => 
+        [ 'akin() does not support refs except STRING and ARRAY.' ],
     
 ) ); ## $err
 
@@ -188,29 +194,43 @@ sub init {
 #   
 sub akin {
     my @words       = @_;
-    my $regex_ref   ;
-        bless ($regex_ref => __PACKAGE__);
+    my $regex       ;
     
     my $any         =  q{*};
     my $any_sep     =  q{.*};
-    my $never_match = qr/?!/;
+    my $not_match   = qr/\A\z/;     # start followed by end of string
     my $any_match   = qr/.*/s;
-    
+        
     if    ( 
              not $words[1]                          # passed a false item
         or   @words == 0                            # passed no items
         or ( @words == 1 and $words[1] =~ /\s/ )    # passed whitespace
     )
-    { $$regex_ref   = $never_match }                # matches only false
-    elsif (  @words == 1 and $words[1] = $any  )    # passed a single star
-    { $$regex_ref   = $any_match   }                # matches anything
+    { $regex        = $not_match }                  # matches only q{}
+    elsif (  @words == 1 and $words[1] eq $any  )   # passed a single star
+    { $regex        = $any_match   }                # matches anything
     else                                            # passed a list of...?
     {
-        my $regex      = join $any_sep, @words;     # join; anything between
-        $$regex_ref = qr/$regex/ism;
+        if    ( ref $words[1] eq 'STRING') {
+            my $tmp     = ${ $words[1] };
+            @words      = $tmp;
+        } 
+        elsif ( ref $words[1] eq 'ARRAY' ) {
+            my @tmp     = @{ $words[1] };
+            @words      = @tmp;            
+        } 
+        elsif ( ref $words[1] ) {
+            $err->crash('_unsupported_akin');
+        }
+        else {
+            # do nothing
+        };
+        
+        my $tmp_r   = join $any_sep, @words;     # join; anything between
+        $regex      = qr/$tmp_r/ism;
     };
     
-    return $regex_ref;
+    return $regex;
 }; ## akin
 
 
