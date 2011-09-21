@@ -21,7 +21,12 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
             
         }],
         
-        all         => [qw{ :util }]
+        test        => [qw{
+            akin
+            
+        }],
+        
+        all         => [qw{ :util :test }]
     ],
 );
 
@@ -37,7 +42,8 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
 # Error messages
 dlock( my $err     = Test::Ranger->new(  # this only locks the reference
     _unpaired   => [ 'Unpaired arguments passed; named args required:' ],
-    
+    _unsupported_akin   => 
+        [ 'akin() does not support refs except STRING and ARRAY.' ],
     
 ) ); ## $err
 
@@ -169,6 +175,65 @@ sub init {
     
     return $self;
 }; ## init
+
+#=========# EXTERNAL FUNCTION
+#
+#   $regex_ref       = akin(qw( foo bar baz ));
+#       
+# Purpose   : Assist caller of check to compose a permissive regex. 
+# Parms     : list of strings
+# Returns   : blessed ref to a regex
+# Throws    : ____
+# See also  : check()
+# 
+# Test::More::like() is too restrictive; one must supply a complete regex. 
+# akin(), easier and more permissive, constructs a regex from a list. 
+# Matching is case-insensitive and allows any strings between "hits". 
+# This is ideal for checking error messages, whose text may change somewhat. 
+# The fact that it's blessed tells check() that it's a regex-ref. 
+#   
+sub akin {
+    my @words       = @_;
+    my $regex       ;
+    
+    my $any         =  q{*};
+    my $any_sep     =  q{.*};
+    my $not_match   = qr/\A\z/;     # start followed by end of string
+    my $any_match   = qr/.*/s;
+        
+    if    ( 
+             not $words[1]                          # passed a false item
+        or   @words == 0                            # passed no items
+        or ( @words == 1 and $words[1] =~ /\s/ )    # passed whitespace
+    )
+    { $regex        = $not_match }                  # matches only q{}
+    elsif (  @words == 1 and $words[1] eq $any  )   # passed a single star
+    { $regex        = $any_match   }                # matches anything
+    else                                            # passed a list of...?
+    {
+        if    ( ref $words[1] eq 'STRING') {
+            my $tmp     = ${ $words[1] };
+            @words      = $tmp;
+        } 
+        elsif ( ref $words[1] eq 'ARRAY' ) {
+            my @tmp     = @{ $words[1] };
+            @words      = @tmp;            
+        } 
+        elsif ( ref $words[1] ) {
+            $err->crash('_unsupported_akin');
+        }
+        else {
+            # do nothing
+        };
+        
+        my $tmp_r   = join $any_sep, @words;     # join; anything between
+        $regex      = qr/$tmp_r/ism;
+    };
+    
+    return $regex;
+}; ## akin
+
+
 
 #    #~ #=========# OBJECT METHOD
 #    #~ #
