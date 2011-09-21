@@ -226,20 +226,19 @@ sub select_term_command {
         
     } 
     else {              # no %args left: select all
+        # Access the DB...
         $sql        = qq{SELECT * FROM $table};
+        $conn->run( sub{                        # $_ aliased to the dbh
+                    $sth = $_->prepare($sql);
+                         $sth->execute();
+                } )
+                or crash( "Select failed:", $sth->errstr, $sql );
+        # ... and wrap up the results.
+        while ( my @row = $sth->fetchrow_array ) {
+            push @$cmds, [ @row ];
+        };
     };
     
-    # Access the DB...
-    $conn->run( sub{                        # $_ aliased to the dbh
-                $sth = $_->prepare($sql);
-                     $sth->execute($text);
-            } )
-            or crash( "Select failed:", $sth->errstr, $sql );
-    
-    # ... and wrap up the results.
-    while ( my @row = $sth->fetchrow_array ) {
-        push @$cmds, [ @row ];
-    };
     
     return $cmds;
 }; ## select_term_command

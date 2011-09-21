@@ -110,6 +110,8 @@ $rv = trap{
     return $cmds;     # returns an AoA ref: $cmds->[$row][$col]
 };
 
+#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
+
 $got        = [];       # clear out previous contents
 @$got       = map { $_->[1] } @{ $rv };
 $want       = \@text,
