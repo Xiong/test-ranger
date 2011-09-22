@@ -22,51 +22,24 @@ my $unit        = 'TR::confirm(): ';
 my $got         ;
 my $want        ;
 my $diag        = $unit;
-my $tc          = 0;
+my $tc          = 0;        # the usual test counter we'll pass
+my $script_tc   = 0;        # private test counter for this script only
 my $one         = 1;       
 my $zero        = 0;       
 
-# pass              : bool      : should match?
-# "test" results    : string    : simulated results
-# akin() args       : scalar or aryref
-my @test_data   = (
-    # pass? # "test" results        # akin() args
-    [ 1,    'a',            'a'             ],
-    [ 1,    undef,          undef           ],
-    [ 1,    undef,          '*'             ],
-    [ 0,   '*',             ''              ],
-    [ 1,   '',              '*'             ],
-    [ 0,   'a',             ''              ],
-    [ 0,   'abc',           ''              ],
-    [ 0,   7,               ''              ],
-    [ 1,   'abcde',         '*'             ],
-    [ 1,   42,              '*'             ],
-    [ 1,   qq{\n},          '*'             ],
-    [ 0,   qq{\n},          ''              ],
-    [ 0,   1,               q{ }            ],
-    [ 0,   1,               q{   }          ],
-    [ 0,   1,               qq{\n}          ],
-    [ 0,   1,               qq{\t}          ],
-    [ 0,   1,               0               ],
-    [ 0,   1,               []              ],
-    [ 1,   1,               \$one           ],
-    [ 0,   0,               \$one           ],
-    [ 0,   0E0,             \$one           ],
-    [ 0,   1,               \$zero          ],
-    [ 1,   0,               \$zero          ],
-    [ 0,   0E0,             \$zero          ],
-    [ 1,   'error',         'error'         ],
-    [ 0,   'pass',          'error'         ],
-    [ 1,   'pass error',    'error'         ],
-    [ 1,   'abc',           qw( a  c )      ],
-    [ 1,   'abc',           [ qw( a  c ) ]  ],
-#~     [ 1,   ],
-#~     [ 1,   ],
-#~     [ 1,   ],
-#~     [ 1,   ],
-#~     [ 1,   ],
-#~     [ 1,   ],
-
+my @test_data       = (
+    { 
+        -base   => 'die foo',
+        -given  => {
+            -code       => sub{ die 'foo' },
+            -leaveby    => 'die',
+            -die        => akin('foo'),
+        },
+        -want   => {
+            -pass       => 1
+        }
+    },
+    
 ); ## test_data
 
 #----------------------------------------------------------------------------#
@@ -74,52 +47,46 @@ my @test_data   = (
 
 for my $i (0..$#test_data) {
     my $lineref     = $test_data[$i];
-    my @line        = @$lineref;
-    my @line_copy   = map { 
-                        if    ( not defined $_ )        { q{} }
-                        elsif ( $_ eq qq{\n} )          { q{\n} }
-                        elsif ( $_ eq qq{\t} )          { q{\t} }
-                        elsif ( ref $_ eq 'SCALAR' )    { $$_ }
-                        elsif ( ref $_ eq 'ARRAY' )     { join q{.}, @$_ }
-                        else                            { $_ } 
-                    } @line;
-##### @line_copy
-    my $want        = shift @line;
-    my $given       = shift @line;
+    my %line        = %$lineref;
     
-    my @args       = @line;
-##### @args
+    my $base        = $unit . $line{-base} . qq{<$i>};
     
-    my $base   =  $unit . qq{<$i> } 
-                . q{|}
-                . ( join q{|}, @line_copy ) 
-                . q{|}
-                ;
+    my %given       = %{ $line{-given} };
+        my $code        = $given{-code} 
+            or crash('Must supply -code to test.');
     
-    # EXECUTE
+    my %want        = %{ $line{-want } };
+        my $pass        = $want{-pass};
+    
+    # EXECUTE-BEAR
     my $rv = trap{        
-        my $pass = $want =~ akin(@args);
-        return $pass;
+        my $rv = &$code();
+        return $rv;
     };
         
-    # CHECK
+    # CHECK-BEAR    
+    my $saved_trap      = $trap;
+    $saved_trap->diag_all;          # Dumps the $trap object, TAP safe   #~
     
-#~     $trap->diag_all;                # Dumps the $trap object, TAP safe   #~
+    # EXECUTE-RANGER
+    trap{        
+        confirm( $saved_trap, %given );
+    };
     
-    $tc++;
+    $script_tc++;
     $diag   = $base . 'did_return';
     $trap->did_return($diag) or exit 1;
     
-    $tc++;
-    $diag   = $base . 'quiet';
-    $got    = join q{}, $trap->stdout, $trap->stderr;
-    $want   = q{};
-    is( $got, $want, $diag ) or exit 1;
-        
-    $tc++;
-    $diag   = $base . 'pass';
-    $got    = $trap->return(0);
-    is( $got, $want, $diag ) or exit 1;
+#~     $tc++;
+#~     $diag   = $base . 'quiet';
+#~     $got    = join q{}, $trap->stdout, $trap->stderr;
+#~     $want   = q{};
+#~     is( $got, $want, $diag ) or exit 1;
+#~         
+#~     $tc++;
+#~     $diag   = $base . 'pass';
+#~     $got    = $trap->return(0);
+#~     is( $got, $want, $diag ) or exit 1;
     
     note(q{-});
 };
@@ -128,7 +95,7 @@ for my $i (0..$#test_data) {
 # TEARDOWN
 
 END {
-    done_testing($tc);                  # declare plan after testing
+    done_testing($script_tc);                  # declare plan after testing
 }
 
 #============================================================================#
