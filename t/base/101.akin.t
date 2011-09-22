@@ -120,7 +120,7 @@ for my $i (0..$#test_data) {
     $tc++;
     $diag   = $base . 'pass';
     $got    = $trap->return(0);
-    is( $got, $want, $diag ) or exit 1;
+    is( $got, $want, $diag ) or exit 1;     # TODO: BULLSHIT???
     
     note(q{-});
 }; ## for test_data
