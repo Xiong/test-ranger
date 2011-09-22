@@ -180,17 +180,17 @@ sub init {
 #
 #   $regex_ref       = akin(qw( foo bar baz ));
 #       
-# Purpose   : Assist caller of check to compose a permissive regex. 
+# Purpose   : Assist caller of confirm() to compose a permissive regex. 
 # Parms     : list of strings
-# Returns   : blessed ref to a regex
-# Throws    : ____
-# See also  : check()
+# Returns   : (blessed) compiled regex
+# Throws    : '_unsupported_akin' if passed something it can't figure out
+# See also  : confirm()
 # 
 # Test::More::like() is too restrictive; one must supply a complete regex. 
 # akin(), easier and more permissive, constructs a regex from a list. 
 # Matching is case-insensitive and allows any strings between "hits". 
 # This is ideal for checking error messages, whose text may change somewhat. 
-# The fact that it's blessed tells check() that it's a regex-ref. 
+# The fact that it's blessed tells confirm() that it's a regex-ref. 
 #   
 sub akin {
     my @words       = @_;
@@ -232,6 +232,27 @@ sub akin {
     
     return $regex;
 }; ## akin
+
+#=========# EXTERNAL FUNCTION
+#
+#   _do_();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub _do_ {
+    my $arg      = $_[0];
+ 
+    
+    
+}; ## _do_
 
 
 
