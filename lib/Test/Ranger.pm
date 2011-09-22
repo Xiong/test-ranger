@@ -23,6 +23,7 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
         
         test        => [qw{
             akin
+            confirm
             
         }],
         
@@ -235,7 +236,7 @@ sub akin {
 
 #=========# EXTERNAL FUNCTION
 #
-#   _do_();     # short
+#   confirm();     # short
 #       
 # Purpose   : ____
 # Parms     : ____
@@ -247,12 +248,12 @@ sub akin {
 # 
 # ____
 #   
-sub _do_ {
+sub confirm {
     my $arg      = $_[0];
  
     
     
-}; ## _do_
+}; ## confirm
 
 
 
