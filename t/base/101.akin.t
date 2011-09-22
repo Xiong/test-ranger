@@ -76,8 +76,15 @@ my @test_data   = (
 for my $i (0..$#test_data) {
     my $lineref     = $test_data[$i];
     my @line        = @$lineref;
-    my @line_copy   = @line || q{};
-##### @line
+    my @line_copy   = map { 
+                        if    ( not defined $_ )        { q{} }
+                        elsif ( $_ eq qq{\n} )          { q{\n} }
+                        elsif ( $_ eq qq{\t} )          { q{\t} }
+                        elsif ( ref $_ eq 'SCALAR' )    { $$_ }
+                        elsif ( ref $_ eq 'ARRAY' )     { join q{.}, @$_ }
+                        else                            { $_ } 
+                    } @line;
+##### @line_copy
     my $want        = shift @line;
     my $given       = shift @line;
     
