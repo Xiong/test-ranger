@@ -123,7 +123,7 @@ for my $i (0..$#test_data) {
     is( $got, $want, $diag ) or exit 1;
     
     note(q{-});
-};
+}; ## for test_data
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
