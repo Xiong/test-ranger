@@ -1,11 +1,344 @@
 
-### in akin():
-### @words: [
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               'a',
+###               'a'
+###             ]
+
+### @given: [
 ###           'a'
 ###         ]
 
-### $w0: 'a'
+### $rv: 1
 
-### $w1: undef
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               '*',
+###               ''
+###             ]
 
-### $regex: qr/(?msi-x:a)/
+### @given: [
+###           ''
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               '',
+###               '*'
+###             ]
+
+### @given: [
+###           '*'
+###         ]
+
+### $rv: 1
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               'a',
+###               ''
+###             ]
+
+### @given: [
+###           ''
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               'abc',
+###               ''
+###             ]
+
+### @given: [
+###           ''
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               7,
+###               ''
+###             ]
+
+### @given: [
+###           ''
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               'abcde',
+###               '*'
+###             ]
+
+### @given: [
+###           '*'
+###         ]
+
+### $rv: 1
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               42,
+###               '*'
+###             ]
+
+### @given: [
+###           '*'
+###         ]
+
+### $rv: 1
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               '\\n',
+###               '*'
+###             ]
+
+### @given: [
+###           '*'
+###         ]
+
+### $rv: 1
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               '\\n',
+###               ''
+###             ]
+
+### @given: [
+###           ''
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               1,
+###               ' '
+###             ]
+
+### @given: [
+###           ' '
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               1,
+###               '   '
+###             ]
+
+### @given: [
+###           '   '
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               1,
+###               '\\n'
+###             ]
+
+### @given: [
+###           '
+'
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               1,
+###               '\\t'
+###             ]
+
+### @given: [
+###           '	'
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               1,
+###               0
+###             ]
+
+### @given: [
+###           0
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               1,
+###               ''
+###             ]
+
+### @given: [
+###           []
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               1,
+###               1
+###             ]
+
+### @given: [
+###           \1
+###         ]
+
+### $rv: 1
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               0,
+###               1
+###             ]
+
+### @given: [
+###           \1
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               '0',
+###               1
+###             ]
+
+### @given: [
+###           \1
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               1,
+###               0
+###             ]
+
+### @given: [
+###           \0
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               0,
+###               0
+###             ]
+
+### @given: [
+###           \0
+###         ]
+
+### $rv: 1
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               'error',
+###               'error'
+###             ]
+
+### @given: [
+###           'error'
+###         ]
+
+### $rv: 1
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               0,
+###               'pass',
+###               'error'
+###             ]
+
+### @given: [
+###           'error'
+###         ]
+
+### $rv: ''
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               'pass error',
+###               'error'
+###             ]
+
+### @given: [
+###           'error'
+###         ]
+
+### $rv: 1
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               'abc',
+###               'a',
+###               'c'
+###             ]
+
+### @given: [
+###           'a',
+###           'c'
+###         ]
+
+### $rv: 1
+
+### in test script: ###                 $VAR1 = [
+### @line_copy: [
+###               1,
+###               'abc',
+###               'a.c'
+###             ]
+
+### @given: [
+###           [
+###             'a',
+###             'c'
+###           ]
+###         ]
+
+### $rv: 1

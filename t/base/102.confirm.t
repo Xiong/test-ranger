@@ -14,6 +14,8 @@ use Test::Ranger::DB;
 #============================================================================#
 # 
 # Tests the regex generator TR::confirm(). This is a Test::Ranger itself test. 
+# This test is failing because confirm() is not yet written. 
+# The effort to write that is stalled over the question of approach. 
 
 #----------------------------------------------------------------------------#
 # SETUP
@@ -70,7 +72,7 @@ for my $i (0..$#test_data) {
     
     # EXECUTE-RANGER
     trap{        
-        confirm( $saved_trap, %given );
+        confirm( -trap  => $saved_trap, %given );
     };
     
     $trap->diag_all;                # Dumps the $trap object, TAP safe   #~

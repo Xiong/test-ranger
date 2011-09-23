@@ -8,6 +8,10 @@ use Carp;
 use version 0.94; our $VERSION = qv('0.0.4');
 
 use Test::More;                 # Standard framework for writing test scripts
+
+use Test::Trap qw( snare $snare :default );     # Nonstandard trap{}, $trap
+                                # Trap exit codes, exceptions, output
+
 use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util;               # General-utility scalar subroutines
 use Scalar::Util::Reftype;      # Alternate reftype() interface
@@ -258,10 +262,16 @@ sub akin {
 # ____
 #   
 sub confirm {
-    my $arg      = $_[0];
- 
+    my %args        = paired(@_);
+    my $snare       = $args{-leaveby};
+#~     my $leaveby     = $args{-leaveby};      # mode by which trap was left
+#~     my $leaveby     = $args{-leaveby};
+#~     my $leaveby     = $args{-leaveby};
+#~     my $leaveby     = $args{-leaveby};
     
+    my $pass        ;
     
+    return $pass;
 }; ## confirm
 
 
