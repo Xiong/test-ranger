@@ -73,21 +73,28 @@ for my $i (0..$#test_data) {
         confirm( $saved_trap, %given );
     };
     
+    $trap->diag_all;                # Dumps the $trap object, TAP safe   #~
+    
     $script_tc++;
     $diag   = $base . 'did_return';
     $trap->did_return($diag) or exit 1;
     
-#~     $tc++;
-#~     $diag   = $base . 'quiet';
-#~     $got    = join q{}, $trap->stdout, $trap->stderr;
-#~     $want   = q{};
-#~     is( $got, $want, $diag ) or exit 1;
-#~         
-#~     $tc++;
-#~     $diag   = $base . 'pass';
-#~     $got    = $trap->return(0);
-#~     is( $got, $want, $diag ) or exit 1;
+    $diag   = $base . 'pass';
+    $got    = $trap->return(0);
+    if ($pass) {
+        ok(  $got, $diag ) or exit 1;
+    } 
+    else {
+        ok( !$got, $diag ) or exit 1;       # !ok (ok if $got is false)
+    };
     
+    $script_tc++;
+    $diag   = $base . 'quiet';
+    $got    = join q{}, $trap->stdout, $trap->stderr;
+    $want   = q{};
+    is( $got, $want, $diag ) or exit 1;
+        
+    $script_tc++;
     note(q{-});
 };
 
