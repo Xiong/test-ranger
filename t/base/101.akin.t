@@ -106,7 +106,7 @@ for my $i (0..$#test_data) {
         my $rv      = $want =~ /$akin/;
         return $rv;
     };
-        
+##### $rv        
     # CHECK
     
 #~     $trap->diag_all;                # Dumps the $trap object, TAP safe   #~
@@ -139,6 +139,7 @@ for my $i (0..$#test_data) {
 
 END {
     done_testing($tc);                  # declare plan after testing
+#~     done_testing();                  # declare no plan at all
 }
 
 #============================================================================#
