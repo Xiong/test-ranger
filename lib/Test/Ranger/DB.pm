@@ -43,7 +43,7 @@ dlock( my $err  = Test::Ranger->new(  # this only locks the reference
 dlock( my $DB_flags = {
     RaiseError          => 1,
     AutoCommit          => 1,
-#~     AutoInactiveDestroy => 1,    # defaults to true in DBIx::Connector
+    AutoInactiveDestroy => 1,    # defaults to true in DBIx::Connector
 #~     AutoInactiveDestroy => '1',  # raises warning if set explicitly
     
 } );
