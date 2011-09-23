@@ -9,12 +9,12 @@ use warnings;
 
 use lib qw( lib ../lib ../../lib);       # while under development       #~
 
-use Gtk2 -init;                             # Gtk+ GUI toolkit
-use Test::Ranger::Script;                   # implements everything
+use Gtk2 -init;                         # Gtk+ GUI toolkit
+use Test::Ranger::Tool;                 # implements GUI tool
 
 #----------------------------------------------------------------------------#
 
-Test::Ranger::Script::main();
+Test::Ranger::Tool::main();             # invoke Test::Ranger::Tool
 
 # It is better to die() than to return() in failure.
 exit(0);

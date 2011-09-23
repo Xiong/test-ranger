@@ -1,4 +1,4 @@
-package Test::Ranger::Script;
+package Test::Ranger::Tool;
 
 use 5.010000;
 use strict;
@@ -57,7 +57,7 @@ our $Debug;
 
 #=========# MAIN INVOCATION ROUTINE
 #
-#   main();     # invoke Test::Ranger::Script
+#   main();     # invoke Test::Ranger::Tool
 #       
 # Purpose   : Execute top-level routines.
 # Parms     : none
@@ -1104,11 +1104,11 @@ __END__
 
 =head1 NAME
 
-Test::Ranger::Script - GUI valet for comprehensive test structure
+Test::Ranger::Tool - GUI valet for comprehensive test structure
 
 =head1 VERSION
 
-This document describes Test::Ranger::Script version v0.0.4
+This document describes Test::Ranger::Tool version v0.0.4
 
 =head1 SYNOPSIS
 
