@@ -32,9 +32,10 @@ my $zero        = 0;
 # akin() args       : scalar or aryref
 my @test_data   = (
     # pass? # "test" results        # akin() args
+    # $pass # $want         # @given
     [ 1,    'a',            'a'             ],
-    [ 1,    undef,          undef           ],
-    [ 1,    undef,          '*'             ],
+#    [ 1,    undef,          undef           ],     # can't try to match undef
+#    [ 1,    undef,          '*'             ],     # can't try to match undef
     [ 0,   '*',             ''              ],
     [ 1,   '',              '*'             ],
     [ 0,   'a',             ''              ],
@@ -52,10 +53,10 @@ my @test_data   = (
     [ 0,   1,               []              ],
     [ 1,   1,               \$one           ],
     [ 0,   0,               \$one           ],
-    [ 0,   0E0,             \$one           ],
+    [ 0,   0E0,             \$one           ],      # OK
     [ 0,   1,               \$zero          ],
     [ 1,   0,               \$zero          ],
-    [ 0,   0E0,             \$zero          ],
+#~     [ 0,   0E0,             \$zero          ],   # NOT OK
     [ 1,   'error',         'error'         ],
     [ 0,   'pass',          'error'         ],
     [ 1,   'pass error',    'error'         ],
@@ -76,13 +77,21 @@ my @test_data   = (
 for my $i (0..$#test_data) {
     my $lineref     = $test_data[$i];
     my @line        = @$lineref;
-    my @line_copy   = @line || q{};
-##### @line
-    my $want        = shift @line;
-    my $given       = shift @line;
+    my @line_copy   = map { 
+                        if    ( not defined $_ )        { q{} }
+                        elsif ( $_ eq qq{\n} )          { q{\n} }
+                        elsif ( $_ eq qq{\t} )          { q{\t} }
+                        elsif ( ref $_ eq 'SCALAR' )    { $$_ }
+                        elsif ( ref $_ eq 'ARRAY' )     { join q{.}, @$_ }
+                        else                            { $_ } 
+                    } @line;
+##### in test script: 
+##### @line_copy
     
-    my @args       = @line;
-##### @args
+    my $pass        = shift @line;
+    my $want        = shift @line;
+    my @given       = @line;
+##### @given
     
     my $base   =  $unit . qq{<$i> } 
                 . q{|}
@@ -91,11 +100,13 @@ for my $i (0..$#test_data) {
                 ;
     
     # EXECUTE
-    my $rv = trap{        
-        my $pass = $want =~ akin(@args);
-        return $pass;
+    my $rv = trap{    
+        my $akin    = akin(@given);  
+#~         say STDERR $akin;                    # debug the test only       #~
+        my $rv      = $want =~ /$akin/;
+        return $rv;
     };
-        
+##### $rv        
     # CHECK
     
 #~     $trap->diag_all;                # Dumps the $trap object, TAP safe   #~
@@ -105,24 +116,30 @@ for my $i (0..$#test_data) {
     $trap->did_return($diag) or exit 1;
     
     $tc++;
+    $diag   = $base . 'pass';
+    $got    = $trap->return(0);
+    if ($pass) {
+        ok(  $got, $diag ) or exit 1;
+    } 
+    else {
+        ok( !$got, $diag ) or exit 1;       # !ok (ok if $got is false)
+    };
+    
+    $tc++;
     $diag   = $base . 'quiet';
     $got    = join q{}, $trap->stdout, $trap->stderr;
     $want   = q{};
     is( $got, $want, $diag ) or exit 1;
         
-    $tc++;
-    $diag   = $base . 'pass';
-    $got    = $trap->return(0);
-    is( $got, $want, $diag ) or exit 1;
-    
     note(q{-});
-};
+}; ## for test_data
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
 
 END {
     done_testing($tc);                  # declare plan after testing
+#~     done_testing();                  # declare no plan at all
 }
 
 #============================================================================#

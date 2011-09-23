@@ -8,6 +8,10 @@ use Carp;
 use version 0.94; our $VERSION = qv('0.0.4');
 
 use Test::More;                 # Standard framework for writing test scripts
+
+use Test::Trap qw( snare $snare :default );     # Nonstandard trap{}, $trap
+                                # Trap exit codes, exceptions, output
+
 use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util;               # General-utility scalar subroutines
 use Scalar::Util::Reftype;      # Alternate reftype() interface
@@ -23,6 +27,7 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
         
         test        => [qw{
             akin
+            confirm
             
         }],
         
@@ -43,7 +48,7 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
 dlock( my $err     = Test::Ranger->new(  # this only locks the reference
     _unpaired   => [ 'Unpaired arguments passed; named args required:' ],
     _unsupported_akin   => 
-        [ 'akin() does not support refs except STRING and ARRAY.' ],
+        [ 'akin() does not support refs except SCALAR and ARRAY.' ],
     
 ) ); ## $err
 
@@ -180,21 +185,28 @@ sub init {
 #
 #   $regex_ref       = akin(qw( foo bar baz ));
 #       
-# Purpose   : Assist caller of check to compose a permissive regex. 
+# Purpose   : Assist caller of confirm() to compose a permissive regex. 
 # Parms     : list of strings
-# Returns   : blessed ref to a regex
-# Throws    : ____
-# See also  : check()
+# Returns   : (blessed) compiled regex
+# Throws    : '_unsupported_akin' if passed something it can't figure out
+# See also  : confirm()
 # 
 # Test::More::like() is too restrictive; one must supply a complete regex. 
 # akin(), easier and more permissive, constructs a regex from a list. 
 # Matching is case-insensitive and allows any strings between "hits". 
 # This is ideal for checking error messages, whose text may change somewhat. 
-# The fact that it's blessed tells check() that it's a regex-ref. 
+# The fact that it's blessed tells confirm() that it's a regex-ref. 
 #   
 sub akin {
     my @words       = @_;
+    my $first       = $words[0] // undef;
     my $regex       ;
+##### in akin():
+##### @words
+#~     my $w0 = $first;
+#~     ##### $w0
+#~     my $w1 = $words[1];
+#~     ##### $w1
     
     my $any         =  q{*};
     my $any_sep     =  q{.*};
@@ -202,24 +214,25 @@ sub akin {
     my $any_match   = qr/.*/s;
         
     if    ( 
-             not $words[1]                          # passed a false item
+             not $first                             # passed a false item
         or   @words == 0                            # passed no items
-        or ( @words == 1 and $words[1] =~ /\s/ )    # passed whitespace
+        or ( @words == 1 and $first =~ /\A\s\z/ )   # passed only whitespace
+        or ( ref $first eq 'ARRAY' and @$first == 0 )   # passed empty arrayref
     )
     { $regex        = $not_match }                  # matches only q{}
-    elsif (  @words == 1 and $words[1] eq $any  )   # passed a single star
+    elsif (  @words == 1 and $first eq $any  )      # passed a single star
     { $regex        = $any_match   }                # matches anything
     else                                            # passed a list of...?
     {
-        if    ( ref $words[1] eq 'STRING') {
-            my $tmp     = ${ $words[1] };
+        if    ( ref $first eq 'SCALAR') {
+            my $tmp     = ${ $first };
             @words      = $tmp;
         } 
-        elsif ( ref $words[1] eq 'ARRAY' ) {
-            my @tmp     = @{ $words[1] };
+        elsif ( ref $first eq 'ARRAY' ) {
+            my @tmp     = @{ $first };
             @words      = @tmp;            
         } 
-        elsif ( ref $words[1] ) {
+        elsif ( ref $first ) {
             $err->crash('_unsupported_akin');
         }
         else {
@@ -229,9 +242,37 @@ sub akin {
         my $tmp_r   = join $any_sep, @words;     # join; anything between
         $regex      = qr/$tmp_r/ism;
     };
+##### $regex
     
     return $regex;
 }; ## akin
+
+#=========# EXTERNAL FUNCTION
+#
+#   confirm();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub confirm {
+    my %args        = paired(@_);
+    my $snare       = $args{-leaveby};
+#~     my $leaveby     = $args{-leaveby};      # mode by which trap was left
+#~     my $leaveby     = $args{-leaveby};
+#~     my $leaveby     = $args{-leaveby};
+#~     my $leaveby     = $args{-leaveby};
+    
+    my $pass        ;
+    
+    return $pass;
+}; ## confirm
 
 
 
