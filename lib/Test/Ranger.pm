@@ -44,7 +44,7 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
 dlock( my $err     = Test::Ranger->new(  # this only locks the reference
     _unpaired   => [ 'Unpaired arguments passed; named args required:' ],
     _unsupported_akin   => 
-        [ 'akin() does not support refs except STRING and ARRAY.' ],
+        [ 'akin() does not support refs except SCALAR and ARRAY.' ],
     
 ) ); ## $err
 
@@ -195,7 +195,14 @@ sub init {
 #   
 sub akin {
     my @words       = @_;
+    my $first       = $words[0] // undef;
     my $regex       ;
+##### in akin():
+##### @words
+#~     my $w0 = $first;
+#~     ##### $w0
+#~     my $w1 = $words[1];
+#~     ##### $w1
     
     my $any         =  q{*};
     my $any_sep     =  q{.*};
@@ -203,24 +210,25 @@ sub akin {
     my $any_match   = qr/.*/s;
         
     if    ( 
-             not $words[1]                          # passed a false item
+             not $first                             # passed a false item
         or   @words == 0                            # passed no items
-        or ( @words == 1 and $words[1] =~ /\s/ )    # passed whitespace
+        or ( @words == 1 and $first =~ /\A\s\z/ )   # passed only whitespace
+        or ( ref $first eq 'ARRAY' and @$first == 0 )   # passed empty arrayref
     )
     { $regex        = $not_match }                  # matches only q{}
-    elsif (  @words == 1 and $words[1] eq $any  )   # passed a single star
+    elsif (  @words == 1 and $first eq $any  )      # passed a single star
     { $regex        = $any_match   }                # matches anything
     else                                            # passed a list of...?
     {
-        if    ( ref $words[1] eq 'STRING') {
-            my $tmp     = ${ $words[1] };
+        if    ( ref $first eq 'SCALAR') {
+            my $tmp     = ${ $first };
             @words      = $tmp;
         } 
-        elsif ( ref $words[1] eq 'ARRAY' ) {
-            my @tmp     = @{ $words[1] };
+        elsif ( ref $first eq 'ARRAY' ) {
+            my @tmp     = @{ $first };
             @words      = @tmp;            
         } 
-        elsif ( ref $words[1] ) {
+        elsif ( ref $first ) {
             $err->crash('_unsupported_akin');
         }
         else {
@@ -230,6 +238,7 @@ sub akin {
         my $tmp_r   = join $any_sep, @words;     # join; anything between
         $regex      = qr/$tmp_r/ism;
     };
+##### $regex
     
     return $regex;
 }; ## akin
