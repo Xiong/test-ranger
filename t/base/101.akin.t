@@ -127,9 +127,7 @@ for my $i (0..$#test_data) {
     
     $tc++;
     $diag   = $base . 'quiet';
-    $got    = join q{}, $trap->stdout, $trap->stderr;
-    $want   = q{};
-    is( $got, $want, $diag ) or exit 1;
+    $trap->quiet($diag) or exit 1;      # no STDOUT or STDERR
         
     note(q{-});
 }; ## for test_data
