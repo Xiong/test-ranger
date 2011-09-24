@@ -1,4 +1,4 @@
-package Test::Ranger;
+package Test::Ranger::Base;     # Base class and procedural utilities
 
 use 5.010001;
 use strict;
@@ -6,11 +6,6 @@ use warnings;
 use Carp;
 
 use version 0.94; our $VERSION = qv('0.0.4');
-
-use Test::More;                 # Standard framework for writing test scripts
-
-use Test::Trap qw( snare $snare :default );     # Nonstandard trap{}, $trap
-                                # Trap exit codes, exceptions, output
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util;               # General-utility scalar subroutines
@@ -24,13 +19,7 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
             paired
             
         }],
-        
-        test        => [qw{
-            akin
-            confirm
-            
-        }],
-        
+                
         all         => [qw{ :util :test }]
     ],
 );
@@ -181,198 +170,6 @@ sub init {
     return $self;
 }; ## init
 
-#=========# EXTERNAL FUNCTION
-#
-#   $regex_ref       = akin(qw( foo bar baz ));
-#       
-# Purpose   : Assist caller of confirm() to compose a permissive regex. 
-# Parms     : list of strings
-# Returns   : (blessed) compiled regex
-# Throws    : '_unsupported_akin' if passed something it can't figure out
-# See also  : confirm()
-# 
-# Test::More::like() is too restrictive; one must supply a complete regex. 
-# akin(), easier and more permissive, constructs a regex from a list. 
-# Matching is case-insensitive and allows any strings between "hits". 
-# This is ideal for checking error messages, whose text may change somewhat. 
-# The fact that it's blessed tells confirm() that it's a regex-ref. 
-#   
-sub akin {
-    my @words       = @_;
-    my $first       = $words[0] // undef;
-    my $regex       ;
-##### in akin():
-##### @words
-#~     my $w0 = $first;
-#~     ##### $w0
-#~     my $w1 = $words[1];
-#~     ##### $w1
-    
-    my $any         =  q{*};
-    my $any_sep     =  q{.*};
-    my $not_match   = qr/\A\z/;     # start followed by end of string
-    my $any_match   = qr/.*/s;
-        
-    if    ( 
-             not $first                             # passed a false item
-        or   @words == 0                            # passed no items
-        or ( @words == 1 and $first =~ /\A\s\z/ )   # passed only whitespace
-        or ( ref $first eq 'ARRAY' and @$first == 0 )   # passed empty arrayref
-    )
-    { $regex        = $not_match }                  # matches only q{}
-    elsif (  @words == 1 and $first eq $any  )      # passed a single star
-    { $regex        = $any_match   }                # matches anything
-    else                                            # passed a list of...?
-    {
-        if    ( ref $first eq 'SCALAR') {
-            my $tmp     = ${ $first };
-            @words      = $tmp;
-        } 
-        elsif ( ref $first eq 'ARRAY' ) {
-            my @tmp     = @{ $first };
-            @words      = @tmp;            
-        } 
-        elsif ( ref $first ) {
-            $err->crash('_unsupported_akin');
-        }
-        else {
-            # do nothing
-        };
-        
-        my $tmp_r   = join $any_sep, @words;     # join; anything between
-        $regex      = qr/$tmp_r/ism;
-    };
-##### $regex
-    
-    return $regex;
-}; ## akin
-
-#=========# EXTERNAL FUNCTION
-#
-#   confirm();     # short
-#       
-# Purpose   : ____
-# Parms     : ____
-# Reads     : ____
-# Returns   : ____
-# Writes    : ____
-# Throws    : ____
-# See also  : ____
-# 
-# ____
-#   
-sub confirm {
-    my %args        = paired(@_);
-    my $snare       = $args{-leaveby};
-#~     my $leaveby     = $args{-leaveby};      # mode by which trap was left
-#~     my $leaveby     = $args{-leaveby};
-#~     my $leaveby     = $args{-leaveby};
-#~     my $leaveby     = $args{-leaveby};
-    
-    my $pass        ;
-    
-    return $pass;
-}; ## confirm
-
-
-
-#    #~ #=========# OBJECT METHOD
-#    #~ #
-#    #~ #   $single->expand();
-#    #~ #
-#    #~ # Purpose   : Expand/parse declaration into canonical form.
-#    #~ # Parms     : $class
-#    #~ #           : $self
-#    #~ # Returns   : $self
-#    #~ #
-#    #~ sub expand {
-#    #~     my $self        = shift;
-#    #~     
-#    #~     # Default givens
-#    #~     if ( !$self->{-given}{-args} ) {
-#    #~         $self->{-given}{-args}     = [];
-#    #~     };
-#    #~     
-#    #~     # Default expectations
-#    #~     if ( !$self->{-return}{-want} ) {
-#    #~         $self->{-return}{-want}     = 1;
-#    #~     };
-#    #~     
-#    #~     
-#    #~     
-#    #~     $self->{-expanded}          = 1;
-#    #~     
-#    #~     return $self;
-#    #~ }; ## expand
-#    #~ 
-#    #~ #=========# OBJECT METHOD
-#    #~ #
-#    #~ #   $single->execute();
-#    #~ #
-#    #~ #       Execute a $single object.
-#    #~ #
-#    #~ sub execute {
-#    #~     my $self        = shift;
-#    #~     
-#    #~     $self->expand() if !$self->{-expanded};
-#    #~     
-#    #~     my $coderef     = $self->{-coderef};
-#    #~     my @args        = @{ $self->{-given}{-args} };
-#    #~     ### $coderef
-#    #~     
-#    #~     $self->{-return}{-got}    = &$coderef( @args );
-#    #~     
-#    #~     return $self;
-#    #~     
-#    #~ }; ## execute
-#    #~ 
-#    #~ #=========# OBJECT METHOD
-#    #~ #
-#    #~ #   $single->check();
-#    #~ #
-#    #~ #       Check results in a $single object.
-#    #~ #
-#    #~ sub check {
-#    #~     my $self        = shift;
-#    #~     
-#    #~     is( $self->{-return}{-got}, $self->{-return}{-want}, $self->{-fullname} );
-#    #~     $self->{-plan_counter}++;
-#    #~     
-#    #~     return $self;
-#    #~     
-#    #~ }; ## check
-#    #~ 
-#    #~ #=========# OBJECT METHOD
-#    #~ #
-#    #~ #   $single->test();
-#    #~ #
-#    #~ #       Execute and check a $single object.
-#    #~ #
-#    #~ sub test {
-#    #~     my $self        = shift;
-#    #~     
-#    #~     $self->execute();
-#    #~     $self->check();
-#    #~     
-#    #~     return $self;
-#    #~     
-#    #~ }; ## test
-#    #~ 
-#    #~ #=========# OBJECT METHOD
-#    #~ #
-#    #~ #   $single->done();
-#    #~ #
-#    #~ #       Conclude testing.
-#    #~ #
-#    #~ sub done {
-#    #~     my $self        = shift;
-#    #~     
-#    #~     done_testing( $self->{-done_counter} );
-#    #~     
-#    #~     return $self;
-#    #~     
-#    #~ }; ## done
-#    #~ 
 
 ## END MODULE
 1;
