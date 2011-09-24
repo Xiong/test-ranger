@@ -10,7 +10,7 @@ use warnings;
 use lib qw( lib ../lib ../../lib);       # while under development       #~
 
 use Gtk2 -init;                         # Gtk+ GUI toolkit
-use Test::Ranger::Tool;                 # implements GUI tool
+use Test::Ranger::Tool;                 # Command line testing valet with GUI
 
 #----------------------------------------------------------------------------#
 

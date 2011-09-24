@@ -1,4 +1,6 @@
-package Test::Ranger::Trap;     # Comprehensive airtight trapping and testing
+package Test::Ranger::Trap;
+#=========# MODULE USAGE
+#~ use Test::Ranger::Trap;         # Comprehensive airtight trap and test
 
 use 5.010001;
 use strict;
@@ -7,26 +9,17 @@ use Carp;
 
 use version 0.94; our $VERSION = qv('0.0.4');
 
+use Test::Ranger::Base          # Base class and procedural utilities
+    qw( :all );
 use Test::More;                 # Standard framework for writing test scripts
 
 use Test::Trap qw( snare $snare :default );     # Nonstandard trap{}, $trap
                                 # Trap exit codes, exceptions, output
+use parent qw{ Test::Trap };    # We are a subclass!
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util;               # General-utility scalar subroutines
 use Scalar::Util::Reftype;      # Alternate reftype() interface
-
-#~ use Exporter::Easy (            # Procedural as well as OO interface; you pick
-#~     TAGS    => [
-#~         test        => [qw{
-#~             akin
-#~             confirm
-#~             
-#~         }],
-#~         
-#~         all         => [qw{ :test }]
-#~     ],
-#~ );
 
 ## use
 
@@ -38,10 +31,7 @@ use Scalar::Util::Reftype;      # Alternate reftype() interface
 # Pseudo-globals
 
 # Error messages
-dlock( my $err     = Test::Ranger->new(  # this only locks the reference
-    _unpaired   => [ 'Unpaired arguments passed; named args required:' ],
-    _unsupported_akin   => 
-        [ 'akin() does not support refs except SCALAR and ARRAY.' ],
+dlock( my $err     = Test::Ranger::Base->new(
     
 ) ); ## $err
 
@@ -87,72 +77,6 @@ dlock( my $err     = Test::Ranger->new(  # this only locks the reference
 #~     
 #~     return $self;
 #~ }; ## init
-
-#=========# EXTERNAL FUNCTION
-#
-#   $regex_ref       = akin(qw( foo bar baz ));
-#       
-# Purpose   : Assist caller of confirm() to compose a permissive regex. 
-# Parms     : list of strings
-# Returns   : (blessed) compiled regex
-# Throws    : '_unsupported_akin' if passed something it can't figure out
-# See also  : confirm()
-# 
-# Test::More::like() is too restrictive; one must supply a complete regex. 
-# akin(), easier and more permissive, constructs a regex from a list. 
-# Matching is case-insensitive and allows any strings between "hits". 
-# This is ideal for checking error messages, whose text may change somewhat. 
-# The fact that it's blessed tells confirm() that it's a regex-ref. 
-#   
-sub akin {
-    my @words       = @_;
-    my $first       = $words[0] // undef;
-    my $regex       ;
-##### in akin():
-##### @words
-#~     my $w0 = $first;
-#~     ##### $w0
-#~     my $w1 = $words[1];
-#~     ##### $w1
-    
-    my $any         =  q{*};
-    my $any_sep     =  q{.*};
-    my $not_match   = qr/\A\z/;     # start followed by end of string
-    my $any_match   = qr/.*/s;
-        
-    if    ( 
-             not $first                             # passed a false item
-        or   @words == 0                            # passed no items
-        or ( @words == 1 and $first =~ /\A\s\z/ )   # passed only whitespace
-        or ( ref $first eq 'ARRAY' and @$first == 0 )   # passed empty arrayref
-    )
-    { $regex        = $not_match }                  # matches only q{}
-    elsif (  @words == 1 and $first eq $any  )      # passed a single star
-    { $regex        = $any_match   }                # matches anything
-    else                                            # passed a list of...?
-    {
-        if    ( ref $first eq 'SCALAR') {
-            my $tmp     = ${ $first };
-            @words      = $tmp;
-        } 
-        elsif ( ref $first eq 'ARRAY' ) {
-            my @tmp     = @{ $first };
-            @words      = @tmp;            
-        } 
-        elsif ( ref $first ) {
-            $err->crash('_unsupported_akin');
-        }
-        else {
-            # do nothing
-        };
-        
-        my $tmp_r   = join $any_sep, @words;     # join; anything between
-        $regex      = qr/$tmp_r/ism;
-    };
-##### $regex
-    
-    return $regex;
-}; ## akin
 
 #=========# EXTERNAL FUNCTION
 #
@@ -288,11 +212,11 @@ __END__
 
 =head1 NAME
 
-Test::Ranger - Testing tool base class and utilities
+Test::Ranger::Trap - Comprehensive airtight trap and test
 
 =head1 VERSION
 
-This document describes Test::Ranger version 0.0.4
+This document describes Test::Ranger::Trap version 0.0.4
 
 TODO: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
 

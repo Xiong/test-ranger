@@ -5,8 +5,8 @@ use warnings;
 use Test::More;
 use Test::Trap qw( :default );
 
-use Test::Ranger qw(:all);      # Testing tool base class and utilities
-use Test::Ranger::DB;
+use Test::Ranger::Base          # Base class and procedural utilities
+    qw( :all );
 
 #~ use Devel::Comments '###';                                  # debug only #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
@@ -19,7 +19,7 @@ use Test::Ranger::DB;
 #----------------------------------------------------------------------------#
 # SETUP
 
-my $unit        = 'TR::akin(): ';
+my $unit        = '::Base::akin(): ';
 my $got         ;
 my $want        ;
 my $diag        = $unit;

@@ -1,4 +1,6 @@
 package Test::Ranger::Tool;
+#=========# MODULE USAGE
+#~ use Test::Ranger::Tool;         # Command line testing valet with GUI
 
 use 5.010000;
 use strict;
@@ -8,10 +10,12 @@ use utf8;
 
 use version 0.94; our $VERSION = qv('v0.0.4');
 
-use parent qw{ Test::Ranger };
-use Test::Ranger qw(:all);      # Testing tool base class and utilities
-use Test::Ranger::CS;           # Class for 'context structure' football
-use Test::Ranger::DB;           # Database interactions for Test-Ranger
+use Test::Ranger::Base          # Base class and procedural utilities
+    qw( :all );
+use parent qw{ Test::Ranger::Base };
+
+use Test::Ranger::CS;           # Class for 'context state' football
+use Test::Ranger::DB;           # Database interactions with SQLite
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 use List::MoreUtils qw(
@@ -40,7 +44,7 @@ use Devel::Comments '###';
 # Constants
 
 # Error messages
-dlock( my $err     = Test::Ranger->new(  # this only locks the reference
+dlock( my $err     = Test::Ranger::Base->new(
     _failed_fork     => [ 'Failed to fork:'                                 ],
     
     
@@ -65,7 +69,7 @@ our $Debug;
 # Returns   : $cs       : my pseudo-global football
 # Writes    : nothing
 # Throws    : nothing
-# See also  : _setup(), Test::Ranger::CS::new()
+# See also  : _setup(), Test::Ranger::Base::new()
 # 
 # This is intended to be called from an invocating script. 
 # It runs once, calling all needed routines. 
@@ -1104,7 +1108,7 @@ __END__
 
 =head1 NAME
 
-Test::Ranger::Tool - GUI valet for comprehensive test structure
+Test::Ranger::Tool - Command line testing valet with GUI
 
 =head1 VERSION
 

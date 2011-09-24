@@ -1,4 +1,6 @@
 package Test::Ranger;
+#=========# MODULE USAGE
+#~ use Test::Ranger;                 # Airtight testing with database and valet
 
 use 5.010001;
 use strict;
@@ -45,7 +47,7 @@ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 #~ # Pseudo-globals
 #~ 
 #~ # Error messages
-#~ dlock( my $err     = Test::Ranger->new(  # this only locks the reference
+#~ dlock( my $err     = Test::Ranger::Base->new(
 #~     _unpaired   => [ 'Unpaired arguments passed; named args required:' ],
 #~     _unsupported_akin   => 
 #~         [ 'akin() does not support refs except SCALAR and ARRAY.' ],
@@ -391,48 +393,7 @@ TODO: THIS IS A DUMMY, NONFUNCTIONAL RELEASE.
 
 =head1 SYNOPSIS
 
-    # Object-oriented usage
     use Test::Ranger;
-
-    my $group    = Test::Ranger->new([
-        {
-            -coderef    => \&Acme::Teddy::_egg,
-            -basename   => 'teddy-egg',
-        },
-        
-        {
-            -name       => '4*7',
-            -given      => [ 4, 7 ],
-            -return     => {
-                -is         => 42,
-            },
-            -stdout     => {
-                -like       => [ qw(hello world) ],
-                -matches    => 2,
-                -lines      => 1,
-            },
-        },
-        
-        {
-            -name       => '9*9',
-            -given      => [ 9, 9 ],
-            -return     => {
-                -is         => 81,
-            },
-        },
-        
-        {
-            -name       => 'string',
-            -given      => [ 'monkey' ],
-            -warn       => {
-                -like       => 'dummy',
-            },
-        },
-        
-    ]); ## end new
-
-    $group->test();
-    
     __END__
 
 =head1 DESCRIPTION

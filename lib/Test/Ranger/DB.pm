@@ -1,4 +1,6 @@
-package Test::Ranger::DB;       # database interactions
+package Test::Ranger::DB;
+#=========# MODULE USAGE
+#~ use Test::Ranger::DB;           # Database interactions with SQLite
 
 use 5.010001;
 use strict;
@@ -7,8 +9,10 @@ use Carp;
 
 use version 0.94; our $VERSION = qv('v0.0.4');
 
-use parent qw{ Test::Ranger };
-use Test::Ranger qw(:all);      # Testing tool base class and utilities
+use Test::Ranger::Base          # Base class and procedural utilities
+    qw( :all );
+use parent qw{ Test::Ranger::Base };
+
 
 use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
@@ -30,7 +34,7 @@ use Data::Lock qw( dlock );     # Declare locked scalars
 # Pseudo-globals
 
 # Error messages
-dlock( my $err  = Test::Ranger->new(  # this only locks the reference
+dlock( my $err  = Test::Ranger::Base->new(
     _unpaired       => [ 'Unpaired arguments passed; named args required:'  ],
     _no_sql_file    => [ 'No SQL file passed:'                              ],
     _bad_sql_file   => [ 'Bad SQL file ($A[0]) passed:'                     ],
@@ -252,7 +256,7 @@ __END__
 
 =head1 NAME
 
-Test::Ranger::DB - Database interactions for Test-Ranger
+Test::Ranger::DB - Database interactions with SQLite
 
 =head1 VERSION
 
