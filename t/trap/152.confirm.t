@@ -10,8 +10,7 @@ use Test::Ranger::Base          # Base class and procedural utilities
 use Test::Ranger::Trap;         # Comprehensive airtight trap and test
                                 # ... also imports $trap and trap{}
 
-#~ use Devel::Comments '###';                                  # debug only #~
-#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' }); # debug only #~
 
 #~ die '---------die after use-ing';
 #============================================================================#
@@ -32,8 +31,6 @@ my $got         ;
 my $want        ;
 my $diag        = $unit;
 my $tc          = 0;        # the usual test counter for this script
-my $one         = 1;       
-my $zero        = 0;       
 
 my @test_data       = (
     { 
@@ -49,6 +46,8 @@ my @test_data       = (
     },
     
 ); ## test_data
+$tc++;
+pass('Starting...');
 
 #----------------------------------------------------------------------------#
 # EXECUTE AND CHECK
@@ -69,32 +68,31 @@ for my $i (0..$#test_data) {
     # EXECUTE-RANGER
     my $r_rv = grab{
               
-        # SETUP-BEAR
-        my $bear        = Test::Ranger::Trap->new();
-#~         my $bear        = {};
-        
         # EXECUTE-BEAR
-#~         $bear->trap{        # should be this way, when...
-        my $rv = trap{        # this way until we make a trap method?
+        my $rv = trap{                  # just like daddy
             my $rv = &$code();
             return $rv;
         };
-#~         my $saved_trap      = $trap;                    # do-jiggery for now
-#~         $bear->{-test_ranger}{-trap} = $saved_trap;     # more do-jiggery
-        $bear   = $trap;                                # different do-jiggery
-        diag('Dumping inner trap:');                                     #~
-        $trap->diag_all;      # Dumps the $trap object, TAP safe   #~
+        
+    ##### $trap    
+        
+#~         diag('Dumping inner trap:');                                     #~
+#~         $trap->diag_all;            # Dumps the $trap object, TAP safe   #~
         
         # CHECK-BEAR    
                                 # bear's givens and wants are ranger's givens
-        my $inner_tc = $bear->confirm( %given );
-        $tc     =+ $inner_tc;   #keep track of number of inner tests run
+        my $rv_c = $trap->confirm( 
+            -base       => 'inside ' . $base,
+            %given, 
+        );
+        return $rv_c;
         
     }; ## trap
+    $tc     += $r_rv;       #keep track of number of inner tests run
     
     # CHECK-RANGER
-    diag('Dumping outer trap:');                                         #~
-    $grab->diag_all;        # Dumps the $grab ($trap) object, TAP safe   #~
+#~     diag('Dumping outer trap:');                                         #~
+#~     $grab->diag_all;        # Dumps the $grab ($trap) object, TAP safe   #~
     
     $tc++;
     $diag   = $base . 'did_return';

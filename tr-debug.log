@@ -1,19 +1,11 @@
 
-### @_: [
-###       bless( {
-###                ' id ' => '1316876231/31523/2',
-###                die => 'foo at t/base/102.confirm.t line 42.
+### $trap: bless( {
+###                 ' id ' => '1316888874/32406/2',
+###                 die => 'foo at t/trap/152.confirm.t line 39.
 ',
-###                leaveby => 'die',
-###                stderr => '',
-###                stdout => '',
-###                wantarray => '',
-###                warn => []
-###              }, 'Test::Ranger::Trap' ),
-###       '-code',
-###       sub { "DUMMY" },
-###       '-leaveby',
-###       'die',
-###       '-die',
-###       qr/(?msi-x:foo)/
-###     ]
+###                 leaveby => 'die',
+###                 stderr => '',
+###                 stdout => '',
+###                 wantarray => '',
+###                 warn => []
+###               }, 'Test::Ranger::Trap' )

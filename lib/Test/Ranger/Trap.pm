@@ -10,7 +10,8 @@ use Carp;
 use version 0.94; our $VERSION = qv('0.0.4');
 
 use Test::Ranger::Base          # Base class and procedural utilities
-    qw( :all );                 # ... becoming a shadow parent
+#~     qw( :all );                 # ... becoming a shadow parent
+    qw( :util :test );          # ... not becoming a shadow parent!
 
 use Test::More;                 # Standard framework for writing test scripts
 
@@ -30,7 +31,7 @@ use Scalar::Util::Reftype;      # Alternate reftype() interface
 ## use
 
 # Alternate uses
-use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 
@@ -42,6 +43,10 @@ dlock( my $err      = Test::Ranger::Base->new(
         [ q{-leaveby must be one of 'return', 'die', or 'exit'.} ],
     
 ) ); ## $err
+
+# Secret hash key
+dlock( my $key         = '-tr_private' );
+
 
 #----------------------------------------------------------------------------#
 
@@ -106,6 +111,33 @@ dlock( my $err      = Test::Ranger::Base->new(
 #~     return 1;
 #~ }; ## import
 
+#~ #=========# EXTERNAL FUNCTION
+#~ #
+#~ #   $trap->setup();     # short
+#~ #       
+#~ # Purpose   : Stuff the empty $trap with $base and $tc
+#~ # Parms     : ____
+#~ # Reads     : $key      : constant  : secret key for private data
+#~ # Returns   : ____
+#~ # Writes    : ____
+#~ # Throws    : ____
+#~ # See also  : ____
+#~ # 
+#~ # ____
+#~ #   
+#~ sub setup {
+#~ ##### @_
+#~     my $trap        = shift;
+#~     my %args        = paired(@_);           # remaining args are *setups*
+#~     my $base        = $args{-base};
+#~     my $count       = $args{-count};
+#~     
+#~     $trap->{$key}{-base}    = $base;
+#~     $trap->{$key}{-counter} = $count;       # initial value of counter
+#~     
+#~     return $trap;
+#~ }; ## setup
+
 #=========# EXTERNAL FUNCTION
 #
 #   confirm();     # short
@@ -122,29 +154,28 @@ dlock( my $err      = Test::Ranger::Base->new(
 #   
 sub confirm {
 ##### @_
-    my $trap        = shift;                # gots are inside object
-    my $base        = 'just-testing: ';     # TODO!
-    
+    my $trap        = shift;                # gots are inside object    
     my %args        = paired(@_);           # remaining args are *wants*
+    my $base        = $args{-base};         # base string for $diag-s
     my $leaveby     = $args{-leaveby};      # mode by which trap was left
     
-    my $diag        ;
-    my $tc          ;
+    my $tc          ;                       # local counter only
+    my $diag        ;                       # diagnostic message
     
     # Check different things depending on how we wanted to leave...
     if    ( $leaveby eq 'die' ) {
         $tc++;
-        $diag       = $base . 'died as wanted';
+        $diag       = $base . 'wanted to die';
         $trap->did_die($diag)
     } 
     elsif ( $leaveby eq 'exit' ) {
         $tc++;
-        $diag       = $base . 'exited as wanted';
+        $diag       = $base . 'wanted to exit';
         $trap->did_exit($diag)        
     } 
     elsif ( $leaveby eq 'return' ) {
         $tc++;
-        $diag       = $base . 'returned as wanted';
+        $diag       = $base . 'wanted to return';
         $trap->did_exit($diag)        
     } 
     else {
@@ -155,7 +186,7 @@ sub confirm {
     
     
     
-    
+    $trap->{$key}{-counter}     = $tc;      # in case we're called again
     return $tc;
 }; ## confirm
 
