@@ -5,39 +5,43 @@ use warnings;
 use Test::More;
 use Test::Trap qw( :default );
 
-use Test::Ranger qw(:all);      # Testing tool base class and utilities
-use Test::Ranger::DB;
+use Test::Ranger::Base          # Base class and procedural utilities
+    qw( :all );
+use Test::Ranger::Trap;         # Comprehensive airtight trap and test
 
 #~ use Devel::Comments '###';                                  # debug only #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
 #============================================================================#
 # 
-# Tests the regex generator TR::confirm(). This is a Test::Ranger itself test. 
+# Tests the analyzer TR::Trap:: confirm(). This is a self test. 
 # This test is failing because confirm() is not yet written. 
-# The effort to write that is stalled over the question of approach. 
-
+# 
+# Two testing "personalities" in this script: the bear and the ranger. 
+# The bear takes some simple code and tests it. 
+# The ranger watches the bear and tests the bear. 
+# Users of Test::Ranger will be using the bear. 
+# 
 #----------------------------------------------------------------------------#
 # SETUP
 
-my $unit        = 'TR::confirm(): ';
+my $unit        = '::Trap::confirm(): ';
 my $got         ;
 my $want        ;
 my $diag        = $unit;
-my $tc          = 0;        # the usual test counter we'll pass
-my $script_tc   = 0;        # private test counter for this script only
+my $tc          = 0;        # the usual test counter for this script
 my $one         = 1;       
 my $zero        = 0;       
 
 my @test_data       = (
     { 
         -base   => 'die foo',
-        -given  => {
-            -code       => sub{ die 'foo' },
-            -leaveby    => 'die',
-            -die        => akin('foo'),
+        -given  => {        # givens for this ranger script
+            -code       => sub{ die 'foo' },    # given for bear trap
+            -leaveby    => 'die',               # want  for bear trap
+            -die        => akin('foo'),         # want  for bear trap
         },
-        -want   => {
+        -want   => {        # wants for this ranger script
             -pass       => 1
         }
     },
@@ -60,27 +64,34 @@ for my $i (0..$#test_data) {
     my %want        = %{ $line{-want } };
         my $pass        = $want{-pass};
     
-    # EXECUTE-BEAR
-    my $rv = trap{        
-        my $rv = &$code();
-        return $rv;
-    };
-        
-    # CHECK-BEAR    
-    my $saved_trap      = $trap;
-    $saved_trap->diag_all;          # Dumps the $trap object, TAP safe   #~
-    
     # EXECUTE-RANGER
     trap{        
-        confirm( -trap  => $saved_trap, %given );
-    };
+        # SETUP-BEAR
+        my $bear        = Test::Ranger::Trap->new();
+        
+        # EXECUTE-BEAR
+        $bear->trap{        # should be this way, when...
+            my $rv = &$code();
+            return $rv;
+        };
+        
+        # CHECK-BEAR    
+        my $saved_trap      = $trap;                    # do-jiggery for now
+        $bear->{-test_ranger}{-trap} = $saved_trap;     # more do-jiggery
+        $saved_trap->diag_all;          # Dumps the $trap object, TAP safe   #~
+        
+        $bear->confirm( %given );
+        
+    }; ## trap
     
+    # CHECK-RANGER
     $trap->diag_all;                # Dumps the $trap object, TAP safe   #~
     
-    $script_tc++;
+    $tc++;
     $diag   = $base . 'did_return';
     $trap->did_return($diag) or exit 1;
     
+    $tc++;
     $diag   = $base . 'pass';
     $got    = $trap->return(0);
     if ($pass) {
@@ -90,13 +101,10 @@ for my $i (0..$#test_data) {
         ok( !$got, $diag ) or exit 1;       # !ok (ok if $got is false)
     };
     
-    $script_tc++;
+    $tc++;
     $diag   = $base . 'quiet';
-    $got    = join q{}, $trap->stdout, $trap->stderr;
-    $want   = q{};
-    is( $got, $want, $diag ) or exit 1;
+    $trap->quiet($diag) or exit 1;      # no STDOUT or STDERR
         
-    $script_tc++;
     note(q{-});
 };
 
@@ -104,7 +112,7 @@ for my $i (0..$#test_data) {
 # TEARDOWN
 
 END {
-    done_testing($script_tc);                  # declare plan after testing
+    done_testing($tc);                  # declare plan after testing
 }
 
 #============================================================================#
