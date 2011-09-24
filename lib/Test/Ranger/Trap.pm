@@ -84,25 +84,25 @@ dlock( my $err     = Test::Ranger::Base->new(
 #~     return $self;
 #~ }; ## init
 
-#=========# EXTERNAL FUNCTION
-#
-#   import();     # short
-#       
-# Purpose   : Don't call parent's import(). 
-# Parms     : ____
-# Reads     : ____
-# Returns   : ____
-# Writes    : ____
-# Throws    : ____
-# See also  : ____
-# 
-# ____
-#   
-sub import {
- 
-    
-    return 1;
-}; ## import
+#~ #=========# EXTERNAL FUNCTION
+#~ #
+#~ #   import();     # short
+#~ #       
+#~ # Purpose   : Don't call parent's import(). 
+#~ # Parms     : ____
+#~ # Reads     : ____
+#~ # Returns   : ____
+#~ # Writes    : ____
+#~ # Throws    : ____
+#~ # See also  : ____
+#~ # 
+#~ # ____
+#~ #   
+#~ sub import {
+#~  
+#~     
+#~     return 1;
+#~ }; ## import
 
 #=========# EXTERNAL FUNCTION
 #

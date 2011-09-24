@@ -3,11 +3,12 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Trap qw( :default );
+use Test::Trap qw( grab $grab :default );  # nonstandard import()
 
 use Test::Ranger::Base          # Base class and procedural utilities
     qw( :all );
 use Test::Ranger::Trap;         # Comprehensive airtight trap and test
+                                # ... also imports $trap and trap{}
 
 #~ use Devel::Comments '###';                                  # debug only #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
@@ -66,7 +67,7 @@ for my $i (0..$#test_data) {
         my $pass        = $want{-pass};
     
     # EXECUTE-RANGER
-    my $r_rv = trap{
+    my $r_rv = grab{
               
         # SETUP-BEAR
         my $bear        = Test::Ranger::Trap->new();
@@ -80,7 +81,8 @@ for my $i (0..$#test_data) {
         };
         my $saved_trap      = $trap;                    # do-jiggery for now
         $bear->{-test_ranger}{-trap} = $saved_trap;     # more do-jiggery
-#~         $saved_trap->diag_all;      # Dumps the $trap object, TAP safe   #~
+        diag('Dumping inner trap:');                                     #~
+        $saved_trap->diag_all;      # Dumps the $trap object, TAP safe   #~
         
         # CHECK-BEAR    
         
@@ -89,15 +91,16 @@ for my $i (0..$#test_data) {
     }; ## trap
     
     # CHECK-RANGER
-    $trap->diag_all;                # Dumps the $trap object, TAP safe   #~
+    diag('Dumping outer trap:');                                         #~
+    $grab->diag_all;        # Dumps the $grab ($trap) object, TAP safe   #~
     
     $tc++;
     $diag   = $base . 'did_return';
-    $trap->did_return($diag) or exit 1;
+    $grab->did_return($diag) or exit 1;
     
     $tc++;
     $diag   = $base . 'pass';
-    $got    = $trap->return(0);
+    $got    = $grab->return(0);
     if ($pass) {
         ok(  $got, $diag ) or exit 1;
     } 
@@ -107,7 +110,7 @@ for my $i (0..$#test_data) {
     
     $tc++;
     $diag   = $base . 'quiet';
-    $trap->quiet($diag) or exit 1;      # no STDOUT or STDERR
+    $grab->quiet($diag) or exit 1;      # no STDOUT or STDERR
         
     note(q{-});
 };
