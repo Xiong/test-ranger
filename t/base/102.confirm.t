@@ -79,14 +79,16 @@ for my $i (0..$#test_data) {
             my $rv = &$code();
             return $rv;
         };
-        my $saved_trap      = $trap;                    # do-jiggery for now
-        $bear->{-test_ranger}{-trap} = $saved_trap;     # more do-jiggery
+#~         my $saved_trap      = $trap;                    # do-jiggery for now
+#~         $bear->{-test_ranger}{-trap} = $saved_trap;     # more do-jiggery
+        $bear   = $trap;                                # different do-jiggery
         diag('Dumping inner trap:');                                     #~
-        $saved_trap->diag_all;      # Dumps the $trap object, TAP safe   #~
+        $trap->diag_all;      # Dumps the $trap object, TAP safe   #~
         
         # CHECK-BEAR    
-        
-        $bear->confirm( %given );   # bear's givens and wants are ranger's givens
+                                # bear's givens and wants are ranger's givens
+        my $inner_tc = $bear->confirm( %given );
+        $tc     =+ $inner_tc;   #keep track of number of inner tests run
         
     }; ## trap
     
@@ -99,14 +101,18 @@ for my $i (0..$#test_data) {
     $grab->did_return($diag) or exit 1;
     
     $tc++;
-    $diag   = $base . 'pass';
-    $got    = $grab->return(0);
-    if ($pass) {
-        ok(  $got, $diag ) or exit 1;
-    } 
-    else {
-        ok( !$got, $diag ) or exit 1;       # !ok (ok if $got is false)
-    };
+    $diag   = $base . 'return value';
+    $got    = $r_rv;        # returns number of tests run (passed or failed)
+    $want   = 1;            # may want to relax this
+    is( $got, $want, $diag );
+    
+#~     $got    = $grab->return(0);
+#~     if ($pass) {
+#~         ok(  $got, $diag ) or exit 1;
+#~     } 
+#~     else {
+#~         ok( !$got, $diag ) or exit 1;       # !ok (ok if $got is false)
+#~     };
     
     $tc++;
     $diag   = $base . 'quiet';

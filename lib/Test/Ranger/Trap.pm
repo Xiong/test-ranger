@@ -37,7 +37,9 @@ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 # Pseudo-globals
 
 # Error messages
-dlock( my $err     = Test::Ranger::Base->new(
+dlock( my $err      = Test::Ranger::Base->new(
+    _bad_leaveby        =>
+        [ q{-leaveby must be one of 'return', 'die', or 'exit'.} ],
     
 ) ); ## $err
 
@@ -120,17 +122,41 @@ dlock( my $err     = Test::Ranger::Base->new(
 #   
 sub confirm {
 ##### @_
-    my $trap        = shift;
-    my %args        = paired(@_);
+    my $trap        = shift;                # gots are inside object
+    my $base        = 'just-testing: ';     # TODO!
+    
+    my %args        = paired(@_);           # remaining args are *wants*
     my $leaveby     = $args{-leaveby};      # mode by which trap was left
-#~     my $leaveby     = $args{-leaveby};      
-#~     my $leaveby     = $args{-leaveby};
-#~     my $leaveby     = $args{-leaveby};
-#~     my $leaveby     = $args{-leaveby};
     
-    my $pass        ;
+    my $diag        ;
+    my $tc          ;
     
-    return $pass;
+    # Check different things depending on how we wanted to leave...
+    if    ( $leaveby eq 'die' ) {
+        $tc++;
+        $diag       = $base . 'died as wanted';
+        $trap->did_die($diag)
+    } 
+    elsif ( $leaveby eq 'exit' ) {
+        $tc++;
+        $diag       = $base . 'exited as wanted';
+        $trap->did_exit($diag)        
+    } 
+    elsif ( $leaveby eq 'return' ) {
+        $tc++;
+        $diag       = $base . 'returned as wanted';
+        $trap->did_exit($diag)        
+    } 
+    else {
+        crash('_bad_leaveby');
+    };
+    
+    
+    
+    
+    
+    
+    return $tc;
 }; ## confirm
 
 
