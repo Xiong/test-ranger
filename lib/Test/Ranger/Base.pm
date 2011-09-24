@@ -20,7 +20,7 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
             
         }],
                 
-        all         => [qw{ :util :test }]
+        all         => [qw{ :util }]
     ],
 );
 
