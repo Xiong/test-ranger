@@ -9,10 +9,15 @@ BEGIN {
 }   
 
 BEGIN {
-    use Test::Ranger;       # Testing tool base class and utilities
-    use Test::Ranger::DB;   # Database interactions for Test-Ranger
+    use Test::Ranger;               # Airtight testing with database and valet
+    use Test::Ranger::Base          # Base class and procedural utilities
+        qw( :all );
+    use Test::Ranger::Trap;         # Comprehensive airtight trap and test
+    use Test::Ranger::Tool;         # Command line testing valet with GUI
+    use Test::Ranger::CS;           # Class for 'context state' football
+    use Test::Ranger::DB;           # Database interactions with SQLite
+    
     use DBI;                # Generic interface to a large number of databases
-    #~ use DBD::mysql;         # DBI driver for MySQL
     use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
     use DBIx::RunSQL;       # run SQL to create a database schema
 }
