@@ -176,7 +176,7 @@ sub confirm {
     elsif ( $leaveby eq 'return' ) {
         $tc++;
         $diag       = $base . 'wanted to return';
-        $trap->did_exit($diag)        
+        $trap->did_return($diag)        
     } 
     else {
         crash('_bad_leaveby');

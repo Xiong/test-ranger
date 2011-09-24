@@ -1,0 +1,2 @@
+ok 3 - should pass
+not ok 4 - should fail

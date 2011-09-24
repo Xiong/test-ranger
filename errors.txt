@@ -1,0 +1,3 @@
+# quiet
+#   Failed test 'should fail'
+#   at t/shit/154.bogus.t line 38.

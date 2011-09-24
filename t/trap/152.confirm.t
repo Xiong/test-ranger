@@ -10,7 +10,7 @@ use Test::Ranger::Base          # Base class and procedural utilities
 use Test::Ranger::Trap;         # Comprehensive airtight trap and test
                                 # ... also imports $trap and trap{}
 
-#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' }); # debug only #~
+use Devel::Comments '#####', ({ -file => 'tr-debug.log' }); # debug only #~
 
 #~ die '---------die after use-ing';
 #============================================================================#
@@ -39,6 +39,18 @@ my @test_data       = (
             -code       => sub{ die 'foo' },    # given for bear trap
             -leaveby    => 'die',               # want  for bear trap
             -die        => akin('foo'),         # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1
+        }
+    },
+    
+    { 
+        -base   => 'say foo',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ say 'foo' },    # given for bear trap
+            -leaveby    => 'return',            # want  for bear trap
+            -return     => akin('foo'),         # want  for bear trap
         },
         -want   => {        # wants for this ranger script
             -pass       => 1
@@ -74,7 +86,7 @@ for my $i (0..$#test_data) {
             return $rv;
         };
         
-    ##### $trap    
+#~     ##### $trap    
         
 #~         diag('Dumping inner trap:');                                     #~
 #~         $trap->diag_all;            # Dumps the $trap object, TAP safe   #~
@@ -91,6 +103,7 @@ for my $i (0..$#test_data) {
     $tc     += $r_rv;       #keep track of number of inner tests run
     
     # CHECK-RANGER
+    ##### $trap    
 #~     diag('Dumping outer trap:');                                         #~
 #~     $grab->diag_all;        # Dumps the $grab ($trap) object, TAP safe   #~
     
