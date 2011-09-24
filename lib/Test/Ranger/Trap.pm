@@ -10,12 +10,18 @@ use Carp;
 use version 0.94; our $VERSION = qv('0.0.4');
 
 use Test::Ranger::Base          # Base class and procedural utilities
-    qw( :all );
+    qw( :all );                 # ... becoming a shadow parent
+
 use Test::More;                 # Standard framework for writing test scripts
 
 use Test::Trap qw( snare $snare :default );     # Nonstandard trap{}, $trap
                                 # Trap exit codes, exceptions, output
-use parent qw{ Test::Trap };    # We are a subclass!
+use parent 'Test::Trap';        # We are a subclass
+
+#~ use parent -norequire,          # We are a subclass; but do not import().
+#~     'Test::Trap';
+#~ use base     'Test::Trap';
+#~ push our @ISA, 'Test::Trap';
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util;               # General-utility scalar subroutines
@@ -24,7 +30,7 @@ use Scalar::Util::Reftype;      # Alternate reftype() interface
 ## use
 
 # Alternate uses
-#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
+use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 
@@ -80,6 +86,26 @@ dlock( my $err     = Test::Ranger::Base->new(
 
 #=========# EXTERNAL FUNCTION
 #
+#   import();     # short
+#       
+# Purpose   : Don't call parent's import(). 
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub import {
+ 
+    
+    return 1;
+}; ## import
+
+#=========# EXTERNAL FUNCTION
+#
 #   confirm();     # short
 #       
 # Purpose   : ____
@@ -93,9 +119,11 @@ dlock( my $err     = Test::Ranger::Base->new(
 # ____
 #   
 sub confirm {
+##### @_
+    my $trap        = shift;
     my %args        = paired(@_);
-    my $snare       = $args{-leaveby};
-#~     my $leaveby     = $args{-leaveby};      # mode by which trap was left
+    my $leaveby     = $args{-leaveby};      # mode by which trap was left
+#~     my $leaveby     = $args{-leaveby};      
 #~     my $leaveby     = $args{-leaveby};
 #~     my $leaveby     = $args{-leaveby};
 #~     my $leaveby     = $args{-leaveby};

@@ -30,7 +30,13 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
             
         }],
         
-        all         => [qw{ :util :test }]
+        oo          => [qw{
+            new
+            init
+            
+        }],
+        
+        all         => [qw{ :util :test :oo }]
     ],
 );
 

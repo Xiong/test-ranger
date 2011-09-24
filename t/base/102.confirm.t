@@ -12,6 +12,7 @@ use Test::Ranger::Trap;         # Comprehensive airtight trap and test
 #~ use Devel::Comments '###';                                  # debug only #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
+#~ die '---------die after use-ing';
 #============================================================================#
 # 
 # Tests the analyzer TR::Trap:: confirm(). This is a self test. 
@@ -65,22 +66,25 @@ for my $i (0..$#test_data) {
         my $pass        = $want{-pass};
     
     # EXECUTE-RANGER
-    trap{        
+    my $r_rv = trap{
+              
         # SETUP-BEAR
         my $bear        = Test::Ranger::Trap->new();
+#~         my $bear        = {};
         
         # EXECUTE-BEAR
-        $bear->trap{        # should be this way, when...
+#~         $bear->trap{        # should be this way, when...
+        my $rv = trap{        # this way until we make a trap method?
             my $rv = &$code();
             return $rv;
         };
-        
-        # CHECK-BEAR    
         my $saved_trap      = $trap;                    # do-jiggery for now
         $bear->{-test_ranger}{-trap} = $saved_trap;     # more do-jiggery
-        $saved_trap->diag_all;          # Dumps the $trap object, TAP safe   #~
+#~         $saved_trap->diag_all;      # Dumps the $trap object, TAP safe   #~
         
-        $bear->confirm( %given );
+        # CHECK-BEAR    
+        
+        $bear->confirm( %given );   # bear's givens and wants are ranger's givens
         
     }; ## trap
     

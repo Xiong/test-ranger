@@ -1,0 +1,23 @@
+
+### @_: [
+###       bless( {
+###                '-test_ranger' => {
+###                                    '-trap' => bless( {
+###                                                        ' id ' => '1316867572/28999/2',
+###                                                        die => 'foo at t/base/102.confirm.t line 41.
+',
+###                                                        leaveby => 'die',
+###                                                        stderr => '',
+###                                                        stdout => '',
+###                                                        wantarray => '',
+###                                                        warn => []
+###                                                      }, 'Test::Trap' )
+###                                  }
+###              }, 'Test::Ranger::Trap' ),
+###       '-code',
+###       sub { "DUMMY" },
+###       '-leaveby',
+###       'die',
+###       '-die',
+###       qr/(?msi-x:foo)/
+###     ]
