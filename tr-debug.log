@@ -1,2 +1,44 @@
 
-### $trap: bless( {}, 'Test::Trap' )
+### $capture: bless( {
+###                    events => [
+###                                bless( {
+###                                         level => 'info',
+###                                         message => 'note here'
+###                                       }, 'Test::Builder2::Event::Log' ),
+###                                bless( {
+###                                         level => 'warning',
+###                                         message => 'quiet'
+###                                       }, 'Test::Builder2::Event::Log' ),
+###                                bless( {}, 'Test::Builder2::Event::StreamStart' ),
+###                                bless( {
+###                                         description => 'should pass',
+###                                         id => 23,
+###                                         location => 't/shit/156.bogus.t'
+###                                       }, 'Test::Builder2::Result::pass' ),
+###                                bless( {
+###                                         description => 'should fail',
+###                                         id => 24,
+###                                         location => 't/shit/156.bogus.t'
+###                                       }, 'Test::Builder2::Result::fail' )
+###                              ],
+###                    fail_count => 1,
+###                    pass_count => 1,
+###                    results => [
+###                                 $VAR1->[0]{events}[3],
+###                                 $VAR1->[0]{events}[4]
+###                               ],
+###                    skip_count => 0,
+###                    stream_depth => 1,
+###                    test_count => 2,
+###                    todo_count => 0
+###                  }, 'Test::Builder2::History' )
+
+### $trap: bless( {
+###                 ' id ' => '1316945731/4866/1',
+###                 leaveby => 'return',
+###                 return => [],
+###                 stderr => '',
+###                 stdout => '',
+###                 wantarray => undef,
+###                 warn => []
+###               }, 'Test::Trap' )
