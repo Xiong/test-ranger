@@ -1,2 +1,19 @@
 
-### $trap: bless( {}, 'Test::Trap' )
+### $trap: bless( {
+###                 ' id ' => '1316932110/2706/1',
+###                 leaveby => 'return',
+###                 return => [],
+###                 stderr => '# quiet
+#   Failed test \'should fail\'
+#   at t/shit/155.bogus.t line 31.
+something to STDERR
+',
+###                 stdout => '# note here
+TAP version 13
+ok 1 - should pass
+not ok 2 - should fail
+something to STDOUT
+',
+###                 wantarray => undef,
+###                 warn => []
+###               }, 'Test::Trap' )
