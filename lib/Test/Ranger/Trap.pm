@@ -21,8 +21,6 @@ use parent 'Test::Trap';        # We are a subclass
 
 #~ use parent -norequire,          # We are a subclass; but do not import().
 #~     'Test::Trap';
-#~ use base     'Test::Trap';
-#~ push our @ISA, 'Test::Trap';
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util;               # General-utility scalar subroutines
@@ -157,7 +155,7 @@ sub confirm {
     my $trap        = shift;                # gots are inside object    
     my %args        = paired(@_);           # remaining args are *wants*
     my $base        = $args{-base};         # base string for $diag-s
-    my $leaveby     = $args{-leaveby};      # mode by which trap was left
+    my $leaveby     = $args{-leaveby};      # caller wanted trap to leaveby
     
     my $tc          ;                       # local counter only
     my $diag        ;                       # diagnostic message
