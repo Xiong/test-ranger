@@ -43,7 +43,7 @@ my @test_data       = (
             -die        => akin('foo'),         # want  for bear trap
         },
         -want   => {        # wants for this ranger script
-            -pass       => 1
+            -pass       => 1,
         }
     },
     
@@ -55,13 +55,50 @@ my @test_data       = (
             -return     => akin('foo'),         # want  for bear trap
         },
         -want   => {        # wants for this ranger script
-            -pass       => 1
+            -pass       => 1,
+        }
+    },
+    
+    { 
+        -base   => 'bad die foo',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ die 'foo' },    # given for bear trap
+            -leaveby    => 'return',            # want  for bear trap
+            -return     => akin('foo'),         # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 0,
+        }
+    },
+    
+    { 
+        -base   => 'fail foo',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ say 'foo' },    # given for bear trap
+            -leaveby    => 'return',            # want  for bear trap
+            -return     => akin('bar'),         # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 0,
+        }
+    },
+    
+    { 
+        -base   => 'leaveby tardis',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ say 'foo' },    # given for bear trap
+            -leaveby    => 'tardis',            # want  for bear trap
+            -return     => akin('foo'),         # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -crash      => akin( 'leaveby' ),
+            -pass       => 1,
         }
     },
     
 ); ## test_data
-$tc++;
-pass('Starting...');
+#~ $tc++;
+#~ pass('Starting...');
 
 #----------------------------------------------------------------------------#
 # EXECUTE AND CHECK
@@ -70,52 +107,67 @@ for my $i (0..$#test_data) {
     my $lineref     = $test_data[$i];
     my %line        = %$lineref;
     
-    my $base        = $unit . $line{-base} . qq{<$i>};
+    my $base        = $unit . qq{<$i>} . $line{-base} . qq{\t};
     
     my %given       = %{ $line{-given} };
         my $code        = $given{-code} 
             or crash('Must supply -code to test.');
     
     my %want        = %{ $line{-want } };
-        my $pass        = $want{-pass};
+        my $want_pass   = $want{-pass};
+        my $want_crash  = $want{-crash};
+    
+    my $inner_rv    ;
     
     # EXECUTE-RANGER
-    my $capture = capture {
-              
-        # EXECUTE-BEAR
-        my $rv = trap{                  # just like daddy
-            my $rv = &$code();
-            return $rv;
-        };
-        
-#~     ##### $trap    
-        
-#~         diag('Dumping inner trap:');                                     #~
-#~         $trap->diag_all;            # Dumps the $trap object, TAP safe   #~
-        
-        # CHECK-BEAR    
-                                # bear's givens and wants are ranger's givens
-        my $rv_c = $trap->confirm( 
-            -base       => 'inside ' . $base,
-            %given, 
-        );
-        return $rv_c;
-        
-    }; ## capture
-#~     $tc     += $r_rv;       #keep track of number of inner tests run
+    my $r_rv = grab{
+        my $capture = capture {
+                  
+            # EXECUTE-BEAR
+            my $rv = trap{                  # just like daddy
+                my $rv = &$code();
+                return $rv;
+            };
+            
+    #~         ##### $trap    
+    #~         diag('Dumping inner trap:');                                     #~
+    #~         $trap->diag_all;            # Dumps the $trap object, TAP safe   #~
+            
+            # CHECK-BEAR    
+                                    # bear's givens and wants are ranger's givens
+            $inner_rv = $trap->confirm( 
+                -base       => 'inside ' . $base,
+                %given, 
+            );
+            
+        }; ## capture
+        return $capture;
+    }; ## grab
     
     # CHECK-RANGER
-    ##### $capture   
-#~     diag('Dumping outer trap:');                                         #~
-#~     $grab->diag_all;        # Dumps the $grab ($trap) object, TAP safe   #~
+#~     ##### $capture   
+    ##### $grab   
+    ##### $inner_rv   
     
     $tc++;
-    $diag   = $base . 'captured';
+    $diag   = $base . 'captured and trapped';
     pass($diag);
     
-#~     $tc++;
-#~     $diag   = $base . 'did_return';
-#~     $grab->did_return($diag) or exit 1;
+    if ( $want_crash ) {
+        $tc++;
+        $diag   = $base . 'crashed as wanted';
+        $grab->did_die($diag) or exit 1;
+        
+        $tc++;
+        $diag   = $base . 'crashed with';
+        $grab->die_like( $want_crash, $diag ) or exit 1;
+        
+        next;       # no need for further testing of this $i (%line)
+    };
+    
+    $tc++;
+    $diag   = $base . 'did_return';
+    $grab->did_return($diag) or exit 1;
     
 #~     $tc++;
 #~     $diag   = $base . 'return value';
@@ -137,6 +189,9 @@ for my $i (0..$#test_data) {
         
     note(q{-});
 };
+
+$tc++;
+pass('...Done.');
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
