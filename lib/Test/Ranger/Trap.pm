@@ -157,35 +157,35 @@ sub confirm {
     my $base        = $args{-base};         # base string for $diag-s
     my $leaveby     = $args{-leaveby};      # caller wanted trap to leaveby
     
-    my $tc          ;                       # local counter only
-    my $diag        ;                       # diagnostic message
-    
-    # Check different things depending on how we wanted to leave...
-    if    ( $leaveby eq 'die' ) {
-        $tc++;
-        $diag       = $base . 'wanted to die';
-        $trap->did_die($diag)
-    } 
-    elsif ( $leaveby eq 'exit' ) {
-        $tc++;
-        $diag       = $base . 'wanted to exit';
-        $trap->did_exit($diag)        
-    } 
-    elsif ( $leaveby eq 'return' ) {
-        $tc++;
-        $diag       = $base . 'wanted to return';
-        $trap->did_return($diag)        
-    } 
-    else {
-        crash('_bad_leaveby');
+    my $ok = subtest $base => sub {         # Test::More::subtest
+        my $tc          ;                       # local counter only
+        my $diag        ;                       # diagnostic message
+        
+        # Check different things depending on how we wanted to leave...
+        if    ( $leaveby eq 'die' ) {
+            $tc++;
+            $diag       = $base . 'wanted to die';
+            $trap->did_die($diag)
+        } 
+        elsif ( $leaveby eq 'exit' ) {
+            $tc++;
+            $diag       = $base . 'wanted to exit';
+            $trap->did_exit($diag)        
+        } 
+        elsif ( $leaveby eq 'return' ) {
+            $tc++;
+            $diag       = $base . 'wanted to return';
+            $trap->did_return($diag)        
+        } 
+        else {
+            crash('_bad_leaveby');
+        };
+        
+        
+        done_testing($tc);
     };
     
-    
-    
-    
-    
-    $trap->{$key}{-counter}     = $tc;      # in case we're called again
-    return $tc;
+    return $ok;
 }; ## confirm
 
 
