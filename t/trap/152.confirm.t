@@ -58,7 +58,7 @@ my @test_data       = (
         -given  => {        # givens for this ranger script
             -code       => sub{ say 'foo' },    # given for bear trap
             -leaveby    => 'return',            # want  for bear trap
-            -return     => akin('foo'),         # want  for bear trap
+            -stdout     => akin('foo'),         # want  for bear trap
         },
         -want   => {        # wants for this ranger script
             -pass       => 1,
