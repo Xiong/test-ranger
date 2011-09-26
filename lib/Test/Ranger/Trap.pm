@@ -38,7 +38,7 @@ use Scalar::Util::Reftype;      # Alternate reftype() interface
 # Error messages
 dlock( my $err      = Test::Ranger::Base->new(
     _bad_leaveby        =>
-        [ q{-leaveby must be one of 'return', 'die', or 'exit'.} ],
+        [ q{-leaveby (required) must be one of 'return', 'die', or 'exit'.} ],
     
 ) ); ## $err
 
@@ -156,31 +156,76 @@ sub confirm {
     my %args        = paired(@_);           # remaining args are *wants*
     my $base        = $args{-base};         # base string for $diag-s
     my $leaveby     = $args{-leaveby};      # caller wanted trap to leaveby
-    
+        
     my $ok = subtest $base => sub {         # Test::More::subtest
         my $tc          ;                       # local counter only
         my $diag        ;                       # diagnostic message
         
-        # Check different things depending on how we wanted to leave...
+        # Check different things depending on what was wanted...
+        
+        # Check what we got if caller wanted anything.
+        if    ( defined $args{-die}    ) {
+            $leaveby    = 'die';
+            $tc++;
+            $diag       = $base . 'died akin to';
+            $trap->die_like( $args{-die}, $diag );  # match regex
+        } 
+        elsif ( defined $args{-exit}   ) {
+            $leaveby    = 'exit';
+            $tc++;
+            $diag       = $base . 'exited with';
+            $trap->exit_is( $args{-exit}, $diag );  # exact eq
+        } 
+        elsif ( defined $args{-return} ) {
+            $leaveby    = 'return';
+            $tc++;
+            $diag       = $base . 'returned akin to';
+            my @gotary  = @{ $trap->return };   # arrayref of return values
+            my $got     = join qq{\n}, @gotary; 
+            like( $got, $args{-return}, $diag );    # match regex
+        }
+        else {
+            # caller didn't want to check
+        }; ## leaveby value
+        
+        # Check how we left.
         if    ( $leaveby eq 'die' ) {
             $tc++;
             $diag       = $base . 'wanted to die';
-            $trap->did_die($diag)
+            $trap->did_die($diag);
         } 
         elsif ( $leaveby eq 'exit' ) {
             $tc++;
             $diag       = $base . 'wanted to exit';
-            $trap->did_exit($diag)        
+            $trap->did_exit($diag);
         } 
         elsif ( $leaveby eq 'return' ) {
             $tc++;
             $diag       = $base . 'wanted to return';
-            $trap->did_return($diag)        
+            $trap->did_return($diag);
         } 
         else {
             crash('_bad_leaveby');
-        };
+        }; ## leaveby mode
         
+        # Check STDOUT and STDERR.
+        if    ( !$args{-stdout} and !$args{-stdout} ) {
+            $tc++;
+            $diag       = $base . 'quiet';
+            $trap->quiet($diag);
+        } 
+        else {
+            if ( $args{-stdout} ) {
+                $tc++;
+                $diag       = $base . 'stdout';
+                $trap->stdout_like( $args{-stdout}, $diag );
+            };
+            if ( $args{-stderr} ) {
+                $tc++;
+                $diag       = $base . 'stderr';
+                $trap->stderr_like( $args{-stderr}, $diag );
+            };
+        }; ## stdout/err
         
         done_testing($tc);
     };
