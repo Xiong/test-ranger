@@ -1,6 +1,6 @@
 
 ### $grab: bless( {
-###                 ' id ' => '1316984441/7662/1',
+###                 ' id ' => '1316999048/9096/1',
 ###                 leaveby => 'return',
 ###                 return => [
 ###                             bless( {
@@ -30,8 +30,10 @@
 ###               }, 'Test::Trap' )
 ### $inner_rv: 1
 
+### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 ### $grab: bless( {
-###                 ' id ' => '1316984441/7662/3',
+###                 ' id ' => '1316999048/9096/3',
 ###                 leaveby => 'return',
 ###                 return => [
 ###                             bless( {
@@ -61,85 +63,4 @@
 ###               }, 'Test::Trap' )
 ### $inner_rv: 1
 
-### $grab: bless( {
-###                 ' id ' => '1316984441/7662/5',
-###                 leaveby => 'return',
-###                 return => [
-###                             bless( {
-###                                      events => [
-###                                                  bless( {}, 'Test::Builder2::Event::StreamStart' ),
-###                                                  bless( {
-###                                                           description => 'inside ::Trap::confirm(): <2>bad die foo	wanted to return',
-###                                                           id => 177,
-###                                                           location => '/home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm'
-###                                                         }, 'Test::Builder2::Result::fail' ),
-###                                                  bless( {
-###                                                           level => 'warning',
-###                                                           message => '    Expecting to return(), but instead die()ed with "foo at t/trap/152.confirm.t line 65.\\n"
-'
-###                                                         }, 'Test::Builder2::Event::Log' )
-###                                                ],
-###                                      fail_count => 1,
-###                                      pass_count => 0,
-###                                      results => [
-###                                                   $VAR1->[0]{return}[0]{events}[1]
-###                                                 ],
-###                                      skip_count => 0,
-###                                      stream_depth => 1,
-###                                      test_count => 1,
-###                                      todo_count => 0
-###                                    }, 'Test::Builder2::History' )
-###                           ],
-###                 stderr => '',
-###                 stdout => '',
-###                 wantarray => '',
-###                 warn => []
-###               }, 'Test::Trap' )
-### $inner_rv: 1
-
-### $grab: bless( {
-###                 ' id ' => '1316984441/7662/7',
-###                 leaveby => 'return',
-###                 return => [
-###                             bless( {
-###                                      events => [
-###                                                  bless( {}, 'Test::Builder2::Event::StreamStart' ),
-###                                                  bless( {
-###                                                           description => 'inside ::Trap::confirm(): <3>fail foo	wanted to return',
-###                                                           id => 177,
-###                                                           location => '/home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm'
-###                                                         }, 'Test::Builder2::Result::pass' )
-###                                                ],
-###                                      fail_count => 0,
-###                                      pass_count => 1,
-###                                      results => [
-###                                                   $VAR1->[0]{return}[0]{events}[1]
-###                                                 ],
-###                                      skip_count => 0,
-###                                      stream_depth => 1,
-###                                      test_count => 1,
-###                                      todo_count => 0
-###                                    }, 'Test::Builder2::History' )
-###                           ],
-###                 stderr => '',
-###                 stdout => '',
-###                 wantarray => '',
-###                 warn => []
-###               }, 'Test::Trap' )
-### $inner_rv: 1
-
-### $grab: bless( {
-###                 ' id ' => '1316984441/7662/9',
-###                 die => '# Test::Ranger::Base: _bad_leaveby
-###                    main    Test::Ranger::Trap::confirm() line 138
-###                    Test::Builder2::Tester    main::__ANON__() line 69
-###                    Test::Builder2::CanTry    Test::Builder2::Tester::__ANON__() line 37
-###                     at /home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm line 180
-',
-###                 leaveby => 'die',
-###                 stderr => '',
-###                 stdout => '',
-###                 wantarray => '',
-###                 warn => []
-###               }, 'Test::Trap' )
-### $inner_rv: undef
+### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

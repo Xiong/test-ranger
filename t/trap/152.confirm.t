@@ -59,42 +59,42 @@ my @test_data       = (
         }
     },
     
-    { 
-        -base   => 'bad die foo',
-        -given  => {        # givens for this ranger script
-            -code       => sub{ die 'foo' },    # given for bear trap
-            -leaveby    => 'return',            # want  for bear trap
-            -return     => akin('foo'),         # want  for bear trap
-        },
-        -want   => {        # wants for this ranger script
-            -pass       => 0,
-        }
-    },
+#~     { 
+#~         -base   => 'bad die foo',
+#~         -given  => {        # givens for this ranger script
+#~             -code       => sub{ die 'foo' },    # given for bear trap
+#~             -leaveby    => 'return',            # want  for bear trap
+#~             -return     => akin('foo'),         # want  for bear trap
+#~         },
+#~         -want   => {        # wants for this ranger script
+#~             -pass       => 0,
+#~         }
+#~     },
     
-    { 
-        -base   => 'fail foo',
-        -given  => {        # givens for this ranger script
-            -code       => sub{ say 'foo' },    # given for bear trap
-            -leaveby    => 'return',            # want  for bear trap
-            -return     => akin('bar'),         # want  for bear trap
-        },
-        -want   => {        # wants for this ranger script
-            -pass       => 0,
-        }
-    },
+#~     { 
+#~         -base   => 'fail foo',
+#~         -given  => {        # givens for this ranger script
+#~             -code       => sub{ say 'foo' },    # given for bear trap
+#~             -leaveby    => 'return',            # want  for bear trap
+#~             -return     => akin('bar'),         # want  for bear trap
+#~         },
+#~         -want   => {        # wants for this ranger script
+#~             -pass       => 0,
+#~         }
+#~     },
     
-    { 
-        -base   => 'leaveby tardis',
-        -given  => {        # givens for this ranger script
-            -code       => sub{ say 'foo' },    # given for bear trap
-            -leaveby    => 'tardis',            # want  for bear trap
-            -return     => akin('foo'),         # want  for bear trap
-        },
-        -want   => {        # wants for this ranger script
-            -crash      => akin( 'leaveby' ),
-            -pass       => 1,
-        }
-    },
+#~     { 
+#~         -base   => 'leaveby tardis',
+#~         -given  => {        # givens for this ranger script
+#~             -code       => sub{ say 'foo' },    # given for bear trap
+#~             -leaveby    => 'tardis',            # want  for bear trap
+#~             -return     => akin('foo'),         # want  for bear trap
+#~         },
+#~         -want   => {        # wants for this ranger script
+#~             -crash      => akin( 'leaveby' ),
+#~             -pass       => 1,
+#~         }
+#~     },
     
 ); ## test_data
 #~ $tc++;
@@ -129,9 +129,9 @@ for my $i (0..$#test_data) {
                 return $rv;
             };
             
-    #~         ##### $trap    
-    #~         diag('Dumping inner trap:');                                     #~
-    #~         $trap->diag_all;            # Dumps the $trap object, TAP safe   #~
+#~         ##### $trap    
+#~         diag('Dumping inner trap:');                                     #~
+#~         $trap->diag_all;            # Dumps the $trap object, TAP safe   #~
             
             # CHECK-BEAR    
                                     # bear's givens and wants are ranger's givens
@@ -159,7 +159,7 @@ for my $i (0..$#test_data) {
         $grab->did_die($diag) or exit 1;
         
         $tc++;
-        $diag   = $base . 'crashed with';
+        $diag   = $base . 'crashed like';
         $grab->die_like( $want_crash, $diag ) or exit 1;
         
         next;       # no need for further testing of this $i (%line)
@@ -169,11 +169,11 @@ for my $i (0..$#test_data) {
     $diag   = $base . 'did_return';
     $grab->did_return($diag) or exit 1;
     
-#~     $tc++;
-#~     $diag   = $base . 'return value';
-#~     $got    = $r_rv;        # returns number of tests run (passed or failed)
-#~     $want   = 1;            # may want to relax this
-#~     is( $got, $want, $diag );
+    $tc++;
+    $diag   = $base . 'return value';
+    $got    = $r_rv;        # returns number of tests run (passed or failed)
+    $want   = 1;            # may want to relax this
+    is( $got, $want, $diag );
     
 #~     $got    = $grab->return(0);
 #~     if ($pass) {
@@ -188,6 +188,7 @@ for my $i (0..$#test_data) {
 #~     $grab->quiet($diag) or exit 1;      # no STDOUT or STDERR
         
     note(q{-});
+    ##### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 };
 
 $tc++;
