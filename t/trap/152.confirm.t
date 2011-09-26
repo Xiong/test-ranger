@@ -34,6 +34,12 @@ my $want        ;
 my $diag        = $unit;
 my $tc          = 0;        # the usual test counter for this script
 
+# The kinds of STDOUT and STDERR that might be emitted by confirm().
+my $ok_regex        = qr/^ok/m;
+my $nok_regex       = qr/^not ok/m;
+my $failed_regex    = qr/^#\s* Failed/m;
+my $empty_regex     = qr/\A\z/;
+
 my @test_data       = (
     { 
         -base   => 'die foo',
@@ -71,30 +77,29 @@ my @test_data       = (
         }
     },
     
-#~     { 
-#~         -base   => 'fail foo',
-#~         -given  => {        # givens for this ranger script
-#~             -code       => sub{ say 'foo' },    # given for bear trap
-#~             -leaveby    => 'return',            # want  for bear trap
-#~             -return     => akin('bar'),         # want  for bear trap
-#~         },
-#~         -want   => {        # wants for this ranger script
-#~             -pass       => 0,
-#~         }
-#~     },
+    { 
+        -base   => 'fail foo',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ say 'foo' },    # given for bear trap
+            -leaveby    => 'return',            # want  for bear trap
+            -return     => akin('bar'),         # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 0,
+        }
+    },
     
-#~     { 
-#~         -base   => 'leaveby tardis',
-#~         -given  => {        # givens for this ranger script
-#~             -code       => sub{ say 'foo' },    # given for bear trap
-#~             -leaveby    => 'tardis',            # want  for bear trap
-#~             -return     => akin('foo'),         # want  for bear trap
-#~         },
-#~         -want   => {        # wants for this ranger script
-#~             -crash      => akin( 'leaveby' ),
-#~             -pass       => 1,
-#~         }
-#~     },
+    { 
+        -base   => 'leaveby tardis',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ say 'foo' },    # given for bear trap
+            -leaveby    => 'tardis',            # want  for bear trap
+            -return     => akin('foo'),         # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -crash      => akin( 'leaveby' ),
+        }
+    },
     
 ); ## test_data
 #~ $tc++;
@@ -107,7 +112,7 @@ for my $i (0..$#test_data) {
     my $lineref     = $test_data[$i];
     my %line        = %$lineref;
     
-    my $base        = $unit . qq{<$i>} . $line{-base} . qq{ --- };
+    my $base        = $unit . qq{<$i> } . $line{-base} . q{ };
     
     my %given       = %{ $line{-given} };
         my $code        = $given{-code} 
@@ -149,11 +154,13 @@ for my $i (0..$#test_data) {
     ##### $grab   
     ##### $inner_rv   
     
+    $base   = $base . q{--- };
+    
     $tc++;
     $diag   = $base . 'captured and trapped';
     pass($diag);
     
-    if ( $want_crash ) {
+    if ($want_crash) {
         $tc++;
         $diag   = $base . 'crashed as wanted';
         $grab->did_die($diag) or exit 1;
@@ -173,15 +180,28 @@ for my $i (0..$#test_data) {
     $diag   = $base . 'pass or fail correctly';
     $got    = $inner_rv;    # confirm() returns true or false (passed or failed)
     $want   = $want_pass;
-    is( $got, $want, $diag );
+    is( $got, $want, $diag ) or exit 1;
     
-#~     $got    = $grab->return(0);
-#~     if ($pass) {
-#~         ok(  $got, $diag ) or exit 1;
-#~     } 
-#~     else {
-#~         ok( !$got, $diag ) or exit 1;       # !ok (ok if $got is false)
-#~     };
+    if ($want_pass) {
+        $tc++;
+        $diag   = $base . 'want-pass, stdout ok';
+        $grab->stdout_like( $ok_regex, $diag ) or exit 1;
+        
+        $tc++;
+        $diag   = $base . 'want-pass, stderr empty';
+        $grab->stderr_like( $empty_regex, $diag ) or exit 1;
+        
+    }
+    else {
+        $tc++;
+        $diag   = $base . 'want-fail, stdout not ok';
+        $grab->stdout_like( $nok_regex, $diag ) or exit 1;
+        
+        $tc++;
+        $diag   = $base . 'want-pass, stderr failed';
+        $grab->stderr_like( $failed_regex, $diag ) or exit 1;
+                
+    };
     
 #~     $tc++;
 #~     $diag   = $base . 'quiet';
