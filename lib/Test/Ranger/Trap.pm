@@ -164,20 +164,21 @@ sub confirm {
         # Check different things depending on what was wanted...
         
         # Check what we got if caller wanted anything.
+        # Caller implies $leaveby if not specified.
         if    ( defined $args{-die}    ) {
-            $leaveby    = 'die';
+            $leaveby    = $leaveby || 'die';
             $tc++;
             $diag       = $base . 'died akin to';
             $trap->die_like( $args{-die}, $diag );  # match regex
         } 
         elsif ( defined $args{-exit}   ) {
-            $leaveby    = 'exit';
+            $leaveby    = $leaveby || 'exit';
             $tc++;
             $diag       = $base . 'exited with';
             $trap->exit_is( $args{-exit}, $diag );  # exact eq
         } 
         elsif ( defined $args{-return} ) {
-            $leaveby    = 'return';
+            $leaveby    = $leaveby || 'return';
             $tc++;
             $diag       = $base . 'returned akin to';
             if ( $trap->return ) {
