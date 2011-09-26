@@ -12,13 +12,12 @@ use Test::Ranger::Base          # Base class and procedural utilities
 use Test::Ranger::Trap;         # Comprehensive airtight trap and test
                                 # ... also imports $trap and trap{}
 
-use Devel::Comments '#####', ({ -file => 'tr-debug.log' }); # debug only #~
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' }); # debug only #~
 
 #~ die '---------die after use-ing';
 #============================================================================#
 # 
 # Tests the analyzer TR::Trap:: confirm(). This is a self test. 
-# This test will fail if extended because should-fails will leak out. 
 # 
 # Two testing "personalities" in this script: the bear and the ranger. 
 # The bear takes some simple code and tests it. 
@@ -39,6 +38,7 @@ my $ok_regex        = qr/^ok/m;
 my $nok_regex       = qr/^not ok/m;
 my $failed_regex    = qr/^#\s* Failed/m;
 my $empty_regex     = qr/\A\z/;
+my $anything_regex  = qr/.*/;
 
 my @test_data       = (
     { 
@@ -46,6 +46,28 @@ my @test_data       = (
         -given  => {        # givens for this ranger script
             -code       => sub{ die 'foo' },    # given for bear trap
             -leaveby    => 'die',               # want  for bear trap
+            -die        => akin('foo'),         # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
+        -base   => 'die foo no like',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ die 'foo' },    # given for bear trap
+            -leaveby    => 'die',               # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
+        -base   => 'die foo only like',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ die 'foo' },    # given for bear trap
             -die        => akin('foo'),         # want  for bear trap
         },
         -want   => {        # wants for this ranger script
@@ -66,6 +88,40 @@ my @test_data       = (
     },
     
     { 
+        -base   => 'say foo no like',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ say 'foo' },    # given for bear trap
+            -leaveby    => 'return',            # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 0,   # fails because stdout found
+        }
+    },
+    
+    { 
+        -base   => 'say foo like anything',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ say 'foo' },    # given for bear trap
+            -leaveby    => 'return',            # want  for bear trap
+            -stdout     => $anything_regex,     # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
+        -base   => 'say foo only like',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ say 'foo' },    # given for bear trap
+            -stdout     => akin('foo'),         # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
         -base   => 'bad die foo',
         -given  => {        # givens for this ranger script
             -code       => sub{ die 'foo' },    # given for bear trap
@@ -73,7 +129,7 @@ my @test_data       = (
             -return     => akin('foo'),         # want  for bear trap
         },
         -want   => {        # wants for this ranger script
-            -pass       => 0,
+            -pass       => 0,   # fail because code under test died unwantedly
         }
     },
     
@@ -85,7 +141,7 @@ my @test_data       = (
             -return     => akin('bar'),         # want  for bear trap
         },
         -want   => {        # wants for this ranger script
-            -pass       => 0,
+            -pass       => 0,   # fail because foo ne bar
         }
     },
     
@@ -97,9 +153,77 @@ my @test_data       = (
             -return     => akin('foo'),         # want  for bear trap
         },
         -want   => {        # wants for this ranger script
-            -crash      => akin( 'leaveby' ),
+            -pass       => 0,   # fail because you can't leave that way
         }
     },
+    
+    { 
+        -base   => 'mumble true',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ 'mumble' },     # given for bear trap
+            -leaveby    => 'return',            # want  for bear trap
+            -return     => akin('mumble'),      # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
+        -base   => 'return empty, wanted undef',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return '' },    # given for bear trap
+            -return     => undef,               # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
+        -base   => 'return zero, wanted undef',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return 0 },     # given for bear trap
+            -return     => undef,               # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
+        -base   => 'return undef, wanted undef',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return undef }, # given for bear trap
+            -return     => undef,               # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
+        -base   => 'return TRUE, wanted undef',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return 'TRUE' },# given for bear trap
+            -return     => undef,               # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,   # undef means caller doesn't care
+        }
+    },
+    
+    { 
+        -base   => 'return TRUE, wanted empty string',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return 'TRUE' },# given for bear trap
+            -return     => '',                  # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 0,   # fail because exactly nothing was demanded
+        }
+    },
+    
     
 ); ## test_data
 #~ $tc++;
@@ -134,7 +258,7 @@ for my $i (0..$#test_data) {
                 return $rv;
             };
             
-        ##### $trap    
+#~         ##### $trap    
 #~         diag('Dumping inner trap:');                                     #~
 #~         $trap->diag_all;            # Dumps the $trap object, TAP safe   #~
             
@@ -152,7 +276,7 @@ for my $i (0..$#test_data) {
     # CHECK-RANGER
 #~     ##### $capture   
     ##### $grab   
-    ##### $inner_rv   
+#~     ##### $inner_rv   
     
     $base   = $base . q{--- };
     
@@ -198,7 +322,7 @@ for my $i (0..$#test_data) {
         $grab->stdout_like( $nok_regex, $diag ) or exit 1;
         
         $tc++;
-        $diag   = $base . 'want-pass, stderr failed';
+        $diag   = $base . 'want-fail, stderr failed';
         $grab->stderr_like( $failed_regex, $diag ) or exit 1;
                 
     };
@@ -207,9 +331,11 @@ for my $i (0..$#test_data) {
 #~     $diag   = $base . 'quiet';
 #~     $grab->quiet($diag) or exit 1;      # no STDOUT or STDERR
         
+}
+continue {
     note(q{-});
     ##### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-};
+}; ## for test data
 
 $tc++;
 pass('...Done.');

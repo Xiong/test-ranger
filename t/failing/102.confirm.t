@@ -1,1 +1,0 @@
-/home/xiong/projects/test-ranger/t/base/102.confirm.t

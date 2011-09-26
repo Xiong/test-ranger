@@ -37,9 +37,6 @@ use Scalar::Util::Reftype;      # Alternate reftype() interface
 
 # Error messages
 dlock( my $err      = Test::Ranger::Base->new(
-    _bad_leaveby        =>
-        [ q{-leaveby (required) must be one of 'return', 'die', or 'exit'.} ],
-    
 ) ); ## $err
 
 # Secret hash key
@@ -188,7 +185,8 @@ sub confirm {
             };
         }
         else {
-            # caller didn't want to check
+            # caller didn't want to check - assume normal return wanted
+            $leaveby    = $leaveby || 'return';
         }; ## leaveby value
         
         # Check how we left.
@@ -208,7 +206,10 @@ sub confirm {
             $trap->did_return($diag);
         } 
         else {
-            crash('_bad_leaveby');
+            fail(
+                  q{Test::Ranger::confirm(): _bad_leaveby:}
+                . q{-leaveby must be one of 'return', 'die', or 'exit'.}
+            );
         }; ## leaveby mode
         
         # Check STDOUT and STDERR.
