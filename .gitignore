@@ -12,3 +12,6 @@ sym
 *.tmp
 *.pm.html
 lib/Test/Ranger-List.pm
+
+# Ignore Devel::Cover files
+cover_db/

@@ -10,12 +10,17 @@ use Carp;
 use version 0.94; our $VERSION = qv('0.0.4');
 
 use Test::Ranger::Base          # Base class and procedural utilities
-    qw( :all );
+#~     qw( :all );                 # ... becoming a shadow parent
+    qw( :util :test );          # ... not becoming a shadow parent!
+
 use Test::More;                 # Standard framework for writing test scripts
 
 use Test::Trap qw( snare $snare :default );     # Nonstandard trap{}, $trap
                                 # Trap exit codes, exceptions, output
-use parent qw{ Test::Trap };    # We are a subclass!
+use parent 'Test::Trap';        # We are a subclass
+
+#~ use parent -norequire,          # We are a subclass; but do not import().
+#~     'Test::Trap';
 
 use Data::Lock qw( dlock );     # Declare locked scalars
 use Scalar::Util;               # General-utility scalar subroutines
@@ -24,16 +29,19 @@ use Scalar::Util::Reftype;      # Alternate reftype() interface
 ## use
 
 # Alternate uses
-#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
+use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 
 # Pseudo-globals
 
 # Error messages
-dlock( my $err     = Test::Ranger::Base->new(
-    
+dlock( my $err      = Test::Ranger::Base->new(
 ) ); ## $err
+
+# Secret hash key
+dlock( my $key         = '-tr_private' );
+
 
 #----------------------------------------------------------------------------#
 
@@ -78,6 +86,53 @@ dlock( my $err     = Test::Ranger::Base->new(
 #~     return $self;
 #~ }; ## init
 
+#~ #=========# EXTERNAL FUNCTION
+#~ #
+#~ #   import();     # short
+#~ #       
+#~ # Purpose   : Don't call parent's import(). 
+#~ # Parms     : ____
+#~ # Reads     : ____
+#~ # Returns   : ____
+#~ # Writes    : ____
+#~ # Throws    : ____
+#~ # See also  : ____
+#~ # 
+#~ # ____
+#~ #   
+#~ sub import {
+#~  
+#~     
+#~     return 1;
+#~ }; ## import
+
+#~ #=========# EXTERNAL FUNCTION
+#~ #
+#~ #   $trap->setup();     # short
+#~ #       
+#~ # Purpose   : Stuff the empty $trap with $base and $tc
+#~ # Parms     : ____
+#~ # Reads     : $key      : constant  : secret key for private data
+#~ # Returns   : ____
+#~ # Writes    : ____
+#~ # Throws    : ____
+#~ # See also  : ____
+#~ # 
+#~ # ____
+#~ #   
+#~ sub setup {
+#~ ##### @_
+#~     my $trap        = shift;
+#~     my %args        = paired(@_);           # remaining args are *setups*
+#~     my $base        = $args{-base};
+#~     my $count       = $args{-count};
+#~     
+#~     $trap->{$key}{-base}    = $base;
+#~     $trap->{$key}{-counter} = $count;       # initial value of counter
+#~     
+#~     return $trap;
+#~ }; ## setup
+
 #=========# EXTERNAL FUNCTION
 #
 #   confirm();     # short
@@ -93,16 +148,99 @@ dlock( my $err     = Test::Ranger::Base->new(
 # ____
 #   
 sub confirm {
-    my %args        = paired(@_);
-    my $snare       = $args{-leaveby};
-#~     my $leaveby     = $args{-leaveby};      # mode by which trap was left
-#~     my $leaveby     = $args{-leaveby};
-#~     my $leaveby     = $args{-leaveby};
-#~     my $leaveby     = $args{-leaveby};
+##### @_
+    my $trap        = shift;                # gots are inside object    
+    my %args        = paired(@_);           # remaining args are *wants*
+    my $base        = $args{-base};         # base string for $diag-s
+    my $leaveby     = $args{-leaveby};      # caller wanted trap to leaveby
+        
+    my $ok = subtest $base => sub {         # Test::More::subtest
+        my $tc          ;                       # local counter only
+        my $diag        ;                       # diagnostic message
+        my $got         ;
+        
+        # Check different things depending on what was wanted...
+        
+        # Check what we got if caller wanted anything.
+        # Caller implies $leaveby if not specified.
+        if    ( defined $args{-die}    ) {
+            $leaveby    = $leaveby || 'die';
+            $tc++;
+            $diag       = $base . 'died akin to';
+            $trap->die_like( $args{-die}, $diag );  # match regex
+        } 
+        elsif ( defined $args{-exit}   ) {
+            $leaveby    = $leaveby || 'exit';
+            $tc++;
+            $diag       = $base . 'exited with';
+            $trap->exit_is( $args{-exit}, $diag );  # exact eq
+        } 
+        elsif ( defined $args{-return} ) {
+            $leaveby    = $leaveby || 'return';
+            $tc++;
+            $diag       = $base . 'returned akin to';
+            if ( defined $trap->return ) {
+                no warnings 'uninitialized';        # some values may be undef
+                my @gotary  = @{ $trap->return };   # arrayref of return values
+                $got    = join qq{\n}, @gotary;
+                $got    = $got || q{};
+            }
+            else {
+                $got    = q{};
+            };
+            like( $got, $args{-return}, $diag );    # match regex
+        }
+        else {
+            # caller didn't want to check - assume normal return wanted
+            $leaveby    = $leaveby || 'return';
+        }; ## leaveby value
+        
+        # Check how we left.
+        if    ( $leaveby eq 'die' ) {
+            $tc++;
+            $diag       = $base . 'wanted to die';
+            $trap->did_die($diag);
+        } 
+        elsif ( $leaveby eq 'exit' ) {
+            $tc++;
+            $diag       = $base . 'wanted to exit';
+            $trap->did_exit($diag);
+        } 
+        elsif ( $leaveby eq 'return' ) {
+            $tc++;
+            $diag       = $base . 'wanted to return';
+            $trap->did_return($diag);
+        } 
+        else {
+            fail(
+                  q{Test::Ranger::confirm(): _bad_leaveby:}
+                . q{-leaveby must be one of 'return', 'die', or 'exit'.}
+            );
+        }; ## leaveby mode
+        
+        # Check STDOUT and STDERR.
+        if    ( !$args{-stdout} and !$args{-stdout} ) {
+            $tc++;
+            $diag       = $base . 'quiet';
+            $trap->quiet($diag);
+        } 
+        else {
+            if ( $args{-stdout} ) {
+                $tc++;
+                $diag       = $base . 'stdout';
+                $trap->stdout_like( $args{-stdout}, $diag );
+            };
+            if ( $args{-stderr} ) {
+                $tc++;
+                $diag       = $base . 'stderr';
+                $trap->stderr_like( $args{-stderr}, $diag );
+            };
+        }; ## stdout/err
+        
+        done_testing($tc);
+    };
     
-    my $pass        ;
-    
-    return $pass;
+    return $ok;
 }; ## confirm
 
 

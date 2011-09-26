@@ -52,7 +52,7 @@ $trap->did_die("$unit dies correctly when given crap .sql file (\$0)")
 
 $tc++;
 $trap->die_like(
-    words(qw( create DB ) ),
+    words(qw( SQL Error ) ),
     "$unit emits expected error message",
 ) or exit 1;
 #~ note( qq{\n Died with: } . $trap->die );
