@@ -7,6 +7,7 @@ use Test::Trap qw( :default );
 
 use Test::Ranger::Base          # Base class and procedural utilities
     qw( :all );
+use Test::Ranger::Trap;         # Comprehensive airtight trap and test
 
 #~ use Devel::Comments '###';                                  # debug only #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
@@ -112,22 +113,11 @@ for my $i (0..$#test_data) {
 #~     $trap->diag_all;                # Dumps the $trap object, TAP safe   #~
     
     $tc++;
-    $diag   = $base . 'did_return';
-    $trap->did_return($diag) or exit 1;
-    
-    $tc++;
-    $diag   = $base . 'pass';
-    $got    = $trap->return(0);
-    if ($pass) {
-        ok(  $got, $diag ) or exit 1;
-    } 
-    else {
-        ok( !$got, $diag ) or exit 1;       # !ok (ok if $got is false)
-    };
-    
-    $tc++;
-    $diag   = $base . 'quiet';
-    $trap->quiet($diag) or exit 1;      # no STDOUT or STDERR
+    $diag   = $base . 'confirm';
+    confirm(
+        -diag   => $base,
+        -return => ( 0, qr/./, $diag ),   # should match any true value
+    );
         
     note(q{-});
 }; ## for test_data
