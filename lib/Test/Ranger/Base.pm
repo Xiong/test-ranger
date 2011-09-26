@@ -25,6 +25,12 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
             
         }],
                 
+        const       => [qw{
+            $QRTRUE
+            $QRFALSE
+            
+        }],
+        
         test        => [qw{
             akin
             
@@ -36,7 +42,7 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
             
         }],
         
-        all         => [qw{ :util :test :oo }]
+        all         => [qw{ :util :const :test :oo }]
     ],
 );
 
@@ -48,6 +54,10 @@ use Exporter::Easy (            # Procedural as well as OO interface; you pick
 #============================================================================#
 
 # Pseudo-globals
+
+# Compiled regexes
+our $QRFALSE      = qr/\A0?\z/            ;
+our $QRTRUE       = qr/\A(?!$QRFALSE)/    ;
 
 # Error messages
 dlock( my $err     = Test::Ranger::Base->new(

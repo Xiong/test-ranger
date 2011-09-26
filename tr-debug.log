@@ -1,0 +1,107 @@
+
+### $QRTRUE: qr/(?-xism:\A(?!(?-xism:\A0?\z)))/
+### $QRFALSE: qr/(?-xism:\A0?\z)/
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: ''
+### $pass: 0
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: 1
+### $pass: 1
+
+### in test script 
+### $rv: 1
+### $pass: 1

@@ -3,7 +3,6 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Trap qw( :default );
 
 use Test::Ranger::Base          # Base class and procedural utilities
     qw( :all );
@@ -20,13 +19,16 @@ use Test::Ranger::Trap;         # Comprehensive airtight trap and test
 #----------------------------------------------------------------------------#
 # SETUP
 
-my $unit        = '::Base::akin(): ';
+my $unit        = 'akin()-with-confirm() : ';
 my $got         ;
 my $want        ;
 my $diag        = $unit;
 my $tc          = 0;
-my $one         = 1;       
-my $zero        = 0;       
+my $one         = 1;
+my $zero        = 0;
+
+##### $QRTRUE
+##### $QRFALSE
 
 # pass              : bool      : should match?
 # "test" results    : string    : simulated results
@@ -35,8 +37,6 @@ my @test_data   = (
     # pass? # "test" results        # akin() args
     # $pass # $want         # @given
     [ 1,    'a',            'a'             ],
-#    [ 1,    undef,          undef           ],     # can't try to match undef
-#    [ 1,    undef,          '*'             ],     # can't try to match undef
     [ 0,   '*',             ''              ],
     [ 1,   '',              '*'             ],
     [ 0,   'a',             ''              ],
@@ -57,7 +57,6 @@ my @test_data   = (
     [ 0,   0E0,             \$one           ],      # OK
     [ 0,   1,               \$zero          ],
     [ 1,   0,               \$zero          ],
-#~     [ 0,   0E0,             \$zero          ],   # NOT OK
     [ 1,   'error',         'error'         ],
     [ 0,   'pass',          'error'         ],
     [ 1,   'pass error',    'error'         ],
@@ -70,6 +69,9 @@ my @test_data   = (
 #~     [ 1,   ],
 #~     [ 1,   ],
 
+#    [ 1,    undef,          undef           ],     # can't try to match undef
+#    [ 1,    undef,          '*'             ],     # can't try to match undef
+#    [ 0,   0E0,             \$zero          ],     # NOT OK
 ); ## test_data
 
 #----------------------------------------------------------------------------#
@@ -86,13 +88,13 @@ for my $i (0..$#test_data) {
                         elsif ( ref $_ eq 'ARRAY' )     { join q{.}, @$_ }
                         else                            { $_ } 
                     } @line;
-##### in test script: 
-##### @line_copy
+#~ ##### in test script: 
+#~ ##### @line_copy
     
     my $pass        = shift @line;
     my $want        = shift @line;
     my @given       = @line;
-##### @given
+#~ ##### @given
     
     my $base   =  $unit . qq{<$i> } 
                 . q{|}
@@ -107,16 +109,19 @@ for my $i (0..$#test_data) {
         my $rv      = $want =~ /$akin/;
         return $rv;
     };
-##### $rv        
-    # CHECK
     
+    # CHECK
+##### in test script 
+##### $rv        
+##### $pass    
 #~     $trap->diag_all;                # Dumps the $trap object, TAP safe   #~
     
     $tc++;
     $diag   = $base . 'confirm';
-    confirm(
-        -diag   => $base,
-        -return => ( 0, qr/./, $diag ),   # should match any true value
+    my $want_here   = $pass ? $QRTRUE : $QRFALSE; 
+    $trap->confirm(
+        -base   => $base,
+        -return => $want_here,          # match what we expect, simply
     );
         
     note(q{-});
