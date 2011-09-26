@@ -134,7 +134,7 @@ for my $i (0..$#test_data) {
                 return $rv;
             };
             
-#~         ##### $trap    
+        ##### $trap    
 #~         diag('Dumping inner trap:');                                     #~
 #~         $trap->diag_all;            # Dumps the $trap object, TAP safe   #~
             

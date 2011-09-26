@@ -180,9 +180,11 @@ sub confirm {
             $leaveby    = 'return';
             $tc++;
             $diag       = $base . 'returned akin to';
-            my @gotary  = @{ $trap->return };   # arrayref of return values
-            my $got     = join qq{\n}, @gotary; 
-            like( $got, $args{-return}, $diag );    # match regex
+            if ( $trap->return ) {
+                my @gotary  = @{ $trap->return };   # arrayref of return values
+                my $got     = join qq{\n}, @gotary; 
+                like( $got, $args{-return}, $diag );    # match regex
+            };
         }
         else {
             # caller didn't want to check

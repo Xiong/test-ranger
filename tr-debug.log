@@ -1,6 +1,17 @@
 
+### $trap: bless( {
+###                 ' id ' => '1317005914/9457/2',
+###                 die => 'foo at t/trap/152.confirm.t line 47.
+',
+###                 leaveby => 'die',
+###                 stderr => '',
+###                 stdout => '',
+###                 wantarray => '',
+###                 warn => []
+###               }, 'Test::Ranger::Trap' )
+
 ### $grab: bless( {
-###                 ' id ' => '1317005395/9416/1',
+###                 ' id ' => '1317005914/9457/1',
 ###                 leaveby => 'return',
 ###                 return => [
 ###                             bless( {
@@ -8,7 +19,7 @@
 ###                                                  bless( {}, 'Test::Builder2::Event::StreamStart' ),
 ###                                                  bless( {
 ###                                                           description => 'inside ::Trap::confirm(): <0> die foo ',
-###                                                           id => 231,
+###                                                           id => 233,
 ###                                                           location => '/home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm'
 ###                                                         }, 'Test::Builder2::Result::pass' )
 ###                                                ],
@@ -37,8 +48,21 @@ ok 3 - inside ::Trap::confirm(): <0> die foo quiet
 
 ### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+### $trap: bless( {
+###                 ' id ' => '1317005914/9457/4',
+###                 leaveby => 'return',
+###                 return => [
+###                             1
+###                           ],
+###                 stderr => '',
+###                 stdout => 'foo
+',
+###                 wantarray => '',
+###                 warn => []
+###               }, 'Test::Ranger::Trap' )
+
 ### $grab: bless( {
-###                 ' id ' => '1317005395/9416/3',
+###                 ' id ' => '1317005914/9457/3',
 ###                 leaveby => 'return',
 ###                 return => [
 ###                             bless( {
@@ -46,7 +70,7 @@ ok 3 - inside ::Trap::confirm(): <0> die foo quiet
 ###                                                  bless( {}, 'Test::Builder2::Event::StreamStart' ),
 ###                                                  bless( {
 ###                                                           description => 'inside ::Trap::confirm(): <1> say foo ',
-###                                                           id => 231,
+###                                                           id => 233,
 ###                                                           location => '/home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm'
 ###                                                         }, 'Test::Builder2::Result::pass' )
 ###                                                ],
@@ -74,16 +98,176 @@ ok 2 - inside ::Trap::confirm(): <1> say foo stdout
 
 ### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-### $grab: bless( {
-###                 ' id ' => '1317005395/9416/5',
-###                 die => 'Can\'t use an undefined value as an ARRAY reference at /home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm line 183.
+### $trap: bless( {
+###                 ' id ' => '1317005914/9457/6',
+###                 die => 'foo at t/trap/152.confirm.t line 71.
 ',
 ###                 leaveby => 'die',
-###                 stderr => '# Child (inside ::Trap::confirm(): <2> bad die foo ) exited without calling finalize()
+###                 stderr => '',
+###                 stdout => '',
+###                 wantarray => '',
+###                 warn => []
+###               }, 'Test::Ranger::Trap' )
+
+### $grab: bless( {
+###                 ' id ' => '1317005914/9457/5',
+###                 leaveby => 'return',
+###                 return => [
+###                             bless( {
+###                                      events => [
+###                                                  bless( {}, 'Test::Builder2::Event::StreamStart' ),
+###                                                  bless( {
+###                                                           description => 'inside ::Trap::confirm(): <2> bad die foo ',
+###                                                           id => 233,
+###                                                           location => '/home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm'
+###                                                         }, 'Test::Builder2::Result::fail' )
+###                                                ],
+###                                      fail_count => 1,
+###                                      pass_count => 0,
+###                                      results => [
+###                                                   $VAR1->[0]{return}[0]{events}[1]
+###                                                 ],
+###                                      skip_count => 0,
+###                                      stream_depth => 1,
+###                                      test_count => 1,
+###                                      todo_count => 0
+###                                    }, 'Test::Builder2::History' )
+###                           ],
+###                 stderr => '
+#   Failed test \'inside ::Trap::confirm(): <2> bad die foo wanted to return\'
+#   at /home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm line 207.
+#     Expecting to return(), but instead die()ed with "foo at t/trap/152.confirm.t line 71.\\n"
+# 3 tests planned, but 2 ran.
+# 1 test of 2 failed.
 ',
 ###                 stdout => 'TAP version 13
+not ok 1 - inside ::Trap::confirm(): <2> bad die foo wanted to return
+ok 2 - inside ::Trap::confirm(): <2> bad die foo quiet
+1..3
 ',
 ###                 wantarray => '',
 ###                 warn => []
 ###               }, 'Test::Trap' )
-### $inner_rv: undef
+### $inner_rv: 0
+
+### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+### $trap: bless( {
+###                 ' id ' => '1317005914/9457/8',
+###                 leaveby => 'return',
+###                 return => [
+###                             1
+###                           ],
+###                 stderr => '',
+###                 stdout => 'foo
+',
+###                 wantarray => '',
+###                 warn => []
+###               }, 'Test::Ranger::Trap' )
+
+### $grab: bless( {
+###                 ' id ' => '1317005914/9457/7',
+###                 leaveby => 'return',
+###                 return => [
+###                             bless( {
+###                                      events => [
+###                                                  bless( {}, 'Test::Builder2::Event::StreamStart' ),
+###                                                  bless( {
+###                                                           description => 'inside ::Trap::confirm(): <3> fail foo ',
+###                                                           id => 233,
+###                                                           location => '/home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm'
+###                                                         }, 'Test::Builder2::Result::fail' )
+###                                                ],
+###                                      fail_count => 1,
+###                                      pass_count => 0,
+###                                      results => [
+###                                                   $VAR1->[0]{return}[0]{events}[1]
+###                                                 ],
+###                                      skip_count => 0,
+###                                      stream_depth => 1,
+###                                      test_count => 1,
+###                                      todo_count => 0
+###                                    }, 'Test::Builder2::History' )
+###                           ],
+###                 stderr => '
+#   Failed test \'inside ::Trap::confirm(): <3> fail foo returned akin to\'
+#   at /home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm line 186.
+#                   \'1\'
+#     doesn\'t match \'(?msi-x:bar)\'
+
+#   Failed test \'inside ::Trap::confirm(): <3> fail foo quiet\'
+#   at /home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm line 217.
+# Expecting no STDOUT, but got "foo\\n"
+# 2 tests of 3 failed.
+',
+###                 stdout => 'TAP version 13
+not ok 1 - inside ::Trap::confirm(): <3> fail foo returned akin to
+ok 2 - inside ::Trap::confirm(): <3> fail foo wanted to return
+not ok 3 - inside ::Trap::confirm(): <3> fail foo quiet
+1..3
+',
+###                 wantarray => '',
+###                 warn => []
+###               }, 'Test::Trap' )
+### $inner_rv: 0
+
+### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+### $trap: bless( {
+###                 ' id ' => '1317005914/9457/10',
+###                 leaveby => 'return',
+###                 return => [
+###                             1
+###                           ],
+###                 stderr => '',
+###                 stdout => 'foo
+',
+###                 wantarray => '',
+###                 warn => []
+###               }, 'Test::Ranger::Trap' )
+
+### $grab: bless( {
+###                 ' id ' => '1317005914/9457/9',
+###                 leaveby => 'return',
+###                 return => [
+###                             bless( {
+###                                      events => [
+###                                                  bless( {}, 'Test::Builder2::Event::StreamStart' ),
+###                                                  bless( {
+###                                                           description => 'inside ::Trap::confirm(): <4> leaveby tardis ',
+###                                                           id => 233,
+###                                                           location => '/home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm'
+###                                                         }, 'Test::Builder2::Result::fail' )
+###                                                ],
+###                                      fail_count => 1,
+###                                      pass_count => 0,
+###                                      results => [
+###                                                   $VAR1->[0]{return}[0]{events}[1]
+###                                                 ],
+###                                      skip_count => 0,
+###                                      stream_depth => 1,
+###                                      test_count => 1,
+###                                      todo_count => 0
+###                                    }, 'Test::Builder2::History' )
+###                           ],
+###                 stderr => '
+#   Failed test \'inside ::Trap::confirm(): <4> leaveby tardis returned akin to\'
+#   at /home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm line 186.
+#                   \'1\'
+#     doesn\'t match \'(?msi-x:foo)\'
+
+#   Failed test \'inside ::Trap::confirm(): <4> leaveby tardis quiet\'
+#   at /home/xiong/projects/test-ranger/lib/Test/Ranger/Trap.pm line 217.
+# Expecting no STDOUT, but got "foo\\n"
+# 2 tests of 3 failed.
+',
+###                 stdout => 'TAP version 13
+not ok 1 - inside ::Trap::confirm(): <4> leaveby tardis returned akin to
+ok 2 - inside ::Trap::confirm(): <4> leaveby tardis wanted to return
+not ok 3 - inside ::Trap::confirm(): <4> leaveby tardis quiet
+1..3
+',
+###                 wantarray => '',
+###                 warn => []
+###               }, 'Test::Trap' )
+### $inner_rv: 0
