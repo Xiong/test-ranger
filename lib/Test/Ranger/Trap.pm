@@ -29,7 +29,7 @@ use Scalar::Util::Reftype;      # Alternate reftype() interface
 ## use
 
 # Alternate uses
-#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
+use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 
@@ -157,6 +157,7 @@ sub confirm {
     my $ok = subtest $base => sub {         # Test::More::subtest
         my $tc          ;                       # local counter only
         my $diag        ;                       # diagnostic message
+        my $got         ;
         
         # Check different things depending on what was wanted...
         
@@ -178,11 +179,16 @@ sub confirm {
             $leaveby    = $leaveby || 'return';
             $tc++;
             $diag       = $base . 'returned akin to';
-            if ( $trap->return ) {
+            if ( defined $trap->return ) {
+                no warnings 'uninitialized';        # some values may be undef
                 my @gotary  = @{ $trap->return };   # arrayref of return values
-                my $got     = join qq{\n}, @gotary; 
-                like( $got, $args{-return}, $diag );    # match regex
+                $got    = join qq{\n}, @gotary;
+                $got    = $got || q{};
+            }
+            else {
+                $got    = q{};
             };
+            like( $got, $args{-return}, $diag );    # match regex
         }
         else {
             # caller didn't want to check - assume normal return wanted

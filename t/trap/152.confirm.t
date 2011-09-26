@@ -169,11 +169,23 @@ my @test_data       = (
         }
     },
     
+# The battle of the falsehoods.
     { 
         -base   => 'return empty, wanted undef',
         -given  => {        # givens for this ranger script
             -code       => sub{ return '' },    # given for bear trap
             -return     => undef,               # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
+        -base   => 'return empty, wanted FALSE',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return '' },    # given for bear trap
+            -return     => $QRFALSE,            # want  for bear trap
         },
         -want   => {        # wants for this ranger script
             -pass       => 1,
@@ -192,10 +204,32 @@ my @test_data       = (
     },
     
     { 
+        -base   => 'return zero, wanted FALSE',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return 0 },     # given for bear trap
+            -return     => $QRFALSE,            # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    { 
         -base   => 'return undef, wanted undef',
         -given  => {        # givens for this ranger script
             -code       => sub{ return undef }, # given for bear trap
             -return     => undef,               # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 1,
+        }
+    },
+    
+    {
+        -base   => 'return undef, wanted FALSE',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return undef }, # given for bear trap
+            -return     => $QRFALSE,            # want  for bear trap
         },
         -want   => {        # wants for this ranger script
             -pass       => 1,
@@ -214,6 +248,28 @@ my @test_data       = (
     },
     
     { 
+        -base   => 'return TRUE, wanted FALSE',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return 'TRUE' },# given for bear trap
+            -return     => $QRFALSE,            # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 0,   # fail; caller demanded FALSE
+        }
+    },
+    
+    { 
+        -base   => 'return FALSE, wanted TRUE',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ return 'TRUE' },# given for bear trap
+            -return     => $QRFALSE,            # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 0,   # fail; caller demanded TRUE
+        }
+    },
+    
+    { 
         -base   => 'return TRUE, wanted empty string',
         -given  => {        # givens for this ranger script
             -code       => sub{ return 'TRUE' },# given for bear trap
@@ -224,6 +280,7 @@ my @test_data       = (
         }
     },
     
+## end battle of true and false
     
 ); ## test_data
 #~ $tc++;
