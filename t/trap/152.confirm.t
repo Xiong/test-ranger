@@ -59,17 +59,17 @@ my @test_data       = (
         }
     },
     
-#~     { 
-#~         -base   => 'bad die foo',
-#~         -given  => {        # givens for this ranger script
-#~             -code       => sub{ die 'foo' },    # given for bear trap
-#~             -leaveby    => 'return',            # want  for bear trap
-#~             -return     => akin('foo'),         # want  for bear trap
-#~         },
-#~         -want   => {        # wants for this ranger script
-#~             -pass       => 0,
-#~         }
-#~     },
+    { 
+        -base   => 'bad die foo',
+        -given  => {        # givens for this ranger script
+            -code       => sub{ die 'foo' },    # given for bear trap
+            -leaveby    => 'return',            # want  for bear trap
+            -return     => akin('foo'),         # want  for bear trap
+        },
+        -want   => {        # wants for this ranger script
+            -pass       => 0,
+        }
+    },
     
 #~     { 
 #~         -base   => 'fail foo',
@@ -107,7 +107,7 @@ for my $i (0..$#test_data) {
     my $lineref     = $test_data[$i];
     my %line        = %$lineref;
     
-    my $base        = $unit . qq{<$i>} . $line{-base} . qq{\t};
+    my $base        = $unit . qq{<$i>} . $line{-base} . qq{ --- };
     
     my %given       = %{ $line{-given} };
         my $code        = $given{-code} 
@@ -170,9 +170,9 @@ for my $i (0..$#test_data) {
     $grab->did_return($diag) or exit 1;
     
     $tc++;
-    $diag   = $base . 'return value';
-    $got    = $r_rv;        # returns number of tests run (passed or failed)
-    $want   = 1;            # may want to relax this
+    $diag   = $base . 'pass or fail correctly';
+    $got    = $inner_rv;    # confirm() returns true or false (passed or failed)
+    $want   = $want_pass;
     is( $got, $want, $diag );
     
 #~     $got    = $grab->return(0);
