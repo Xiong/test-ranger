@@ -32,6 +32,7 @@ use Glib                        # Gtk constants
 
 # specific Frame defaults
 # You may specify a Frame by number 0..3 or by letter 'A'..'D'
+-history_frame          => 'C',         # pane to create terminal windows
 -terminal_frame         => 'D',         # pane to create terminal windows
 #~ -terminal_frame         => '1',         # pane to create terminal windows
 

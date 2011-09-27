@@ -33,6 +33,7 @@ use Glib                        # Gtk constants
     'TRUE', 'FALSE',
 ; ## Glib
 use Gnome2::Vte;
+use Gtk2::SimpleList;           # Simple interface to complex MVC list widget
 
 ## use
 
@@ -154,8 +155,14 @@ sub _setup {
     # Database
     _setup_db($cs);         # find or create database file
     
+    # Command history
+    _setup_history($cs);    # display from database
+    
     # Terminal
     _setup_terminal($cs);   # virtual terminal emulator
+    
+    
+    
     
     
     # Futz around here.
@@ -191,7 +198,6 @@ sub _setup {
     # Display everything
     $vbox0->show_all();
     $mw->add($vbox0);
-    
     
     
     
@@ -393,13 +399,17 @@ sub _setup_panes {
     
     # Set specific frame defaults.
     # These will control where new tabs are put.
-    my $term_frame      = $cs->{-config}{-terminal_frame};
-    $term_frame        =~ tr/ABCD/0123/;
-    $cs->{-term_frame}  = $term_frame;
+    my $term_frame          = $cs->{-config}{-terminal_frame};
+    $term_frame            =~ tr/ABCD/0123/;
+    $cs->{-term_frame}      = $term_frame;
+    
+    my $hist_frame          = $cs->{-config}{-history_frame};
+    $hist_frame            =~ tr/ABCD/0123/;
+    $cs->{-hist_frame}      = $hist_frame;
     
     # Store the Frames and VBox panes for later access
-    $cs->{-frames}      = \@frames;
-    $cs->{-panes}       = \@panes;
+    $cs->{-frames}          = \@frames;
+    $cs->{-panes}           = \@panes;
     
         
     return $cs;
@@ -639,9 +649,12 @@ sub _setup_terminal {
 #~     $vbox->pack_start( $echo_view, FALSE, FALSE, 0 );
     
     
+    # Start user off... and be sure 'script' starts.
+    $terminal->grab_focus();
     
     return $cs;
 }; ## _setup_terminal
+
 
 # scratch test feed sub
 sub test_feed {
@@ -941,6 +954,65 @@ sub test_echo {
 sub dummy {1};
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+
+#=========# GTK SETUP ROUTINE
+#
+#   _setup_history();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup_history {
+    my $cs          = shift;
+    my $mw          = $cs->get_mw();
+    my $hist_frame  = $cs->{-hist_frame};
+    my $hist_pane   = $cs->get_pane($hist_frame);
+    my $vbox        = Gtk2::VBox->new;
+    
+    $hist_pane->add($vbox);
+
+    #create a scrolled window that will host the treeview
+    my $sw = Gtk2::ScrolledWindow->new (undef, undef);
+    $sw->set_shadow_type ('etched-out');
+    $sw->set_policy ('automatic', 'automatic');
+    #This is a method of the Gtk2::Widget class,it will force a minimum 
+    #size on the widget. Handy to give intitial size to a 
+    #Gtk2::ScrolledWindow class object
+    $sw->set_size_request ( 0, 150 );
+    #method of Gtk2::Container
+    $sw->set_border_width(5);
+    
+                                            # TABLE term_command
+    my $slist = Gtk2::SimpleList->new (
+                    'Int Field'     => 'int',       # term_command
+                    'Scalar Field'  => 'scalar',    # c_text
+                        
+#~                     'Text Field'    => 'text',
+#~                     'Markup Field'  => 'markup',
+#~                     'Int Field'     => 'int',
+#~                     'Double Field'  => 'double',
+#~                     'Bool Field'    => 'bool',
+#~                     'Scalar Field'  => 'scalar',
+#~                     'Pixbuf Field'  => 'pixbuf',
+                );
+    
+    @{ $slist->{data} }  = ([0,'a'],[1,'b']);     # AoA, just like we get it from DB 
+    
+    $slist->set_rules_hint (TRUE);
+    
+    $sw->add($slist);
+    $vbox->pack_start($sw,TRUE,TRUE,0);
+    
+    $cs->{-hist_list}   = $slist;
+    return $cs;
+}; ## _setup_history
 
 #=========# GTK SETUP ROUTINE
 #
