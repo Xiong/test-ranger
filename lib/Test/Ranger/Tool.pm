@@ -976,6 +976,8 @@ sub _setup_history {
     my $hist_pane   = $cs->get_pane($hist_frame);
     my $vbox        = Gtk2::VBox->new;
     
+    my @history     ;       # tied array
+    
     $hist_pane->add($vbox);
 
     #create a scrolled window that will host the treeview
@@ -1002,15 +1004,20 @@ sub _setup_history {
 #~                     'Scalar Field'  => 'scalar',
 #~                     'Pixbuf Field'  => 'pixbuf',
                 );
+#~     # Dummy data.
+#~     @{ $slist->{data} }  = ([0,'a'],[1,'b']);     # AoA, just like from DB
     
-    @{ $slist->{data} }  = ([0,'a'],[1,'b']);     # AoA, just like we get it from DB 
+    # Initial get from DB.
+    @history    = @{ $cs->db_history_get_all() };   # SELECT * FROM term_command
+    @{ $slist->{data} }  = @history;                # AoA, just like from DB
     
     $slist->set_rules_hint (TRUE);
     
     $sw->add($slist);
     $vbox->pack_start($sw,TRUE,TRUE,0);
     
-    $cs->{-hist_list}   = $slist;
+    $cs->{-hist_list}       = $slist;
+    $cs->{-history_aryref}  = \@history;
     return $cs;
 }; ## _setup_history
 

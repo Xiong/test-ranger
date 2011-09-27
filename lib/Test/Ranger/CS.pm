@@ -356,6 +356,28 @@ sub db_history_add {
 
 #=========# OBJECT METHOD
 #
+#   $cs->db_history_get_all();     # SELECT * FROM term_command
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub db_history_get_all {
+    my $cs  = shift;
+    my $db  = $cs->{-db};
+    
+    return $db->select_term_command();   # SELECT *    
+}; ## db_history_get_all
+
+#=========# OBJECT METHOD
+#
 #   $mw = $cs->get_mw();        # retrieve the Gtk main Window object
 #       
 # Purpose   : Copy main Window object from football into supplied ref.
