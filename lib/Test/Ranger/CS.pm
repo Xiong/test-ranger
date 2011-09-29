@@ -328,11 +328,11 @@ sub _bump_history_cache_state {
     my $ipc                     = $cs->_read_ipc_file();
     
     # Bump it then store it.
-    $cs->{-ipc}{-history_cache_state} = ++$ipc->{-history_cache_state};
+    $cs->{-ipc}{-history_cache_state} = $ipc->{-history_cache_state}++;
     
     # Write the new state, preserving other filed values.
     $cs->_write_ipc_file($ipc);
-    
+### $ipc    
     return $cs;
 }; ## _bump_history_cache_state
 
@@ -516,21 +516,22 @@ sub db_history_add {
     };
     my $history     = $cs->{-history};      # copy of cache
     
-### db_history_add
-### $history
-### $text
+#### db_history_add
+#### $history
+#### $text
     
     # Don't insert a duplicate.
     my $c_text = 1;                         # c_text FROM TABLE term_command 
     my %fudge   = map { $_->[$c_text] => 1 } @$history;
 #~     my %fudge   = map { $_ } @$history;
 #~     my %fudge   = map { @$_[$c_text] => 1 } @$history;
-### %fudge
+#### %fudge
     if ( not defined $fudge{$text} ) {      # $text is unique
-        $db     = $db->insert_term_command(     # add to command history
+        $db     = $db->insert_term_command( # add to command history
                     '-text' => $text, 
                 );
-        $cs->db_history_get_all();     # update cache
+        $cs->db_history_get_all();          # update cache
+        $cs->_bump_history_cache_state();   # ... and let others know
     };
     
     return $cs;

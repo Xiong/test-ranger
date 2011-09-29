@@ -37,7 +37,7 @@
 ###                                                   _dbh => bless( {}, 'DBI::db' ),
 ###                                                   _dond => 1,
 ###                                                   _mode => 'fixup',
-###                                                   _pid => 10005,
+###                                                   _pid => 10356,
 ###                                                   _svp_depth => 0,
 ###                                                   driver => bless( {
 ###                                                                      driver => 'SQLite'
@@ -60,15 +60,33 @@
 ###                             [
 ###                               '3',
 ###                               'ls'
+###                             ],
+###                             [
+###                               '4',
+###                               'cat foo'
+###                             ],
+###                             [
+###                               '5',
+###                               'ls -la'
+###                             ],
+###                             [
+###                               '6',
+###                               'cat bar'
 ###                             ]
 ###                           ],
 ###               '-ipc' => {
-###                           '-history_cache_state' => 1,
+###                           '-history_cache_state' => 0,
 ###                           '-title' => 'Test::Ranger::CS v0.0.4'
 ###                         },
 ###               '-ipc_file' => '.test-ranger/tr_ipc.perl',
 ###               '-mw' => bless( {}, 'Gtk2::Window' ),
 ###               '-term_frame' => '3'
 ###             }, 'Test::Ranger::CS' )
+
+### Command: 'ls'
+
+### Command: 'cat foo'
+
+### Command: 'cat food'
 
 ### Command: 'exit'
