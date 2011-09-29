@@ -38,8 +38,8 @@ use Gtk2::SimpleList;           # Simple interface to complex MVC list widget
 ## use
 
 # Alternate uses
-#~ use Devel::Comments '###';
-use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
+use Devel::Comments '###';
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 # Constants
@@ -164,7 +164,8 @@ sub _setup {
     # Terminal
     _setup_terminal($cs);   # virtual terminal emulator
     
-    
+    # Timers
+    _setup_timers($cs);     # called repeatedly during _main_loop();
     
     
     
@@ -627,8 +628,8 @@ sub _setup_terminal {
     # Store $sig_id to disconnect this signal after first reception. 
 #~     $cs->{-terminal_connect_id}{$terminal}  = $sig_id;
     $cs->{-terminals}{$term_id}{-sig_id}    = $sig_id; 
-### $term_id
-### $sig_id
+#~ ### $term_id
+#~ ### $sig_id
     
     
     # Test feed button
@@ -985,19 +986,28 @@ sub _setup_history {
     my $hist_pane   = $cs->get_pane($hist_frame);
     my $vbox        = Gtk2::VBox->new;
     
+    # Position of contents within ScrolledWindow
+    my $vadj        ;
+    my $upper       = 100;
+    my $lower       =   0;
+    my $value       =  50;
+    
+    # Get contents to display. 
     my @history     = @{ $cs->{-history} };
         
+    # Decide where to put it based on config.
     $hist_pane->add($vbox);
-
-    #create a scrolled window that will host the treeview
+    
+    # Lifted whole from TreeView tutorial. 
+        #create a scrolled window that will host the treeview
     my $sw = Gtk2::ScrolledWindow->new (undef, undef);
     $sw->set_shadow_type ('etched-out');
     $sw->set_policy ('automatic', 'automatic');
-    #This is a method of the Gtk2::Widget class,it will force a minimum 
-    #size on the widget. Handy to give intitial size to a 
-    #Gtk2::ScrolledWindow class object
+        #This is a method of the Gtk2::Widget class,it will force a minimum 
+        #size on the widget. Handy to give intitial size to a 
+        #Gtk2::ScrolledWindow class object
     $sw->set_size_request ( 0, 150 );
-    #method of Gtk2::Container
+        #method of Gtk2::Container
     $sw->set_border_width(5);
     
                                             # TABLE term_command
@@ -1019,14 +1029,100 @@ sub _setup_history {
     # Initial get.
     @{ $slist->{data} }     = @history;        # AoA, just like from DB
     
-    $slist->set_rules_hint (TRUE);
-    
+    # Style the history display.
+    $slist->set_rules_hint (TRUE);    
     $sw->add($slist);
     $vbox->pack_start($sw,TRUE,TRUE,0);
     
-    $cs->{-hist_list}       = $slist;   # $cs->{hist_list}{data}
+    # Scroll to the most recent item.
+    $vadj       = $sw->get_vadjustment;
+#~ my $old_upper   = $vadj->upper;
+#~ my $old_lower   = $vadj->lower;
+#~ my $old_val     = $vadj->value;
+#~ ### $vadj
+#~ ### $old_upper
+#~ ### $old_lower
+#~ ### $old_val    
+    
+    $vadj->upper ($upper);
+    $vadj->lower ($lower);
+    $vadj->value ($value);
+    $vadj->notify('upper');
+    $vadj->notify('lower');
+    $vadj->notify('value');
+    $vadj->value_changed;
+    $sw->set_vadjustment ($vadj);
+    
+    $cs->{-hist_list}       = $slist;   # history in $cs->{hist_list}{data}
+    $cs->{-hist_window}     = $sw;      # Gtk2::ScrolledWindow
+    $cs->{-hist_vadj}       = $vadj;    # Gtk2::Adjustment
     return $cs;
 }; ## _setup_history
+
+#=========# INTERNAL ROUTINE
+#
+#   _timed_refresh($cs);     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _timed_refresh {
+    my $cs          = shift;
+#~ ### _timed_refresh
+    
+    # Refresh history pane.
+    if ( $cs->_is_history_cache_invalid() ) {
+        $cs->db_history_get_all();
+    };
+    my $hist_list           = $cs->{-hist_list};
+    my @history             = @{ $cs->{-history} };
+    @{ $hist_list->{data} } = @history;     # tied to display already
+    ## history
+    
+    
+    return Glib::SOURCE_CONTINUE;           # don't uninstall after run
+#~     return Glib::SOURCE_REMOVE;             # uninstall after run
+}; ## _timed_refresh
+
+#=========# GTK SETUP ROUTINE
+#
+#   _setup_timers($cs);     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup_timers {
+    my $cs          = shift;
+    
+    my $interval    = 1;
+    my $callback    = sub{ _timed_refresh($cs) };
+    my $data        = undef;
+    my $priority    = Glib::G_PRIORITY_DEFAULT;
+    
+    
+    my $id  = Glib::Timeout->add_seconds (
+                $interval,          # int   : seconds between runs
+                $callback,          # code  : callback routine
+                $data,              # ?
+                $priority           # ?
+            );
+    
+    return $cs;
+}; ## _setup_timers
 
 #=========# GTK SETUP ROUTINE
 #

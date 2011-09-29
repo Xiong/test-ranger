@@ -53,7 +53,7 @@ use Glib                        # Gtk constants
 ; ## Glib
 
 # use for debug only
-use Devel::Comments '###';      # debug only                             #~
+#~ use Devel::Comments '###';      # debug only                             #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
