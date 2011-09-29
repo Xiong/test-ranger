@@ -27,8 +27,6 @@ use Data::Lock qw( dlock );     # Declare locked scalars
 #~ use Devel::Comments '###';      # debug only                             #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
 
-
-
 #============================================================================#
 
 # Pseudo-globals

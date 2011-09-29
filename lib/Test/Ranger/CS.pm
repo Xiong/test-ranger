@@ -54,8 +54,7 @@ use Glib                        # Gtk constants
 
 # use for debug only
 use Devel::Comments '###';      # debug only                             #~
-
-$::Debug = 0 unless (defined $::Debug);     # global; can be raised in caller
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 
@@ -198,6 +197,171 @@ sub get_config {
     return $cs;
     
 }; ## get_config
+
+#=========# OBJECT METHOD
+#
+#   $cs->setup_ipc();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub setup_ipc {
+    my $cs          = shift;
+    my $title       = "Test::Ranger::CS $VERSION";
+    my $write       = {
+                        -title                 => $title,
+                        -history_cache_state    => 0,
+                        
+                    };
+    
+    # Write initial file contents.
+    $cs->_write_ipc_file($write);
+    
+    # This *is* the file; not merely what user wanted it to be. 
+    $cs->{-ipc_file}    = $cs->{-config}{-ipc_file};
+    
+    # Verify and store
+    my $ipc         = $cs->_read_ipc_file();
+    $cs->{-ipc}     = $ipc;
+    
+    return $cs;
+}; ## setup_ipc
+
+#=========# OBJECT METHOD
+#
+#   $cs->_write_ipc_file($write);     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub _write_ipc_file {
+    my $cs          = shift;
+    my $write       = shift;
+    my $ipc_file    = $cs->{-ipc_file} // $cs->{-config}{-ipc_file};
+    
+    my @lines       ;
+    
+    # Serialize $write with Data::Dumper.
+    my $dumper      = Data::Dumper->new([$write],['ipc']);
+    $dumper->Purity(1)->Sortkeys(1);
+    @lines          = $dumper->Dump;
+    
+    # File handling.
+    open( my $ipc_fh, '>', $ipc_file )
+        or crash("Couldn't open $ipc_file for writing");
+    
+    for (@lines) {
+        say {$ipc_fh} $_
+            or crash("Couldn't write '$_' to $ipc_file");
+    };
+    
+    close $ipc_fh
+        or crash("Couldn't close $ipc_file");
+    
+    return $cs;
+}; ## _write_ipc_file
+
+#=========# OBJECT METHOD
+#
+#   $read  =$cs->_read_ipc_file();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub _read_ipc_file {
+    my $cs          = shift;
+##### $cs
+    my $ipc_file    = $cs->{-ipc_file}
+        or crash("IPC file never chosen");
+    
+    my $read        ;
+    
+    $read           = do $ipc_file
+        or crash "Failed to read (do) $ipc_file";
+    
+    return $read;
+}; ## _read_ipc_file
+
+#=========# OBJECT METHOD
+#
+#   $cs->_bump_history_cache_state();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub _bump_history_cache_state {
+    my $cs          = shift;
+    
+    # Get the old value.
+    my $ipc                     = $cs->_read_ipc_file();
+    
+    # Bump it then store it.
+    $cs->{-ipc}{-history_cache_state} = ++$ipc->{-history_cache_state};
+    
+    # Write the new state, preserving other filed values.
+    $cs->_write_ipc_file($ipc);
+    
+    return $cs;
+}; ## _bump_history_cache_state
+
+#=========# OBJECT METHOD
+#
+#   $invalid    = $cs->_is_history_cache_invalid();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : $invalid      : bool
+# Invokes   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+#   
+sub _is_history_cache_invalid {
+    my $cs          = shift;
+    my $old_ipc     = $cs->{-ipc};
+    my $new_ipc     = $cs->_read_ipc_file();
+    
+    my $old_history_cache_state     = $old_ipc->{-history_cache_state};
+    my $new_history_cache_state     = $new_ipc->{-history_cache_state};
+    
+    return ( $old_history_cache_state == $new_history_cache_state ) ? 0 : 1; 
+#~     return 1;       # shitty; always invalid
+}; ## _is_history_cache_invalid
 
 #=========# OBJECT METHOD
 #
@@ -347,9 +511,27 @@ sub db_history_add {
     my $text    = $args{-command};
     my $id      = $args{-term_id};
     
-    $db     = $db->insert_term_command(    # add to command history
-                '-text' => $text, 
-            );
+    if ( $cs->_is_history_cache_invalid() ) {
+        $cs->db_history_get_all();     # update cache
+    };
+    my $history     = $cs->{-history};      # copy of cache
+    
+### db_history_add
+### $history
+### $text
+    
+    # Don't insert a duplicate.
+    my $c_text = 1;                         # c_text FROM TABLE term_command 
+    my %fudge   = map { $_->[$c_text] => 1 } @$history;
+#~     my %fudge   = map { $_ } @$history;
+#~     my %fudge   = map { @$_[$c_text] => 1 } @$history;
+### %fudge
+    if ( not defined $fudge{$text} ) {      # $text is unique
+        $db     = $db->insert_term_command(     # add to command history
+                    '-text' => $text, 
+                );
+        $cs->db_history_get_all();     # update cache
+    };
     
     return $cs;
 }; ## db_history_add
@@ -370,10 +552,19 @@ sub db_history_add {
 # ____
 #   
 sub db_history_get_all {
+    ##### db_history_get_all
+    ##### @_
     my $cs  = shift;
     my $db  = $cs->{-db};
+        
+    my $hist    = $db->select_term_command();   # SELECT *
+    if (not $hist) {            # create dummy history
+        $hist   = [];
+    };
     
-    return $db->select_term_command();   # SELECT *    
+    $cs->{-history}     = $hist;
+    
+    return $hist;
 }; ## db_history_get_all
 
 #=========# OBJECT METHOD
@@ -426,7 +617,7 @@ sub put_mw {
 
 #=========# OBJECT METHOD
 #
-#   $obj->method( '-parm' => $value, );     # short
+#   $cs->method( '-parm' => $value, );     # short
 #       
 # Purpose   : ____
 # Parms     : ____
@@ -440,9 +631,9 @@ sub put_mw {
 # ____
 #   
 sub method {
+    my $cs         = shift;
     
-    
-    
+    return $cs;
 }; ## method
 
 

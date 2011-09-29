@@ -40,9 +40,10 @@ use Glib                        # Gtk constants
 -terminal_color_background      => 'straw',
 -terminal_color_foreground      => 'black',
 
--db_file                => '.test-ranger/tr_db',    # SQLite database file
--sql_file               => 'file/db/tr_db.sql',     # setup file contains SQL
-
+# File names
+-db_file        => '.test-ranger/tr_db',        # SQLite database file
+-sql_file       => 'file/db/tr_db.sql',         # setup file contains SQL
+-ipc_file       => '.test-ranger/tr_ipc.perl',  # For parent-child IPC
 
 
 

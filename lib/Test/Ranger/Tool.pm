@@ -38,8 +38,8 @@ use Gtk2::SimpleList;           # Simple interface to complex MVC list widget
 ## use
 
 # Alternate uses
-use Devel::Comments '###';
-#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
+#~ use Devel::Comments '###';
+use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 # Constants
@@ -87,6 +87,9 @@ sub main {
     
     # Load cascading configurations from config files.
     $cs->get_config();
+    
+    # Set up parent-child IPC; create or re-use IPC file
+    $cs->setup_ipc();
     
     # main Window configuration
     my $mw_width    = $cs->{-config}{-mw_initial_H};
@@ -620,34 +623,18 @@ sub _setup_terminal {
     my $sig_id  = $terminal->signal_connect( 'text-inserted' => 
         \&make_logger, $cs 
     ); ## terminal signal
-#### $sig_id
     
     # Store $sig_id to disconnect this signal after first reception. 
 #~     $cs->{-terminal_connect_id}{$terminal}  = $sig_id;
     $cs->{-terminals}{$term_id}{-sig_id}    = $sig_id; 
+### $term_id
+### $sig_id
     
     
     # Test feed button
     my $feed_button     = Gtk2::Button->new_with_mnemonic('_Feed');
     $feed_button->signal_connect( 'clicked' => \&test_feed, $terminal );
     $vbox->pack_start( $feed_button, FALSE, FALSE, 0 );
-    
-#~     # Test echo box
-#~     my $echo_buf        = Gtk2::TextBuffer->new();
-#~     my $echo_view       = Gtk2::TextView->new_with_buffer($echo_buf);
-#~     my $buffer_ball     = {
-#~                             -echo_buf       => $echo_buf,
-#~                             -previous_row   => 0,
-#~                             -previous_col   => 0,
-#~                             -row_count      => 0,
-#~                         };
-#~     
-#~     $terminal->signal_connect( 'text-inserted' => 
-#~         \&test_echo, $buffer_ball 
-#~     ); ## terminal signal
-#~     
-#~     $vbox->pack_start( $echo_view, FALSE, FALSE, 0 );
-    
     
     # Start user off... and be sure 'script' starts.
     $terminal->grab_focus();
@@ -738,7 +725,21 @@ sub make_logger {
         push @{ $cs->{-child_pid} }, $pid;
     } 
     else {                  # child
-        # Open fifo. 
+        # $cs (and contents) is just a copy of the original
+        # So delete useless, dynamic elements
+        delete $cs->{-frames};
+        delete $cs->{-hist_frame};
+        delete $cs->{-hist_list};
+        delete $cs->{-menubar};
+        delete $cs->{-next_term_id};
+        delete $cs->{-panes};
+        delete $cs->{-terminals};
+        delete $cs->{-vbox0};
+        delete $cs->{-config_paths};
+    ##### Child
+    ##### $cs
+                
+        # Open fifo in child. 
         open my $fh, '<', $fifo
             or crash( "Failed to open $fifo for reading " );
     
@@ -752,12 +753,16 @@ sub make_logger {
         close $fh
             or crash( "Failed to open $fifo for reading " );
         exit(0);
-    };
+    }; ## fork
     
     # Start logging
     my $command 
         = qq{script -f -a $fifo};
     $terminal->feed_child( $command . qq{\n} );
+    $cs->db_history_add(            # add command to history database
+        -command        => $command,
+        -term_id        => $term_id,
+    );
     
     # Register this subshell in football for later 'exit'-ing.
     # TODO: Do we need this? Or should we work off $cs->{-terminals}?
@@ -822,13 +827,13 @@ my $t3 = $text;                                                     # debug
     # Discard BEL characters.
     $text       =~ s/(?:$bel)+//g;
     
-##### 0: $t0
-##### 1: $t1
-##### m: $matches
-##### 2: $t2
-##### 3: $t3
-##### X: $text
-##### $: $prompt
+#### 0: $t0
+#### 1: $t1
+#### m: $matches
+#### 2: $t2
+#### 3: $t3
+#### X: $text
+#### $: $prompt
     
     #---# End cleanup #---#
     # still in _parse_script
@@ -836,7 +841,7 @@ my $t3 = $text;                                                     # debug
     # Now decide what to do with the extracted poop -- if anything
     return if not $text;                # nothing left after cleanup
     if    ( $prompt && $text ) {        # a command was entered
-### Command: $text
+##### Command: $text
         $cs->db_history_add(            # add command to history database
             -command        => $text,
             -term_id        => $term_id,
@@ -874,11 +879,11 @@ my $t3 = $text;                                                     # debug
 # 
 sub _setup_db {
     my $cs          = shift;
-#~     my $mw          = $cs->get_mw();       # not needed?
     my $db_file     = $cs->{-config}{-db_file};
     my $sql_file    = $cs->{-config}{-sql_file};
     
     my $db          = Test::Ranger::DB->new();  # our DB object
+    
     my $dbh         ;                           # DBI object
     
     # Determine if the DB file exists, is initialized, and is writable.
@@ -898,8 +903,12 @@ sub _setup_db {
 #~                         -verbose    => $verbose,
         );
     };
-    
     $cs->{-db}      = $db;
+    
+    # Populate cache.
+    $cs->{-history}     = $cs->db_history_get_all();
+    $cs->_bump_history_cache_state();   # and store state, too
+    
     return $cs;
 }; ## _setup_db
 
@@ -976,8 +985,8 @@ sub _setup_history {
     my $hist_pane   = $cs->get_pane($hist_frame);
     my $vbox        = Gtk2::VBox->new;
     
-    my @history     ;       # tied array
-    
+    my @history     = @{ $cs->{-history} };
+        
     $hist_pane->add($vbox);
 
     #create a scrolled window that will host the treeview
@@ -1007,17 +1016,15 @@ sub _setup_history {
 #~     # Dummy data.
 #~     @{ $slist->{data} }  = ([0,'a'],[1,'b']);     # AoA, just like from DB
     
-    # Initial get from DB.
-    @history    = @{ $cs->db_history_get_all() };   # SELECT * FROM term_command
-    @{ $slist->{data} }  = @history;                # AoA, just like from DB
+    # Initial get.
+    @{ $slist->{data} }     = @history;        # AoA, just like from DB
     
     $slist->set_rules_hint (TRUE);
     
     $sw->add($slist);
     $vbox->pack_start($sw,TRUE,TRUE,0);
     
-    $cs->{-hist_list}       = $slist;
-    $cs->{-history_aryref}  = \@history;
+    $cs->{-hist_list}       = $slist;   # $cs->{hist_list}{data}
     return $cs;
 }; ## _setup_history
 
