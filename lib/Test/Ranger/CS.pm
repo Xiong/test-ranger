@@ -332,6 +332,7 @@ sub _bump_history_cache_state {
     
     # Write the new state, preserving other filed values.
     $cs->_write_ipc_file($ipc);
+### _bump...
 ### $ipc    
     return $cs;
 }; ## _bump_history_cache_state
@@ -358,6 +359,8 @@ sub _is_history_cache_invalid {
     
     my $old_history_cache_state     = $old_ipc->{-history_cache_state};
     my $new_history_cache_state     = $new_ipc->{-history_cache_state};
+#~ ### $old_history_cache_state
+#~ ### $new_history_cache_state
     
     return ( $old_history_cache_state == $new_history_cache_state ) ? 0 : 1; 
 #~     return 1;       # shitty; always invalid
@@ -555,14 +558,18 @@ sub db_history_add {
 sub db_history_get_all {
     ##### db_history_get_all
     ##### @_
-    my $cs  = shift;
-    my $db  = $cs->{-db};
-        
+    my $cs          = shift;
+    my $db          = $cs->{-db};
+    my $new_ipc     = $cs->_read_ipc_file();
+    
+    # Get new history from DB.
     my $hist    = $db->select_term_command();   # SELECT *
     if (not $hist) {            # create dummy history
         $hist   = [];
     };
     
+    # Store it.
+    $cs->{-ipc}{-history_cache_state} = $new_ipc->{-history_cache_state};
     $cs->{-history}     = $hist;
     
     return $hist;

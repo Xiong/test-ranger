@@ -986,12 +986,6 @@ sub _setup_history {
     my $hist_pane   = $cs->get_pane($hist_frame);
     my $vbox        = Gtk2::VBox->new;
     
-    # Position of contents within ScrolledWindow
-    my $vadj        ;
-    my $upper       = 100;
-    my $lower       =   0;
-    my $value       =  50;
-    
     # Get contents to display. 
     my @history     = @{ $cs->{-history} };
         
@@ -1034,28 +1028,10 @@ sub _setup_history {
     $sw->add($slist);
     $vbox->pack_start($sw,TRUE,TRUE,0);
     
-    # Scroll to the most recent item.
-    $vadj       = $sw->get_vadjustment;
-#~ my $old_upper   = $vadj->upper;
-#~ my $old_lower   = $vadj->lower;
-#~ my $old_val     = $vadj->value;
-#~ ### $vadj
-#~ ### $old_upper
-#~ ### $old_lower
-#~ ### $old_val    
-    
-    $vadj->upper ($upper);
-    $vadj->lower ($lower);
-    $vadj->value ($value);
-    $vadj->notify('upper');
-    $vadj->notify('lower');
-    $vadj->notify('value');
-    $vadj->value_changed;
-    $sw->set_vadjustment ($vadj);
-    
+    # Store for later use.    
     $cs->{-hist_list}       = $slist;   # history in $cs->{hist_list}{data}
     $cs->{-hist_window}     = $sw;      # Gtk2::ScrolledWindow
-    $cs->{-hist_vadj}       = $vadj;    # Gtk2::Adjustment
+#~     $cs->{-hist_vadj}       = $vadj;    # Gtk2::Adjustment
     return $cs;
 }; ## _setup_history
 
@@ -1075,17 +1051,30 @@ sub _setup_history {
 # 
 sub _timed_refresh {
     my $cs          = shift;
-#~ ### _timed_refresh
     
     # Refresh history pane.
     if ( $cs->_is_history_cache_invalid() ) {
+    my $hist_cache_state    = $cs->{-ipc}{-history_cache_state};
+#~     ### refreshing...
+#~     ### $hist_cache_state
         $cs->db_history_get_all();
-    };
-    my $hist_list           = $cs->{-hist_list};
-    my @history             = @{ $cs->{-history} };
-    @{ $hist_list->{data} } = @history;     # tied to display already
-    ## history
-    
+        my $hist_list           = $cs->{-hist_list};
+        my @history             = @{ $cs->{-history} };
+        @{ $hist_list->{data} } = @history;     # tied to display already
+        
+        # Force history scrollbar to bottom. 
+        my $sw      = $cs->{-hist_window};
+        my $vadj    = $sw->get_vadjustment;
+            # ? Must send signal first... and last.
+        $vadj->value_changed;
+        my $value   ;
+#~         $value      = $vadj->upper - $vadj->page_size;  # arithmetic minus
+            # Set $value way too high to cover all possibilities.
+        $value      = $vadj->upper + $vadj->page_size;  # arithmetic plus
+        $vadj->value ($value);
+        $vadj->value_changed;
+        
+    }; ## history refresh
     
     return Glib::SOURCE_CONTINUE;           # don't uninstall after run
 #~     return Glib::SOURCE_REMOVE;             # uninstall after run
