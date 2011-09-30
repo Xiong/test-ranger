@@ -14,7 +14,7 @@ use Test::Ranger::Base          # Base class and procedural utilities
 use parent qw{ Test::Ranger::Base };
 
 
-use DBI;                # Generic interface to a large number of databases
+use DBI 1.616;          # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
 #~ use DBD::SQLite;        # Self-contained RDBMS in a DBI Driver
 use DBIx::RunSQL;       # Run SQL to create a database schema
@@ -26,8 +26,6 @@ use Data::Lock qw( dlock );     # Declare locked scalars
 # use for debug only
 #~ use Devel::Comments '###';      # debug only                             #~
 #~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });              #~
-
-
 
 #============================================================================#
 
@@ -47,8 +45,8 @@ dlock( my $err  = Test::Ranger::Base->new(
 dlock( my $DB_flags = {
     RaiseError          => 1,
     AutoCommit          => 1,
-    AutoInactiveDestroy => 1,    # defaults to true in DBIx::Connector
-#~     AutoInactiveDestroy => '1',  # raises warning if set explicitly
+    AutoInactiveDestroy => 1,       # defaults to true in DBIx::Connector;
+                                    #   DBI 1.616 required
     
 } );
 

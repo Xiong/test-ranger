@@ -33,6 +33,7 @@ use Glib                        # Gtk constants
     'TRUE', 'FALSE',
 ; ## Glib
 use Gnome2::Vte;
+use Gtk2::SimpleList;           # Simple interface to complex MVC list widget
 
 ## use
 
@@ -86,6 +87,9 @@ sub main {
     
     # Load cascading configurations from config files.
     $cs->get_config();
+    
+    # Set up parent-child IPC; create or re-use IPC file
+    $cs->setup_ipc();
     
     # main Window configuration
     my $mw_width    = $cs->{-config}{-mw_initial_H};
@@ -154,8 +158,15 @@ sub _setup {
     # Database
     _setup_db($cs);         # find or create database file
     
+    # Command history
+    _setup_history($cs);    # display from database
+    
     # Terminal
     _setup_terminal($cs);   # virtual terminal emulator
+    
+    # Timers
+    _setup_timers($cs);     # called repeatedly during _main_loop();
+    
     
     
     # Futz around here.
@@ -191,7 +202,6 @@ sub _setup {
     # Display everything
     $vbox0->show_all();
     $mw->add($vbox0);
-    
     
     
     
@@ -393,13 +403,17 @@ sub _setup_panes {
     
     # Set specific frame defaults.
     # These will control where new tabs are put.
-    my $term_frame      = $cs->{-config}{-terminal_frame};
-    $term_frame        =~ tr/ABCD/0123/;
-    $cs->{-term_frame}  = $term_frame;
+    my $term_frame          = $cs->{-config}{-terminal_frame};
+    $term_frame            =~ tr/ABCD/0123/;
+    $cs->{-term_frame}      = $term_frame;
+    
+    my $hist_frame          = $cs->{-config}{-history_frame};
+    $hist_frame            =~ tr/ABCD/0123/;
+    $cs->{-hist_frame}      = $hist_frame;
     
     # Store the Frames and VBox panes for later access
-    $cs->{-frames}      = \@frames;
-    $cs->{-panes}       = \@panes;
+    $cs->{-frames}          = \@frames;
+    $cs->{-panes}           = \@panes;
     
         
     return $cs;
@@ -610,11 +624,12 @@ sub _setup_terminal {
     my $sig_id  = $terminal->signal_connect( 'text-inserted' => 
         \&make_logger, $cs 
     ); ## terminal signal
-#### $sig_id
     
     # Store $sig_id to disconnect this signal after first reception. 
 #~     $cs->{-terminal_connect_id}{$terminal}  = $sig_id;
     $cs->{-terminals}{$term_id}{-sig_id}    = $sig_id; 
+#~ ### $term_id
+#~ ### $sig_id
     
     
     # Test feed button
@@ -622,26 +637,12 @@ sub _setup_terminal {
     $feed_button->signal_connect( 'clicked' => \&test_feed, $terminal );
     $vbox->pack_start( $feed_button, FALSE, FALSE, 0 );
     
-#~     # Test echo box
-#~     my $echo_buf        = Gtk2::TextBuffer->new();
-#~     my $echo_view       = Gtk2::TextView->new_with_buffer($echo_buf);
-#~     my $buffer_ball     = {
-#~                             -echo_buf       => $echo_buf,
-#~                             -previous_row   => 0,
-#~                             -previous_col   => 0,
-#~                             -row_count      => 0,
-#~                         };
-#~     
-#~     $terminal->signal_connect( 'text-inserted' => 
-#~         \&test_echo, $buffer_ball 
-#~     ); ## terminal signal
-#~     
-#~     $vbox->pack_start( $echo_view, FALSE, FALSE, 0 );
-    
-    
+    # Start user off... and be sure 'script' starts.
+    $terminal->grab_focus();
     
     return $cs;
 }; ## _setup_terminal
+
 
 # scratch test feed sub
 sub test_feed {
@@ -725,7 +726,21 @@ sub make_logger {
         push @{ $cs->{-child_pid} }, $pid;
     } 
     else {                  # child
-        # Open fifo. 
+        # $cs (and contents) is just a copy of the original
+        # So delete useless, dynamic elements
+        delete $cs->{-frames};
+        delete $cs->{-hist_frame};
+        delete $cs->{-hist_list};
+        delete $cs->{-menubar};
+        delete $cs->{-next_term_id};
+        delete $cs->{-panes};
+        delete $cs->{-terminals};
+        delete $cs->{-vbox0};
+        delete $cs->{-config_paths};
+    ##### Child
+    ##### $cs
+                
+        # Open fifo in child. 
         open my $fh, '<', $fifo
             or crash( "Failed to open $fifo for reading " );
     
@@ -739,12 +754,16 @@ sub make_logger {
         close $fh
             or crash( "Failed to open $fifo for reading " );
         exit(0);
-    };
+    }; ## fork
     
     # Start logging
     my $command 
         = qq{script -f -a $fifo};
     $terminal->feed_child( $command . qq{\n} );
+    $cs->db_history_add(            # add command to history database
+        -command        => $command,
+        -term_id        => $term_id,
+    );
     
     # Register this subshell in football for later 'exit'-ing.
     # TODO: Do we need this? Or should we work off $cs->{-terminals}?
@@ -809,13 +828,13 @@ my $t3 = $text;                                                     # debug
     # Discard BEL characters.
     $text       =~ s/(?:$bel)+//g;
     
-##### 0: $t0
-##### 1: $t1
-##### m: $matches
-##### 2: $t2
-##### 3: $t3
-##### X: $text
-##### $: $prompt
+#### 0: $t0
+#### 1: $t1
+#### m: $matches
+#### 2: $t2
+#### 3: $t3
+#### X: $text
+#### $: $prompt
     
     #---# End cleanup #---#
     # still in _parse_script
@@ -823,7 +842,7 @@ my $t3 = $text;                                                     # debug
     # Now decide what to do with the extracted poop -- if anything
     return if not $text;                # nothing left after cleanup
     if    ( $prompt && $text ) {        # a command was entered
-### Command: $text
+##### Command: $text
         $cs->db_history_add(            # add command to history database
             -command        => $text,
             -term_id        => $term_id,
@@ -861,11 +880,11 @@ my $t3 = $text;                                                     # debug
 # 
 sub _setup_db {
     my $cs          = shift;
-#~     my $mw          = $cs->get_mw();       # not needed?
     my $db_file     = $cs->{-config}{-db_file};
     my $sql_file    = $cs->{-config}{-sql_file};
     
     my $db          = Test::Ranger::DB->new();  # our DB object
+    
     my $dbh         ;                           # DBI object
     
     # Determine if the DB file exists, is initialized, and is writable.
@@ -885,8 +904,12 @@ sub _setup_db {
 #~                         -verbose    => $verbose,
         );
     };
-    
     $cs->{-db}      = $db;
+    
+    # Populate cache.
+    $cs->{-history}     = $cs->db_history_get_all();
+    $cs->_bump_history_cache_state();   # and store state, too
+    
     return $cs;
 }; ## _setup_db
 
@@ -941,6 +964,154 @@ sub test_echo {
 sub dummy {1};
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+
+#=========# GTK SETUP ROUTINE
+#
+#   _setup_history();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup_history {
+    my $cs          = shift;
+    my $mw          = $cs->get_mw();
+    my $hist_frame  = $cs->{-hist_frame};
+    my $hist_pane   = $cs->get_pane($hist_frame);
+    my $vbox        = Gtk2::VBox->new;
+    
+    # Get contents to display. 
+    my @history     = @{ $cs->{-history} };
+        
+    # Decide where to put it based on config.
+    $hist_pane->add($vbox);
+    
+    # Lifted whole from TreeView tutorial. 
+        #create a scrolled window that will host the treeview
+    my $sw = Gtk2::ScrolledWindow->new (undef, undef);
+    $sw->set_shadow_type ('etched-out');
+    $sw->set_policy ('automatic', 'automatic');
+        #This is a method of the Gtk2::Widget class,it will force a minimum 
+        #size on the widget. Handy to give intitial size to a 
+        #Gtk2::ScrolledWindow class object
+    $sw->set_size_request ( 0, 150 );
+        #method of Gtk2::Container
+    $sw->set_border_width(5);
+    
+                                            # TABLE term_command
+    my $slist = Gtk2::SimpleList->new (
+                    'Int Field'     => 'int',       # term_command
+                    'Scalar Field'  => 'scalar',    # c_text
+                        
+#~                     'Text Field'    => 'text',
+#~                     'Markup Field'  => 'markup',
+#~                     'Int Field'     => 'int',
+#~                     'Double Field'  => 'double',
+#~                     'Bool Field'    => 'bool',
+#~                     'Scalar Field'  => 'scalar',
+#~                     'Pixbuf Field'  => 'pixbuf',
+                );
+#~     # Dummy data.
+#~     @{ $slist->{data} }  = ([0,'a'],[1,'b']);     # AoA, just like from DB
+    
+    # Initial get.
+    @{ $slist->{data} }     = @history;        # AoA, just like from DB
+    
+    # Style the history display.
+    $slist->set_rules_hint (TRUE);    
+    $sw->add($slist);
+    $vbox->pack_start($sw,TRUE,TRUE,0);
+    
+    # Store for later use.    
+    $cs->{-hist_list}       = $slist;   # history in $cs->{hist_list}{data}
+    $cs->{-hist_window}     = $sw;      # Gtk2::ScrolledWindow
+#~     $cs->{-hist_vadj}       = $vadj;    # Gtk2::Adjustment
+    return $cs;
+}; ## _setup_history
+
+#=========# INTERNAL ROUTINE
+#
+#   _timed_refresh($cs);     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _timed_refresh {
+    my $cs          = shift;
+    
+    # Refresh history pane.
+    if ( $cs->_is_history_cache_invalid() ) {
+    my $hist_cache_state    = $cs->{-ipc}{-history_cache_state};
+#~     ### refreshing...
+#~     ### $hist_cache_state
+        $cs->db_history_get_all();
+        my $hist_list           = $cs->{-hist_list};
+        my @history             = @{ $cs->{-history} };
+        @{ $hist_list->{data} } = @history;     # tied to display already
+        
+        # Force history scrollbar to bottom. 
+        my $sw      = $cs->{-hist_window};
+        my $vadj    = $sw->get_vadjustment;
+            # ? Must send signal first... and last.
+        $vadj->value_changed;
+        my $value   ;
+#~         $value      = $vadj->upper - $vadj->page_size;  # arithmetic minus
+            # Set $value way too high to cover all possibilities.
+        $value      = $vadj->upper + $vadj->page_size;  # arithmetic plus
+        $vadj->value ($value);
+        $vadj->value_changed;
+        
+    }; ## history refresh
+    
+    return Glib::SOURCE_CONTINUE;           # don't uninstall after run
+#~     return Glib::SOURCE_REMOVE;             # uninstall after run
+}; ## _timed_refresh
+
+#=========# GTK SETUP ROUTINE
+#
+#   _setup_timers($cs);     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup_timers {
+    my $cs          = shift;
+    
+    my $interval    = 1;
+    my $callback    = sub{ _timed_refresh($cs) };
+    my $data        = undef;
+    my $priority    = Glib::G_PRIORITY_DEFAULT;
+    
+    
+    my $id  = Glib::Timeout->add_seconds (
+                $interval,          # int   : seconds between runs
+                $callback,          # code  : callback routine
+                $data,              # ?
+                $priority           # ?
+            );
+    
+    return $cs;
+}; ## _setup_timers
 
 #=========# GTK SETUP ROUTINE
 #

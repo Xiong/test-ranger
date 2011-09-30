@@ -29,7 +29,7 @@ use Scalar::Util::Reftype;      # Alternate reftype() interface
 ## use
 
 # Alternate uses
-use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
+#~ use Devel::Comments '#####', ({ -file => 'tr-debug.log' });
 
 #============================================================================#
 

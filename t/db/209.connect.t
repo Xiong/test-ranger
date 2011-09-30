@@ -3,9 +3,11 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Trap qw( :default );
 
-use Test::Ranger::DB;
+use Test::Ranger::Base          # Base class and procedural utilities
+    qw( :all );
+use Test::Ranger::Trap;         # Comprehensive airtight trap and test
+use Test::Ranger::DB;           # Database interactions with SQLite
 
 use DBI;                # Generic interface to a large number of databases
 #~ use DBD::mysql;         # DBI driver for MySQL
@@ -25,6 +27,7 @@ use DBIx::Connector;    # Fast, safe DBI connection and transaction management
 my $unit        = '::DB::connect(): ';
 my $got         ;
 my $want        ;
+my $base        = $unit;
 my $diag        = $unit;
 my $tc          = 0;
 
@@ -63,45 +66,26 @@ for my $text (@text) {
 };
 
 #----------------------------------------------------------------------------#
-# EXECUTE
+# EXECUTE-connect()
 
-my $rv = trap{
-    
+my $rv = trap{    
     my $conn = $db->connect( -db_name => $db_name );   
-    
-    return $conn;
 };
 
 #----------------------------------------------------------------------------#
-# CHECK
+# CHECK-connect()
 
-#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
+#~ ##### $trap
 
-$diag       = "$unit returned normally";
 $tc++;
-$got        = $trap->did_return($diag) or exit 1;
+$base       = "$unit - connect() ";
+$trap->confirm(
+    -base       => $base,
+    -leaveby    => 'return',
+);
 
-$diag       = "$unit returned something";
-$tc++;
-$trap->return_ok(
-    0,               # even if :scalar, return => []
-    $diag,
-) or exit 1;
-
-my $conn     = $rv;
-
-#~ $got        = [];       # clear out previous contents
-#~ @$got       = map { $_->[1] } @{ $rv };
-#~ $want       = \@text,
-#~ $diag       = "$unit returned three inserted commands deeply";
-#~ $tc++;
-#~ is_deeply( $got, $want, $diag ) or exit 1;
-
-#~ my $dsn     = "DBI:SQLite:$db_name";
-#~ my $dbh     = DBI->connect($dsn, $user, $pass);
-#~ $diag       = "$unit test connected to      $db_name";
-#~ $tc++;
-#~ ok( $dbh, $diag ) or exit 1;
+#----------------------------------------------------------------------------#
+# EXECUTE-select()
 
 # New $trap.
 $rv = trap{
@@ -110,30 +94,24 @@ $rv = trap{
     return $cmds;     # returns an AoA ref: $cmds->[$row][$col]
 };
 
-#~ $trap->diag_all;                    # Dumps the $trap object, TAP safe   #~
+#----------------------------------------------------------------------------#
+# CHECK-select()
 
+#~ ##### $trap
+
+$tc++;
+$base       = "$unit - select_term_command() ";
+$trap->confirm(
+    -base       => $base,
+    -leaveby    => 'return',
+);
+
+$tc++;
+$diag       = "$base returned three inserted commands deeply";
 $got        = [];       # clear out previous contents
 @$got       = map { $_->[1] } @{ $rv };
 $want       = \@text,
-$diag       = "$unit returned three inserted commands deeply";
-$tc++;
 is_deeply( $got, $want, $diag ) or exit 1;
-
-#~ $got        = $trap->leaveby;           # 'return', 'die', or 'exit'.
-#~ $want       = 'return'; 
-#~ $diag       = "$unit test select returned normally";
-#~ $tc++;
-#~ is($got, $want, $diag) or exit 1;
-
-#~ $got        = $rv;
-#~ $diag       = "$unit test select returned true";
-#~ $tc++;
-#~ ok( $got, $diag ) or exit 1;
-
-#~ $got        = $dbh->disconnect();
-#~ $diag       = "$unit test disconnected";
-#~ $tc++;
-#~ ok( $got, $diag ) or exit 1;
 
 #----------------------------------------------------------------------------#
 # TEARDOWN
@@ -151,16 +129,3 @@ END {
 }
 
 #============================================================================#
-
-sub words {                         # sloppy match these strings
-    my @words   = @_;
-    my $regex   = q{};
-    
-    for (@words) {
-        $regex  = $regex . $_ . '.*';
-    };
-    
-    return qr/$regex/is;
-};
-
-
