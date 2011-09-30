@@ -164,8 +164,11 @@ sub _setup {
     # Terminal
     _setup_terminal($cs);   # virtual terminal emulator
     
-    # Timers
+    # Timers run every N seconds.
     _setup_timers($cs);     # called repeatedly during _main_loop();
+    
+    # Idlers run when main loop is idle.
+    _setup_idlers($cs);     # called repeatedly during _main_loop();
     
     
     
@@ -1037,7 +1040,7 @@ sub _setup_history {
 
 #=========# INTERNAL ROUTINE
 #
-#   _timed_refresh($cs);     # short
+#   _refresh( $cs, $timed );     # short
 #       
 # Purpose   : ____
 # Parms     : ____
@@ -1049,11 +1052,12 @@ sub _setup_history {
 # 
 # ____
 # 
-sub _timed_refresh {
+sub _refresh {
     my $cs          = shift;
+    my $timed       = shift;    # don't uninstall this callback when complete
     
-    # Refresh history pane.
-    if ( $cs->_is_history_cache_invalid() ) {
+    # Refresh history pane if cache invalid or running on an idle event.
+    if ( $cs->_is_history_cache_invalid() or not $timed ) {
     my $hist_cache_state    = $cs->{-ipc}{-history_cache_state};
 #~     ### refreshing...
 #~     ### $hist_cache_state
@@ -1076,9 +1080,9 @@ sub _timed_refresh {
         
     }; ## history refresh
     
-    return Glib::SOURCE_CONTINUE;           # don't uninstall after run
-#~     return Glib::SOURCE_REMOVE;             # uninstall after run
-}; ## _timed_refresh
+    # Uninstall this callback if it is not a timed callback.
+    return $timed ? Glib::SOURCE_CONTINUE : Glib::SOURCE_REMOVE;
+}; ## _refresh
 
 #=========# GTK SETUP ROUTINE
 #
@@ -1098,7 +1102,8 @@ sub _setup_timers {
     my $cs          = shift;
     
     my $interval    = 1;
-    my $callback    = sub{ _timed_refresh($cs) };
+    my $timed       = 1;    # a timed callback
+    my $callback    = sub{ _refresh( $cs, $timed ) };
     my $data        = undef;
     my $priority    = Glib::G_PRIORITY_DEFAULT;
     
@@ -1112,6 +1117,38 @@ sub _setup_timers {
     
     return $cs;
 }; ## _setup_timers
+
+#=========# GTK SETUP ROUTINE
+#
+#   _setup_idlers($cs);     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
+# 
+sub _setup_idlers {
+    my $cs          = shift;
+    
+    my $timed       = 0;    # not a timed callback
+    my $callback    = sub{ _refresh( $cs, $timed ) };
+    my $data        = undef;
+    my $priority    = Glib::G_PRIORITY_DEFAULT;
+    
+    
+    my $id  = Glib::Idle->add (
+                $callback,          # code  : callback routine
+                $data,              # ?
+                $priority           # ?
+            );
+    
+    return $cs;
+}; ## _setup_idlers
 
 #=========# GTK SETUP ROUTINE
 #
